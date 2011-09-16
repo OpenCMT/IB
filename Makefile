@@ -21,23 +21,33 @@ GRIND_CLIENT = $(shell pkg-config --libs --cflags valgrind)
 CXX           = g++ -m64
 CC            = gcc -m64
 #flags for maximum optimization (but no debugging....) 
-D = NDEBUG
-CXXFLAGS      = -Wall -Winline -fPIC -I$(ROOTSYS)/include -g -D$(D)
+CXXFLAGS      = -Wall -Winline -fPIC -I$(ROOTSYS)/include
 CXXFLAGS     += $(ROOTCFLAGS)
 LD            = g++ 
 LDFLAGS       = -m64
 #SOFLAGS       = -Wl,-soname,libEvent.so -shared
 LIBS          = $(ROOTLIBS) -lgcc -lm -ldl
 GLIBS         = $(ROOTGLIBS)
-OPT	      = -O2 -fopenmp #-falign-function=2 -falign-jumps=2 
+
+
+OPT =  -DNDEBUG -O2 -fopenmp #-falign-function=2 -falign-jumps=2
+ifdef mode
+ifeq ($(mode),debug)
+	OPT = -g -D_DEBUG 
+else
+	OPT =  -DNDEBUG -O2 -fopenmp #-falign-function=2 -falign-jumps=2
+endif
+endif
 
 #------------------------------------------------------------------------------
 OBJvEM = templates.o debug.o ImgAnalyzer.o MuonCollection.o VoxCollection.o Muon.o Voxel.o IBMuon.o IBMuonCollection.o IBGeometry.o IBVoxCollection.o IBAnalyzerEM.o
 OBJrunEM = templates.o debug.o IBMuon.o IBMuonCollection.o IBGeometry.o IBVoxCollection.o IBAnalyzerEM.o IBAnalyzerEM_simple.o IBAnalyzerPoca.o
 
 
-runEM: ${OBJrunEM} main.C
+
+runEM:  ${OBJrunEM} main.C
 	${CXX} main.C -o runEM ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
+
 
 test_debug: ${OBJrunEM} test_debug.C
 	${CXX} test_debug.C -o test_debug ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS) #$(GRIND_CLIENT)

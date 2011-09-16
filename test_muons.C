@@ -1,6 +1,7 @@
 #include "IB.h"
 #include "debug.h"
-
+DEBUG_HEADER
+        
 using std::string;
 
 int main(int argc, char *argv[]) {
