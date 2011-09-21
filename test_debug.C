@@ -35,18 +35,19 @@ int main(int argc, char *argv[]) {
 
     P("entering message")
 
-//    debug_message("hello: this is debug test");
 //
 //    debug_handle("triggered_message","Message var:%d",123); // create trigger
 //    debug_message("\nThis is a triggered message:");
 //    debug_handle("triggered_message",NULL); // shot
+    debug_message("hello: this is debug test");
     
-   // set_domain();
-    demo_debug_init();
-    debug_set_active_domain("demo");
-    printf("domain demo active flag = %d\n",
-           debug_test_active(DEBUG_LOCAL_REF, 5));
-  
+//    demo_debug_init();
+//    debug_set_active_domain("demo");
+//    printf("domain demo active flag = %d\n",
+//           debug_test_active(DEBUG_LOCAL_REF, 5));
+
+
+    IBVoxCollection a(10,10,10);
 
     return 0;
 }

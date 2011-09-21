@@ -1,7 +1,8 @@
 #include "IB.h"
+
 #include "debug.h"
 DEBUG_HEADER
-        
+
 using std::string;
 
 int main(int argc, char *argv[]) {
@@ -22,7 +23,7 @@ int main(int argc, char *argv[]) {
         44,         // default phi view vox number
         23,         // default y vox numbers
         34,         // default theta view vox number
-        100,       // K events
+        21,       // K events
         0.1E-6      // default lambda starting value
     };
 
@@ -111,15 +112,16 @@ int main(int argc, char *argv[]) {
     int start = parameters.run_num;
     int end = start + 1;
     debug_set_domain("IBMuonCollection");
-    vector <IBMuon *> v(muons.muons().begin()+start,muons.muons().begin()+end);
-    debug_current("muons_vtk","muon_plot.vtk",&muons,&v);
-    debug_current("poca_vtk", "poca_plot.vtk", &v);
+    vector <IBMuon *> v1(muons.muons().begin()+start,muons.muons().begin()+end);
+
+    debug_current("muons_vtk","muon_plot.vtk",&muons,&v1);
+    debug_current("poca_vtk", "poca_plot.vtk", &v1);
     debug_current("ch_position_vtk", "muon_ch_position.vtk", 
 		  &muons, &muons.muons());
 
     debug_set_domain("IBVoxCollection");
     debug_current("container_vtk","container_box.vtk",&voxels);
-    debug_current("muon_entry_vtk","muon_entry.vtk",&voxels,&muons,&v);
+    debug_current("muon_entry_vtk","muon_entry.vtk",&voxels,&muons,&v1);
     debug_current("muon_entry_vtk","muons_entry.vtk",
 		  &voxels,&muons,&muons.muons());
  //   for (int i = start; i < end ; i++)
@@ -129,12 +131,12 @@ int main(int argc, char *argv[]) {
 //        printf("%d -> Lij = %f\n", i, ray->L->at(i));
 
 
-    debug_set_domain("default");
-    debug_message("Creating Analyzer: muon -> EMmuon");
-    IBAnalyzerEM em(&muons,&voxels);
+    //debug_set_domain("default");
+    //debug_message("Creating Analyzer: muon -> EMmuon");
+    //IBAnalyzerEM em(&muons,&voxels);
 
-    voxels.init_lambda(parameters.lambda_0);
-    em.print_ray_parameters(0);
+    //voxels.init_lambda(parameters.lambda_0);
+    //em.print_ray_parameters(0);
 
 
  

@@ -50,14 +50,13 @@ runEM:  ${OBJrunEM} main.C
 
 
 test_debug: ${OBJrunEM} test_debug.C
-	${CXX} test_debug.C -o test_debug ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS) #$(GRIND_CLIENT)
+	${CXX} test_debug.C -o test_debug ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
 
 test_muons: ${OBJrunEM} test_muons.C
-	${CXX} test_muons.C -o test_muons ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS) #$(GRIND_CLIENT)
+	${CXX} test_muons.C -o test_muons ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
 
 vEM: ${OBJvEM} main_v.C
-	${CXX} main_v.C -o vEM ${CXXFLAGS} ${OBJvEM} $(OPT) $(LIBS) $(GLIBS) #$(GRIND_CLIENT)
-
+	${CXX} main_v.C -o vEM ${CXXFLAGS} ${OBJvEM} $(OPT) $(LIBS) $(GLIBS)
 
 
 doxy:
