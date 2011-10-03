@@ -19,12 +19,12 @@ int main(int argc, char *argv[]) {
         float lambda_0;
         
     } parameters = {
-        0,          // default run num is not set
-        44,         // default phi view vox number
-        23,         // default y vox numbers
-        34,         // default theta view vox number
-        21,       // K events
-        0.1E-6      // default lambda starting value
+        24,          // default run num is not set
+        102,         // default phi view vox number
+        53,         // default y vox numbers
+        80,         // default theta view vox number
+        1,       // K events
+        1      // default lambda starting value
     };
 
 
