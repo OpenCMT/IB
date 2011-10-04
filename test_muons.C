@@ -113,15 +113,17 @@ int main(int argc, char *argv[]) {
     int end = start + 1;
     debug_set_domain("IBMuonCollection");
     vector <IBMuon *> v1(muons.muons().begin()+start,muons.muons().begin()+end);
-
+    vector <IBMuon *> v2(muons.muons().begin() + start, muons.muons().begin() + end + 50);
     debug_current("muons_vtk","muon_plot.vtk",&muons,&v1);
     debug_current("poca_vtk", "poca_plot.vtk", &v1);
+    debug_current("poca_vtk", "poca_plots.vtk", &v2);
     debug_current("ch_position_vtk", "muon_ch_position.vtk", 
 		  &muons, &muons.muons());
 
     debug_set_domain("IBVoxCollection");
     debug_current("container_vtk","container_box.vtk",&voxels);
     debug_current("muon_entry_vtk","muon_entry.vtk",&voxels,&muons,&v1);
+    debug_current("muon_entry_vtk","muon_entrys.vtk",&voxels,&muons,&v2);
     debug_current("muon_entry_vtk","muons_entry.vtk",
 		  &voxels,&muons,&muons.muons());
  //   for (int i = start; i < end ; i++)
