@@ -101,9 +101,10 @@ int main(int argc, char *argv[]) {
 
 
     /* SETUP VOXELS CONTAINER */
-    IBVoxCollection voxels(parameters.vxnum,
+    IBInt3d dim(parameters.vxnum,
                            parameters.vynum,
                            parameters.vznum);
+    IBVoxCollection voxels(dim);
     voxels.init_lambda(parameters.lambda_0);
 
     debug_set_domain("IBMuonCollection");

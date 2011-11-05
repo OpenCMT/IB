@@ -41,19 +41,26 @@ endif
 
 #------------------------------------------------------------------------------
 OBJvEM = templates.o debug.o ImgAnalyzer.o MuonCollection.o VoxCollection.o Muon.o Voxel.o IBMuon.o IBMuonCollection.o IBGeometry.o IBVoxCollection.o IBAnalyzerEM.o
-OBJrunEM = templates.o debug.o IBMuon.o IBMuonCollection.o IBGeometry.o IBVoxCollection.o IBAnalyzerEM.o IBAnalyzerEM_simple.o IBAnalyzerPoca.o
-
+OBJrunEM = templates.o debug.o IBMuon.o IBMuonCollection.o IBGeometry.o IBGrid3d.o IBVoxCollection.o IBAnalyzerEM.o IBAnalyzerEM_simple.o IBAnalyzerPoca.o IBVoxFilters.o
 
 
 runEM:  ${OBJrunEM} main.C
 	${CXX} main.C -o runEM ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
 
+lib:    ${OBJrunEM}
+	$(CXX)  $(CXXFLAGS) $(OPT) $(LIBS) $(GLIBS) -shared -Wl,-soname,libMutomIB.so -o libMutomIB.so $(OBJrunEM)
 
 test_debug: ${OBJrunEM} test_debug.C
 	${CXX} test_debug.C -o test_debug ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
 
 test_muons: ${OBJrunEM} test_muons.C
 	${CXX} test_muons.C -o test_muons ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
+
+test_filters: ${OBJrunEM} test_filters.C
+	${CXX} test_filters.C -o test_filters ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
+
+test_Sijcut: ${OBJrunEM} test_Sijcut.C
+	${CXX} test_Sijcut.C -o test_Sijcut ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
 
 vEM: ${OBJvEM} main_v.C
 	${CXX} main_v.C -o vEM ${CXXFLAGS} ${OBJvEM} $(OPT) $(LIBS) $(GLIBS)
@@ -92,5 +99,5 @@ doxy:
 #	${CXX} ${CXXFLAGS} $(GRIND_CLIENT) -c main.C
 
 clean:
-	rm -f runEM vEM test_muons test_debug ${OBJvEM} ${OBJrunEM} *~ *.vtk *.ply 
+	rm -f runEM vEM libMutomIB.so test_muons test_debug test_filters test_Sijcut ${OBJvEM} ${OBJrunEM} *~ *.vtk *.ply 
 	@echo "all cleaned up!"
