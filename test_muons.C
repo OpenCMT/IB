@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
                            MCOLL_FLAG_SLOPECUT |
                            0);
 
-    muons.addMuonFromTTree(tree,parameters.kevent_num);
+    muons.addMuonFromTTree(tree,0,parameters.kevent_num);
 
 
 
