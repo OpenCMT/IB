@@ -62,6 +62,9 @@ test_filters: ${OBJrunEM} test_filters.C
 test_Sijcut: ${OBJrunEM} test_Sijcut.C
 	${CXX} test_Sijcut.C -o test_Sijcut ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
 
+test_gauss: ${OBJrunEM} test_gauss.C
+	${CXX} test_gauss.C -o test_gauss ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
+
 vEM: ${OBJvEM} main_v.C
 	${CXX} main_v.C -o vEM ${CXXFLAGS} ${OBJvEM} $(OPT) $(LIBS) $(GLIBS)
 
