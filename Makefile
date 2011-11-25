@@ -53,6 +53,9 @@ lib:    ${OBJrunEM}
 test_debug: ${OBJrunEM} test_debug.C
 	${CXX} test_debug.C -o test_debug ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
 
+test_timescale: ${OBJrunEM} test_timescale.C
+	${CXX} test_timescale.C -o test_timescale ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
+
 test_muons: ${OBJrunEM} test_muons.C
 	${CXX} test_muons.C -o test_muons ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
 
@@ -102,5 +105,5 @@ doxy:
 #	${CXX} ${CXXFLAGS} $(GRIND_CLIENT) -c main.C
 
 clean:
-	rm -f runEM vEM libMutomIB.so test_muons test_debug test_filters test_Sijcut ${OBJvEM} ${OBJrunEM} *~ *.vtk *.ply 
+	rm -f runEM vEM libMutomIB.so test_muons test_timescale test_debug test_filters test_Sijcut ${OBJvEM} ${OBJrunEM} *~ *.vtk *.ply
 	@echo "all cleaned up!"
