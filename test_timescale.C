@@ -269,10 +269,12 @@ timing_results.item##_err = sqrt(timing_results.item##_err);
 
         ////// DUMP TO CSV ////////////////////////////////
         fprintf(tf,
-                "%.3f,\t"
-                "%.3f,\t%.3f,\t%.3f,\t%.3f,\t%.3f,\t%.3f,\t%.3f\t"
+                "%.3f,\t%d,\t%d,\t%d,\t%d,\t"
+                "%.3f,\t%.3f,\t%.3f,\t%.3f,\t%.3f,\t%.3f,\t%.3f,\t"
                 "%.3f,\t%.3f,\t%.3f,\t%.3f,\t%.3f,\t%.3f,\t%.3f\n",
-                size,
+		size,
+                dim.x,dim.y,dim.z,
+		dim.x*dim.y*dim.z,
                 timing_results.root_loader,
                 timing_results.root_loader_err,
                 timing_results.EM_constructor,
