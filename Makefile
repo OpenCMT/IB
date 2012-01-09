@@ -105,5 +105,5 @@ doxy:
 #	${CXX} ${CXXFLAGS} $(GRIND_CLIENT) -c main.C
 
 clean:
-	rm -f runEM vEM libMutomIB.so test_muons test_timescale test_debug test_filters test_Sijcut ${OBJvEM} ${OBJrunEM} *~ *.vtk *.ply
+	rm -f runEM vEM libMutomIB.so test_muons test_timescale test_debug test_filters test_Sijcut ${OBJvEM} ${OBJrunEM} *~ *.vtk *.vti *.ply
 	@echo "all cleaned up!"
