@@ -62,6 +62,12 @@ test_muons: ${OBJrunEM} test_muons.C
 test_filters: ${OBJrunEM} test_filters.C
 	${CXX} test_filters.C -o test_filters ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
 
+test_denoise: ${OBJrunEM} test_denoise.C
+	${CXX} test_denoise.C -o test_denoise ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
+
+test_denoiser: ${OBJrunEM} test_denoise.C
+	${CXX} test_denoiser.C -o test_denoiser ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
+
 test_Sijcut: ${OBJrunEM} test_Sijcut.C
 	${CXX} test_Sijcut.C -o test_Sijcut ${CXXFLAGS} ${OBJrunEM} $(OPT) $(LIBS) $(GLIBS)
 
@@ -105,5 +111,5 @@ doxy:
 #	${CXX} ${CXXFLAGS} $(GRIND_CLIENT) -c main.C
 
 clean:
-	rm -f runEM vEM libMutomIB.so test_muons test_timescale test_debug test_filters test_Sijcut ${OBJvEM} ${OBJrunEM} *~ *.vtk *.vti *.ply
+	rm -f runEM vEM libMutomIB.so test_muons test_timescale test_debug test_filters test_denoise test_denoiser test_Sijcut ${OBJvEM} ${OBJrunEM} *~ *.vtk *.vti *.ply
 	@echo "all cleaned up!"
