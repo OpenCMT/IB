@@ -33,7 +33,9 @@ GLIBS         = $(ROOTGLIBS)
 OPT =  -DNDEBUG -O2 -fopenmp #-falign-function=2 -falign-jumps=2
 ifdef mode
 ifeq ($(mode),debug)
-	OPT = -g -D_DEBUG 
+	OPT = -g -D_DEBUG
+else ifeq ($(mode),single)
+	OPT =  -DNDEBUG -O2 #-falign-function=2 -falign-jumps=2
 else
 	OPT =  -DNDEBUG -O2 -fopenmp #-falign-function=2 -falign-jumps=2
 endif
