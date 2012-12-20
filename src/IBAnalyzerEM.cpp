@@ -21,6 +21,7 @@ struct Event {
             Scalarf Sij;
         };
         IBVoxel *voxel;
+        Scalarf pw;
     };
 
     struct {
@@ -33,6 +34,8 @@ struct Event {
 
 static int _inv_bugs = 0;
 
+
+// EM ALGORITHMS DECLARATIONS //
 static void four_hidden_pxtz(Matrix4f &Sigma, Event *evc);
 static void two_hidden_px   (Matrix4f &Sigma, Event *evc);
 static void two_hidden_tz   (Matrix4f &Sigma, Event *evc);
@@ -42,7 +45,15 @@ static void one_hidden_p    (Matrix4f &Sigma, Event *evc);
 static void one_hidden_t    (Matrix4f &Sigma, Event *evc);
 static void one_hidden_x    (Matrix4f &Sigma, Event *evc);
 static void one_hidden_z    (Matrix4f &Sigma, Event *evc);
+
+// MAP PRIOR DECLARATION //
 static void gaussian_lambda_prior(float beta, Event *evc);
+
+// PW ALGORITHM DECLARATIONS //
+static void pweigth_pw(Event *evc, Scalarf nominalp);
+static void pweigth_sw(Event *evc, Scalarf nominalp);
+static void pweigth_cw(Event *evc, Scalarf nominalp);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /////  PIMPL  //////////////////////////////////////////////////////////////////
@@ -56,7 +67,8 @@ public:
         m_VarAlgorithm(NULL),
         m_RayAlgorithm(NULL),
         m_SijSelectedFunction(four_hidden_pxtz),
- 		m_MAPLambdaFunction(gaussian_lambda_prior)
+        m_MAPLambdaFunction(gaussian_lambda_prior),
+        m_PWeigthFunction(pweigth_pw)
     {
 #ifndef NDEBUG
         ok = true;
@@ -108,6 +120,7 @@ public:
 
     void SijCut(float threshold);
 
+    void UpdatePW(IBAnalyzerEM::PWeigthAlgorithm algorithm);
 
     // members //
     IBAnalyzerEM::Parameters         *m_parameters;
@@ -116,6 +129,7 @@ public:
     IBVoxRaytracer                   *m_RayAlgorithm;
     void (* m_SijSelectedFunction)(Matrix4f &ISigma, Event *evc);
     void (* m_MAPLambdaFunction)(float beta, Event *evc);
+    void (* m_PWeigthFunction)(Event *evc, Scalarf nominalp);
     Vector<Event> m_Events;
 
 #ifndef NDEBUG
@@ -304,8 +318,7 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
     for (unsigned int i = start; i < end; ++i)
         this->Project(&m_Events[i]);
     #pragma omp barrier
-    std::cout << "inv impossible at " << _inv_bugs << " tracks \n" << std::flush;
-
+    std::cout << "inv impossible at " << _inv_bugs << " tracks \n" << std::flush;    
 
     // Backprojection
     #pragma omp parallel for
@@ -313,6 +326,38 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
         this->BackProject(&m_Events[i]);
     #pragma omp barrier
 }
+
+// PWEIGTH //
+void IBAnalyzerEMPimpl::UpdatePW(enum IBAnalyzerEM::PWeigthAlgorithm algorithm)
+{
+    static enum IBAnalyzerEM::PWeigthAlgorithm cache = IBAnalyzerEM::PWeigth_pw;
+    if(cache != algorithm) {
+        cache = algorithm;
+        switch (algorithm) {
+        case IBAnalyzerEM::PWeigth_disabled:
+            this->m_PWeigthFunction = NULL;
+            break;
+        case IBAnalyzerEM::PWeigth_pw:
+            this->m_PWeigthFunction = pweigth_pw;
+            break;
+        case IBAnalyzerEM::PWeigth_sw:
+            this->m_PWeigthFunction = pweigth_sw;
+            break;
+        case IBAnalyzerEM::PWeigth_cw:
+            this->m_PWeigthFunction = pweigth_cw;
+            break;
+        }
+    }
+    if (m_PWeigthFunction) {
+        #pragma omp parallel for
+        for (uint i = 0; i < this->m_Events.size(); ++i) {
+            m_PWeigthFunction(&this->m_Events[i], m_parameters->nominal_momentum);
+        }
+        #pragma omp barrier
+    }
+}
+
+
 
 
 ////// CUTS //////
@@ -338,6 +383,9 @@ void IBAnalyzerEMPimpl::SijCut(float threshold)
         else ++itr;
     } while (itr != this->m_Events.end());
 }
+
+
+
 
 
 
@@ -372,7 +420,7 @@ void IBAnalyzerEM::AddMuon(MuonScatterData &muon)
     if(unlikely(!d->m_PocaAlgorithm || !d->m_RayAlgorithm || !d->m_VarAlgorithm)) return;
     Event evc;
 
-    evc.header.InitialSqrP = 3/muon.GetMomentum(); // <<<<<<<<<<<<<<<<< HARDCODED!!!!
+    evc.header.InitialSqrP = parameters().nominal_momentum/muon.GetMomentum();
     evc.header.InitialSqrP *= evc.header.InitialSqrP;
 
     if(likely(d->m_VarAlgorithm->evaluate(muon))) {
@@ -457,6 +505,11 @@ void IBAnalyzerEM::SijCut(float threshold) {
     d->Evaluate(1);
     d->SijCut(threshold);
     this->GetVoxCollection()->UpdateDensity(0); // HARDCODE THRESHOLD
+}
+
+void IBAnalyzerEM::UpdatePW(IBAnalyzerEM::PWeigthAlgorithm algorithm)
+{
+    d->UpdatePW(algorithm);
 }
 
 
@@ -689,3 +742,93 @@ static void gaussian_lambda_prior(float beta, Event *evc) {
         evc->elements[j].Sij = pow(a+b, 1/3) + pow(a-b, 1/3) - voxel->Value;    // FIXX
     }
 }
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+////// PWEIGTH ALGORITHMS  /////////////////////////////////////////////////////
+
+
+static void pweigth_pw(Event *evc, Scalarf nominalp) {
+    float pw_A = 1.42857;
+    float pw_epsilon = 4.0;
+    float Xres = 0;
+    Matrix4f Wij;
+    for (int j = evc->elements.size(); j --> 0;) //BACKWARD
+    {
+        Wij = evc->elements[j].Wij;
+
+        evc->elements[j].pw = pw_A * (nominalp) *
+                sqrt(pw_epsilon/(Xres + pw_epsilon));
+
+        Xres += (evc->elements[j].voxel->Value * 1.E6 < 2.5) ?
+                    Wij(0,0) * evc->elements[j].voxel->Value * 40000 :
+                    Wij(0,0) * 2.5 * 0.04;
+
+        //Xres += Wij[0] * evc->elements[j].voxel->density * 40000; //<- previous version of
+                                      // p_weight: bugged but enhancing!
+    }
+}
+
+static void pweigth_sw(Event *evc, Scalarf nominalp) {
+    float scale = 0.8;   //this is experimental and empirical!
+    float alpha = 0.436; // this is the distribution peak angle, 25 degrees
+    // note: albeit NOT efficient, this procedure is fundamental in testing the algorithm capability
+    TODO("Optimize PW functions");
+    float b1 = 13.52; // Iron Values
+    float b2 = 319.9;
+    float c1 = 3.73E-4;
+    float c2 = 2.55E-2;
+    float d = 2.33;
+    float e = 1.56;
+
+    float sw_epsilon_1 = scale * sqrt(b1 + c1 * alpha * alpha);
+    float sw_epsilon_2 = scale * sqrt(b2 + c2 * alpha * alpha);
+    float sw_A = d + e * cos(alpha) * cos(alpha);
+
+    float Xres = 0;
+    Matrix4f Wij;
+    for (int j = evc->elements.size(); j --> 0;) //BACKWARD
+    {
+        Wij = evc->elements[j].Wij;
+
+        evc->elements[j].pw = (nominalp) * sqrt( sw_A /
+                (Xres/sw_epsilon_1 + pow(Xres/sw_epsilon_2,2) + 1) );
+    /*
+        Xres += (evc->elements[j].voxel->density * 1.E6 < 2.5) ?
+                Wij[0] * evc->elements[j].voxel->density * 40000 :
+                Wij[0] * 2.5 * 0.04;
+        */
+        Xres += Wij(0,0) * evc->elements[j].voxel->Value * 40000; //<- previous version of
+                                      // p_weight: bugged but enhancing!
+    }
+}
+
+static void pweigth_cw(Event *evc, Scalarf nominalp){
+    float cw_A = 1.42857;
+    float cw_epsilon = 50;
+    float X0_tot = 0;
+    Matrix4f Wij;
+    for (int j = 0; j < evc->elements.size(); ++j)
+    {
+        Wij = evc->elements[j].Wij;
+        /*X0_tot += (evc->elements[j].voxel->density * 1.E6 < 2.5 ) ?
+                 Wij[0] * evc->elements[j].voxel->density * 40000 :
+                 Wij[0] * 2.5 * 0.04;
+         */
+        X0_tot += Wij(0,0) * evc->elements[j].voxel->Value * 40000;
+    }
+
+    float _pw = cw_A * (nominalp) *
+            sqrt( cw_epsilon / ( X0_tot + cw_epsilon ));
+    for (int i = 0; i < evc->elements.size(); ++i )
+    {
+        evc->elements[i].pw = _pw;
+    }
+}
+
+
+
+

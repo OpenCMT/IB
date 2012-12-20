@@ -11,7 +11,7 @@ class IBAnalyzerEM : public IBAnalyzer {
     typedef IBAnalyzer BaseClass;
 public:
     enum Algorithm {
-        PXTZ,
+        PXTZ = 0,
         PX,
         TZ,
         PT,
@@ -22,9 +22,18 @@ public:
         Z
     };
 
+    enum PWeigthAlgorithm {
+        PWeigth_disabled = 0,
+        PWeigth_pw,
+        PWeigth_sw,
+        PWeigth_cw
+    };
+
     ULIB_OBJECT_PARAMETERS(BaseClass)
     {
+        Scalarf nominal_momentum;
         enum Algorithm algorithm;
+        enum PWeigthAlgorithm pweigth;
     };
 
 public:
@@ -45,6 +54,8 @@ public:
 
     void SijCut(float threshold);
 
+    void UpdatePW(enum PWeigthAlgorithm algorithm);
+
 private:
     friend class IBAnalyzerEMPimpl;
     class IBAnalyzerEMPimpl *d;
@@ -53,7 +64,9 @@ private:
 
 inline void IBAnalyzerEM::init_parameters() {
     Parameters &p = this->parameters();
+    p.nominal_momentum = 3;
     p.algorithm = PXTZ;
+    p.pweigth = PWeigth_disabled;
 }
 
 
