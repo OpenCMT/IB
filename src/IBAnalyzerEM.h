@@ -66,7 +66,7 @@ inline void IBAnalyzerEM::init_parameters() {
     Parameters &p = this->parameters();
     p.nominal_momentum = 3;
     p.algorithm = PXTZ;
-    p.pweigth = PWeigth_disabled;
+    p.pweigth = PWeigth_pw;
 }
 
 

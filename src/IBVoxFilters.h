@@ -4,7 +4,7 @@
 #include <Core/Object.h>
 #include <Core/StaticInterface.h>
 #include <Math/VoxImageFilter.h>
-
+#include <IBVoxImageFilterPlasmon.hpp>
 #include "IBVoxel.h"
 
 
@@ -69,7 +69,7 @@ typedef uLib::VoxFilterAlgorithmMedian<IBVoxel> IBVoxFilter_Median;
 
 typedef uLib::VoxFilterAlgorithmAbtrim<IBVoxel> IBVoxFilter_Abtrim;
 
-
+typedef VoxImageFilterAlgorithmPlasmon<IBVoxel> IBVoxFilter_Plasmon;
 
 
 

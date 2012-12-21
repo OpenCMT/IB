@@ -72,7 +72,7 @@ int main() {
     abfilt.SetImage(&voxels);
     abfilt.SetABTrim(0,2);
 
-    // pocal //
+    // poca //
     IBPocaEvaluator* processor = IBPocaEvaluator::New(IBPocaEvaluator::TiltedAxis);
 
     // tracer //

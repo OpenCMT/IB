@@ -32,7 +32,6 @@ struct Event {
     Vector<Element> elements;
 };
 
-static int _inv_bugs = 0;
 
 
 // EM ALGORITHMS DECLARATIONS //
@@ -311,14 +310,12 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
     unsigned int end = (int) (m_Events.size() * muons_ratio);
 
     this->SetAlgorithm(m_parameters->algorithm);
-    _inv_bugs = 0;
 
     // Projection
     #pragma omp parallel for
     for (unsigned int i = start; i < end; ++i)
         this->Project(&m_Events[i]);
-    #pragma omp barrier
-    std::cout << "inv impossible at " << _inv_bugs << " tracks \n" << std::flush;    
+    #pragma omp barrier  
 
     // Backprojection
     #pragma omp parallel for
@@ -535,34 +532,11 @@ static void print_matrix(Matrix4f &mat, std::ostream &o)
  ************************************************/
 static void four_hidden_pxtz(Matrix4f &Sigma, Event *evc)
  {
-    bool inv = false;
+
     Matrix4f iS;
 
-    Sigma.computeInverseWithCheck(iS,inv);
     iS = Sigma.inverse();
 
-
-    // DUMP //
-//    std::cout << "Matrice Sigma: \n";
-//    print_matrix(Sigma, std::cout);
-//    std::cout << "\n";
-//    std::cout << "Matrice ISigma: \n";
-//    print_matrix(iS, std::cout);
-//    std::cout << "\n";
-//    std::cout << "parametro di invertibilita: " << (iS*Sigma).sum() - 4 << " Eigen inv opinion " << inv << "\n\n";
-
-    // if Sigma has no inverse, ISigma is computed as zero and SijCap goes 0 //
-    // so we predecrement voxel Count to remove this event from mean         //
-    if(unlikely(!inv)) {
-       _inv_bugs++;
-    }
-        //        for (unsigned int j = 0; j < evc->elements.size(); ++j) {
-//            evc->elements[j].voxel->Count--;
-//            evc->elements[j].Sij = 0;
-//        }
-//        _inv_bugs++;
-//        return;
-//    }
     for (unsigned int j = 0; j < evc->elements.size(); ++j) {
         Matrix4f iSWij       = iS * evc->elements[j].Wij;
         float DISWISD        = evc->header.Di.transpose() * iSWij * iS * evc->header.Di;
