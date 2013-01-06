@@ -14,6 +14,9 @@ struct IBVoxel {
 };
 
 
+struct IBBasicVoxel {
+    uLib::Scalarf Value;
+};
 
 
 #endif // IBVOXEL_H

@@ -35,6 +35,7 @@ class IBVoxCollectionCap : public IBVoxCollection
 {
     typedef IBVoxCollection BaseClass;
 public:
+    typedef IBVoxCollection VoxImageType;
     IBVoxCollectionCap(const Vector3i size) :
         BaseClass(size) {}
 

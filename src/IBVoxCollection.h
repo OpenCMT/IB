@@ -42,6 +42,7 @@ public:
 
 class IBVoxCollection : public uLib::VoxImage<IBVoxel> {
     typedef uLib::VoxImage<IBVoxel> BaseClass;
+    typedef IBVoxCollection VoxImageType;
 public:
 
     IBVoxCollection(const uLib::Vector3i size);
