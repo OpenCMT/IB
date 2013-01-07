@@ -3,9 +3,6 @@
 #include "IBSubImageGrabber.h"
 #include "IBVoxImageScanner.h"
 
-void PrintRData(RangeThresholdScan::ScanData d);
-void PrintData(SimpleThresholdScan::ScanData d);
-
 int main()
 {
     IBVoxCollectionCap image(Vector3i(10,10,10));
@@ -32,7 +29,6 @@ int main()
         SimpleThresholdScan::ScanOption o;
         o.Threshold = i*1E-6;
         r_opt.push_back(o);
-        std::cout<< r_opt.at(i).Threshold << std::endl;
     }
     RangeThresholdScan::ScanData r_output;
 

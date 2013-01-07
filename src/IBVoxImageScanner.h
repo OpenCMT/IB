@@ -9,8 +9,9 @@ template<class T>
 class IBVoxImageScanner
 {
 public:
-    IBVoxImageScanner(T& image) : m_Image(image) {}
-
+    IBVoxImageScanner() : m_Image(NULL)           {}
+    IBVoxImageScanner(T * image) : m_Image(image) {}
+    IBVoxImageScanner(T& image) : m_Image(&image) {}
     template<class A>
     class A::ScanData ScanImage(class A::ScanOption opt)
     {
@@ -19,10 +20,10 @@ public:
         return scanner.Scan(opt);
     }
 
-    uLibGetSetMacro(Image, T)
+    uLibGetSetMacro(Image, T*)
 
 private:
-    T m_Image;
+    T * m_Image;
 };
 
 // TODO: interface for Vector<float> ImageData
@@ -47,7 +48,7 @@ public:
     SimpleThresholdScan() {}
 
     template<class T>
-    void LoadImageData(T &image);
+    void LoadImageData(T * image);
 
     ScanData Scan(ScanOption opt);
 
@@ -65,13 +66,14 @@ protected:
 };
 
 template<class T>
-void SimpleThresholdScan::LoadImageData(T &image)
+void SimpleThresholdScan::LoadImageData(T * image)
 {
-    for(int i=0; i<image.Data().size(); ++i)
-        this->m_ImageData.push_back(image.At(i).Value);
+    for(int i=0; i<image->Data().size(); ++i)
+        this->m_ImageData.push_back(image->At(i).Value);
 }
 
-SimpleThresholdScan::ScanData SimpleThresholdScan::Scan(
+// get rid of inline when moving to separate file!
+inline SimpleThresholdScan::ScanData SimpleThresholdScan::Scan(
         SimpleThresholdScan::ScanOption opt)
 {
     this->ResetScanData();
@@ -84,7 +86,7 @@ SimpleThresholdScan::ScanData SimpleThresholdScan::Scan(
     }
     m_ScanData.Intensity /= found;
     m_ScanData.Percent = 100 * ((float)found / m_ImageData.size());
-    if(m_ScanData.Percent==0.f || m_ScanData.Percent==100.f)
+    if(m_ScanData.Percent==0.f)
         m_ScanData.Intensity = 0.f;
     return m_ScanData;
 }

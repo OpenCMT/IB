@@ -95,7 +95,6 @@ int main() {
         voxels.ExportToVtk(file,0);
     }
 
-
     delete aem;
     delete minimizator;
     return 0;
