@@ -14,10 +14,6 @@ struct IBVoxel {
 };
 
 
-struct IBBasicVoxel {
-    uLib::Scalarf Value;
-};
-
-typedef uLib::VoxImage<IBBasicVoxel> IBLightCollection;
+typedef uLib::VoxImage<uLib::Voxel> IBLightCollection;
 
 #endif // IBVOXEL_H
