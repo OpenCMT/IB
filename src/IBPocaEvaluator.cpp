@@ -1,5 +1,6 @@
 #include "IBPocaEvaluator.h"
 #include "IBTiltedAxisPocaEvaluator.h"
+#include "IBLineDistancePocaEvaluator.h"
 
 using namespace uLib;
 
@@ -8,5 +9,7 @@ IBPocaEvaluator *IBPocaEvaluator::New(IBPocaEvaluator::IBPocaEvaluationAlgorithm
     switch (S) {
     case TiltedAxis:
         return new IBTiltedAxisPocaEvaluator;
+    case LineDistance:
+        return new IBLineDistancePocaEvaluator;
     }
 }

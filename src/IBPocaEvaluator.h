@@ -10,12 +10,14 @@
 using namespace uLib;
 
 class IBTiltedAxisPocaEvaluator;
+class IBLineDistancePocaEvaluator;
 
 class IBPocaEvaluator
 {
 public:
     enum IBPocaEvaluationAlgorithms {
-        TiltedAxis
+        TiltedAxis,
+        LineDistance
     };
 
     static IBPocaEvaluator* New(enum IBPocaEvaluationAlgorithms S);

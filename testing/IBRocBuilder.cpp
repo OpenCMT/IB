@@ -13,7 +13,7 @@ void PrintData(SimpleThresholdScan::ScanData d);
 int main()
 {
     std::cout << "Initializing containers..." << std::flush;
-    TFile f("ROC_20121223_RTS.root","RECREATE");
+    TFile f("ROC_20121223_RTS_8.root","RECREATE");
 
     TTree t("ROC", "20121223");
     RangeThresholdScan::ScanOption opt;
@@ -60,7 +60,7 @@ int main()
     for(int ii=1; ii<100; ++ii) {
         fbulk++;
         char fname[50];
-        sprintf(fname, "./roc_set/lead_image_%i.vtk",ii);
+        sprintf(fname, "/home/eth/musteel/data/ROC/lead_image_%i.vtk",ii);
         image.ImportFromVtk(fname);
         // filter
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
@@ -69,6 +69,12 @@ int main()
         trim.SetABTrim(0,2);
         trim.SetImage(&image);
         trim.Run();
+        Vector<float> kern;
+        for(int i=0; i<8; ++i) kern.push_back(static_cast<float>(1));
+        IBVoxFilter_Linear average(Vector3i(2,2,2));
+        average.SetImage(&image);
+        average.SetKernelNumericXZY(kern);
+        average.Run();
         // grabbing
         Vector3i z(0,0,0);
         IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
@@ -102,7 +108,7 @@ int main()
             for(int j=0; j<opt.size(); ++j) {
                 perc_b_t[i][j] += res.at(j).Percent;
                 inte_b_t[i][j] += res.at(j).Intensity;
-                iden_b_t[i][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
+                iden_b_t[i][j] += (res.at(j).Percent>0.f && res.at(j).Intensity>0.08) ? 1.0 : 0.0;
             }
         }
         std::cout << "\rProcessing " << ii << "\% complete." << std::flush;
@@ -115,14 +121,21 @@ int main()
     for(int ii=1; ii<100; ++ii) {
         fbulk++;
         char fname[50];
-        sprintf(fname, "./roc_set/nolead_image_%i.vtk", ii);
+        sprintf(fname, "/home/eth/musteel/data/ROC/nolead_image_%i.vtk", ii);
         image.ImportFromVtk(fname);
+        //filtering
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
         IBFilterGaussShape shape(0.2);
         trim.SetKernelSpherical(shape);
         trim.SetABTrim(0,2);
         trim.SetImage(&image);
         trim.Run();
+        Vector<float> kern;
+        for(int i=0; i<8; ++i) kern.push_back(static_cast<float>(1));
+        IBVoxFilter_Linear average(Vector3i(2,2,2));
+        average.SetImage(&image);
+        average.SetKernelNumericXZY(kern);
+        average.Run();
         // grabbing
         IBVoxImageScanner<IBVoxCollectionCap> scanner;
         scanner.SetImage(&image);
@@ -130,7 +143,7 @@ int main()
         for(int j=0; j<opt.size(); ++j) {
             perc_b_t[9][j] += res.at(j).Percent;
             inte_b_t[9][j] += res.at(j).Intensity;
-            iden_b_t[9][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
+            iden_b_t[9][j] += (res.at(j).Percent>0.f && res.at(j).Intensity>0.08) ? 1.0 : 0.0;
         }
         std::cout << "\rProcessing " << ii << "\% complete." << std::flush;
     }

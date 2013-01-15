@@ -15,6 +15,8 @@
 #include "IBAnalyzerWPoca.h"
 #include "IBAnalyzerPoca.h"
 #include "IBVoxFilters.h"
+#include "IBLineDistancePocaEvaluator.h"
+
 
 using namespace uLib;
 
@@ -24,7 +26,7 @@ int main() {
     IBMuonError sigma(11.93,2.03,18.53,2.05);
 
     // reader //
-    TFile* f = new TFile("/var/local/data/root/run_PDfit_201210/muSteel_PDfit_20121016_v10.root");
+    TFile* f = new TFile("~/musteel/data/muSteel_PDfit_2012122300_v11.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
@@ -39,6 +41,7 @@ int main() {
     voxels.SetPosition(Vector3f(-400,-270,-150));
     voxels.InitLambda(zero);
 
+    IBVoxCollectionCap voxels2(voxels);
     // filter
     IBVoxFilter_Abtrim abfilt(Vector3i(5,5,5));
     IBFilterGaussShape shape(0.2);
@@ -56,11 +59,17 @@ int main() {
 
     //poca
     IBPocaEvaluator* processor = IBPocaEvaluator::New(IBPocaEvaluator::TiltedAxis);
+    IBLineDistancePocaEvaluator* proc2 = new IBLineDistancePocaEvaluator();
 
     IBAnalyzerWPoca* ap = new IBAnalyzerWPoca();
     ap->SetPocaAlgorithm(processor);
     ap->SetVariablesAlgorithm(minimizator);
     ap->SetVoxCollection(&voxels);
+
+    IBAnalyzerWPoca* ap2 = new IBAnalyzerWPoca();
+    ap2->SetPocaAlgorithm(proc2);
+    ap2->SetVariablesAlgorithm(minimizator);
+    ap2->SetVoxCollection(&voxels2);
 
     std::cout << "There are " << reader->getNumberOfEvents() << " events!\n" << std::flush;
 
@@ -71,6 +80,7 @@ int main() {
         if(reader->readNext(&mu)) {
             //std::cout << "Event : " << reader->getCurrentPosition() << "\n";
             ap->AddMuon(mu);
+            ap2->AddMuon(mu);
             tot++;
             if(tot%10000 == 0 ) std::cout<<tot<<"\n"<<std::flush;
         }
@@ -78,14 +88,20 @@ int main() {
     } while (tot2<2500000);
 
     ap->Run();
+    ap2->Run();
     delete ap;
+    delete ap2;
     std::cout << "There are " << tot << " event actually read\n";
 
-    voxels.ExportToVtk("20121016_poca_4.vtk",0);
+    voxels.ExportToVtk("poca_algorithm_TAPE.vtk",0);
+    voxels2.ExportToVtk("poca_algorithm_LDPE.vtk",0);
 
     abfilt.Run();
-    voxels.ExportToVtk("20121016_poca_abtrim_3_4.vtk", 0);
+    voxels.ExportToVtk("Trimmed_TAPE.vtk", 0);
 
+    abfilt.SetImage(&voxels2);
+    abfilt.Run();
+    voxels2.ExportToVtk("Trimmed_LDPE.vtk",0);
     return 0;
 
 }
