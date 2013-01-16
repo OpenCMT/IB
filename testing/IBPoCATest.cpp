@@ -21,7 +21,7 @@ int main() {
     BEGIN_TESTING(IBPoCA);
 
     IBMuonError error(11.93,2.03,18.53,2.05);
-    TFile* f = new TFile("~/musteel/data/muSteel_PDfit_2012122300_v11.root");
+    TFile* f = new TFile("/var/local/data/root/ROC_sets/201212/lead/muSteel_PDfit_2012122300_v11.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
@@ -39,7 +39,7 @@ int main() {
     image.ExportToVtk("BBox.vtk",0);
 
     char fname1[20],fname2[20],fname3[20],fname4[20];
-    for (int i = 0; i<20; ++i) {
+    for (int i = 0; i<40; ++i) {
         MuonScatter event;
         if(reader->readNext(&event)) {
             sprintf(fname1, "trackI_%i.vtk",i);
@@ -57,6 +57,13 @@ int main() {
             v_ev2.AddPocaPoint(pocaprocessor2->getOutTrackPoca());
             v_ev3.AddPocaPoint(pocaprocessor1->getPoca());
             v_ev4.AddPocaPoint(pocaprocessor2->getPoca());
+
+            std::cout << "ev: " << i << "  [ p1 = " <<
+                         pocaprocessor1->getPoca().transpose() <<
+                         " , p2 = " <<
+                         pocaprocessor2->getPoca().transpose() <<
+                         " ]\n";
+
             v_ev1.SaveToFile(fname1);
             v_ev2.SaveToFile(fname2);
             v_ev3.SaveToFile(fname3);

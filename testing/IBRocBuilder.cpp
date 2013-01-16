@@ -13,11 +13,11 @@ void PrintData(SimpleThresholdScan::ScanData d);
 int main()
 {
     std::cout << "Initializing containers..." << std::flush;
-    TFile f("ROC_20121223_RTS_8.root","RECREATE");
+    TFile f("ROC_20130114_RTS_10min.root","RECREATE");
 
-    TTree t("ROC", "20121223");
+    TTree t("ROC", "20130114");
     RangeThresholdScan::ScanOption opt;
-    for(int i=0; i<300; ++i) {
+    for(int i=0; i<200; ++i) {
         SimpleThresholdScan::ScanOption o;
         o.Threshold = (0.1e-6)*i;
         opt.push_back(o);
@@ -57,10 +57,10 @@ int main()
     std::cout << "Scanning the 9 areas of POSITIVE situation...\n" << std::flush;
     // lead
     int fbulk = 0;
-    for(int ii=1; ii<100; ++ii) {
+    for(int ii=1; ii<50; ++ii) {
         fbulk++;
-        char fname[50];
-        sprintf(fname, "/home/eth/musteel/data/ROC/lead_image_%i.vtk",ii);
+        char fname[100];
+        sprintf(fname, "/var/local/data/vtk/ROC/run_20130114/time10m/lead_image_%i.vtk",ii);
         image.ImportFromVtk(fname);
         // filter
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
@@ -108,7 +108,7 @@ int main()
             for(int j=0; j<opt.size(); ++j) {
                 perc_b_t[i][j] += res.at(j).Percent;
                 inte_b_t[i][j] += res.at(j).Intensity;
-                iden_b_t[i][j] += (res.at(j).Percent>0.f && res.at(j).Intensity>0.08) ? 1.0 : 0.0;
+                iden_b_t[i][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
             }
         }
         std::cout << "\rProcessing " << ii << "\% complete." << std::flush;
@@ -118,10 +118,10 @@ int main()
     // no lead
     std::cout << "Scanning the whole images of NEGATIVE situation...\n" << std::flush;
     fbulk = 0;
-    for(int ii=1; ii<100; ++ii) {
+    for(int ii=1; ii<50; ++ii) {
         fbulk++;
-        char fname[50];
-        sprintf(fname, "/home/eth/musteel/data/ROC/nolead_image_%i.vtk", ii);
+        char fname[100];
+        sprintf(fname, "/var/local/data/vtk/ROC/run_20130113/time10m/nolead_image_%i.vtk", ii);
         image.ImportFromVtk(fname);
         //filtering
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
@@ -143,7 +143,7 @@ int main()
         for(int j=0; j<opt.size(); ++j) {
             perc_b_t[9][j] += res.at(j).Percent;
             inte_b_t[9][j] += res.at(j).Intensity;
-            iden_b_t[9][j] += (res.at(j).Percent>0.f && res.at(j).Intensity>0.08) ? 1.0 : 0.0;
+            iden_b_t[9][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
         }
         std::cout << "\rProcessing " << ii << "\% complete." << std::flush;
     }

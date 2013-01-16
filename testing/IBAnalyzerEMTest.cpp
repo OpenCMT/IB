@@ -28,7 +28,7 @@ int main() {
     IBMuonError sigma(11.93,2.03, 18.53,2.05);
     // reader //
     TFile* f = new TFile
-            ("/var/local/data/root/run_PDfit_201210/muSteel_PDfit_20121215_v11.root");
+            ("/var/local/data/root/ROC_sets/201212/lead/muSteel_PDfit_2012122300_v11.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
@@ -40,9 +40,9 @@ int main() {
     IBVoxel zero = {0.1E-6,0,0};
 //    IBVoxCollectionCap voxels(Vector3i(10,6,4));
 //    voxels.SetSpacing(Vector3f(80,80,80));
-    IBVoxCollectionCap voxels(Vector3i(60,40,60)); // BIG = 30 45 30 Portal= 80, 45, 30; Fat = 190 58 90
-    voxels.SetSpacing(Vector3f(3,3,3));
-    voxels.SetPosition(Vector3f(-90,-60,-90));  //BIG= -150 -270 -150 Size= -400, -270, -150
+    IBVoxCollectionCap voxels(Vector3i(140,72,60)); // BIG = 30 45 30 Portal= 80, 45, 30; Fat = 190 58 90
+    voxels.SetSpacing(Vector3f(5,5,5));
+    voxels.SetPosition(Vector3f(-350,-180,-150));  //BIG= -150 -270 -150 Size= -400, -270, -150
     voxels.InitLambda(zero);
 //    for (int i=10; i<70; ++i) {
 //        for (int k=7; k<23; ++k) {
@@ -73,7 +73,7 @@ int main() {
     abfilt.SetABTrim(0,2);
 
     // poca //
-    IBPocaEvaluator* processor = IBPocaEvaluator::New(IBPocaEvaluator::TiltedAxis);
+    IBPocaEvaluator* processor = IBPocaEvaluator::New(IBPocaEvaluator::LineDistance);
 
     // tracer //
     IBVoxRaytracer* tracer = new IBVoxRaytracer(voxels);
@@ -100,17 +100,17 @@ int main() {
     std::cout << "There are " << reader->getNumberOfEvents() << " events!\n";
     int tot=0;
 
-    for (int i=0; i<2500000/*reader->getNumberOfEvents()*/; i++) {
+    for (int i=0; i<10/*reader->getNumberOfEvents()*/; i++) {
         MuonScatter mu;
         if(reader->readNext(&mu)) {
-            ap->AddMuon(mu);
+            //ap->AddMuon(mu);
             aem->AddMuon(mu);
             tot++;
         }
 
     }
 
-
+    exit(0);
     char file[100];
 
     int before = aem->Size();
@@ -143,18 +143,18 @@ int main() {
 
 
 
-    int it   = 50;
+    int it   = 10;
     int drop = 10;
 
     std::cout << "PXTZ\n";
     for (int i=1; i<=it; ++i) {
         aem->Run(drop,1);
-        sprintf(file, "20121215_v488_2PXTZ_Cut60_v11_l100_vx3_p07_Inv_%i.vtk", i*drop);
-        voxels.ExportToVtk(file,0);
+        sprintf(file, "NewPocaAlgorithmTEST_%i.vtk", i*drop);
+        //voxels.ExportToVtk(file,0);
     }
 
     abfilt.Run();
-    voxels.ExportToVtk("20121215_v488_2PXTZ_Cut60_v11_l100_vx3_p07_Inv_trim.vtk",0);
+    //voxels.ExportToVtk("NewPocaAlgorithmTEST_Trim.vtk",0);
 
 //    std::cout << "PX\n";
 //    aem->parameters().algorithm = IBAnalyzerEM::PX;

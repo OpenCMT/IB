@@ -438,6 +438,7 @@ void IBAnalyzerEM::AddMuon(MuonScatterData &muon)
             poca = d->m_PocaAlgorithm->getPoca();
             ray = d->m_RayAlgorithm->TraceBetweenPoints(entry_pt,poca);
             ray.AppendRay( d->m_RayAlgorithm->TraceBetweenPoints(poca,exit_pt) );
+
         }
         else {
             ray = d->m_RayAlgorithm->TraceBetweenPoints(entry_pt,exit_pt);

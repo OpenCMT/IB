@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
     aem->SetRaytracer(tracer);
     aem->SetVariablesAlgorithm(minimizator);
 
-    int toBread = 2754500; // 2.7545M = 10 min
+    int toBread = 2754500;// 1377250; // 2.7545M = 10 min
     for (int i=0; i<toBread; i++) {
         MuonScatter mu;
         if(reader->readNext(&mu)) {

@@ -20,7 +20,7 @@ int main() {
 
     // reader //
     TFile* f = new TFile
-            ("/var/local/data/root/run_PDfit_201210/muSteel_PDfit_20121224_v11.root");
+            ("/var/local/data/root/ROC_sets/201212/lead/muSteel_PDfit_2012122300_v11.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
@@ -83,16 +83,16 @@ int main() {
 
     aem->SijCut(60);
 
-    int it   = 20;
-    int drop = 10;
+    int it   = 1;
+    int drop = 100;
 
     char file[100];
 
     std::cout << "PXTZ\n";
     for (int i=1; i<=it; ++i) {
         aem->Run(drop,1);
-        sprintf(file, "20121224_v495_2PXTZ_%i.vtk", i*drop);
-        voxels.ExportToVtk(file,0);
+ //       sprintf(file, "20121224_v495_2PXTZ_%i.vtk", i*drop);
+ //       voxels.ExportToVtk(file,0);
     }
 
     delete aem;
