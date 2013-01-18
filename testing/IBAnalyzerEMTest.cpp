@@ -28,7 +28,7 @@ int main() {
     IBMuonError sigma(11.93,2.03, 18.53,2.05);
     // reader //
     TFile* f = new TFile
-            ("/home/eth/musteel/data/muSteel_PDfit_2012122300_v11.root");
+            ("/var/local/data/root/run_20130124/muSteel_PDfit_20130124_v12.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
@@ -100,7 +100,7 @@ int main() {
     std::cout << "There are " << reader->getNumberOfEvents() << " events!\n";
     int tot=0;
 
-    for (int i=0; i<10/*reader->getNumberOfEvents()*/; i++) {
+    for (int i=0; i<reader->getNumberOfEvents(); i++) {
         MuonScatter mu;
         if(reader->readNext(&mu)) {
             //ap->AddMuon(mu);
@@ -110,7 +110,6 @@ int main() {
 
     }
 
-    exit(0);
     char file[100];
 
     int before = aem->Size();
@@ -149,12 +148,14 @@ int main() {
     std::cout << "PXTZ\n";
     for (int i=1; i<=it; ++i) {
         aem->Run(drop,1);
-        sprintf(file, "NewPocaAlgorithmTEST_%i.vtk", i*drop);
+        //sprintf(file, "NewPocaAlgorithmTEST_%i.vtk", i*drop);
         //voxels.ExportToVtk(file,0);
     }
 
+    voxels.ExportToVtk("20130124.vtk",0);
+
     abfilt.Run();
-    //voxels.ExportToVtk("NewPocaAlgorithmTEST_Trim.vtk",0);
+    voxels.ExportToVtk("20130124_Trim.vtk",0);
 
 //    std::cout << "PX\n";
 //    aem->parameters().algorithm = IBAnalyzerEM::PX;

@@ -25,6 +25,7 @@ public:
     virtual void setMomentum(Scalarf p)             = 0;
     virtual void setError(IBMuonError e)            = 0;
     virtual void selectionCode(short code)          = 0;
+    virtual void setAcquisitionTime(float min){}
 
 
     virtual unsigned long getNumberOfEvents() = 0;
