@@ -22,29 +22,12 @@ public:
         if (unlikely(!isFinite(den)))
             m_integrity = false;
         else {
-            Scalarf lambda = (diff.transpose()*((v-(w*prod))*den));
-            Scalarf mu     = (diff.transpose()*(((v*prod)-w)*den));
+            Scalarf lambda = (diff.transpose()*(v*den-(w*prod*den)));
+            Scalarf mu     = (diff.transpose()*((v*prod)*den-w*den));
             m_inPoca       = p + v*lambda;
             m_outPoca      = q + w*mu;
             Vector4f mdseg = (m_outPoca-m_inPoca)*0.5;
             m_poca         = m_inPoca + mdseg;
-            std::cout << "Segment-LineIN prod:   " <<
-                         v.transpose() * mdseg << std::endl;
-            std::cout << "Segment-LineOUT prod:  " <<
-                         w.transpose() * mdseg << std::endl;
-            std::cout << " ----- \n";
-
-            Vector4f lIN  = (m_inPoca  - p);
-            Vector4f lOUT = (m_outPoca - q);
-
-            std::cout << "Segment-pINoIN prod:   " <<
-                         (lIN/lambda).transpose()  * mdseg << std::endl;
-            std::cout << "Segment-pOUToOUT prod: " <<
-                         (lOUT/mu).transpose() * mdseg << std::endl;
-            std::cout << "(Nr-p)*v/lambda = " << (lIN.transpose() * v)/lambda << std::endl;
-            std::cout << "(Ns-q)*w/mu     = " << (lOUT.transpose() * w)/mu << std::endl;
-            std::cout << "Den = " << den << "\n";
-            std::cout << " ===== \n";
             m_integrity   = true;
         }
     }
