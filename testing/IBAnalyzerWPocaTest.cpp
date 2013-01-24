@@ -23,10 +23,11 @@ using namespace uLib;
 int main() {
 
     // errors //
-    IBMuonError sigma(11.93,2.03,18.53,2.05);
+//    IBMuonError sigma(11.93,2.03,18.53,2.05);
+    IBMuonError sigma(12.24,0, 18.85,0);
 
     // reader //
-    TFile* f = new TFile("/var/local/data/root/ROC_sets/201212/lead/muSteel_PDfit_2012122300_v11.root");
+    TFile* f = new TFile ("/var/local/data/root/ROC_sets/201212/20121223/muSteel_PDfit_20121223_1_v11.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
@@ -36,9 +37,9 @@ int main() {
 
     // voxels //
     IBVoxel zero = {0,0,0};
-    IBVoxCollectionCap voxels(Vector3i(160,90,60));
-    voxels.SetSpacing(Vector3f(5,5,5));
-    voxels.SetPosition(Vector3f(-400,-270,-150));
+    IBVoxCollectionCap voxels(Vector3i(140,72,60));
+    voxels.SetSpacing (Vector3f(5,5,5));
+    voxels.SetPosition(Vector3f(-350,-180,-150));
     voxels.InitLambda(zero);
 
     IBVoxCollectionCap voxels2(voxels);
@@ -47,7 +48,7 @@ int main() {
     IBFilterGaussShape shape(0.2);
     abfilt.SetKernelSpherical(shape);
     abfilt.SetImage(&voxels);
-    abfilt.SetABTrim(0,2);
+    abfilt.SetABTrim(0,0);
 
     // tracer //
     IBVoxRaytracer* tracer = new IBVoxRaytracer(voxels);
@@ -61,14 +62,14 @@ int main() {
     IBPocaEvaluator* processor = IBPocaEvaluator::New(IBPocaEvaluator::TiltedAxis);
     IBLineDistancePocaEvaluator* proc2 = new IBLineDistancePocaEvaluator();
 
-    IBAnalyzerWPoca* ap = new IBAnalyzerWPoca();
+    IBAnalyzerPoca* ap = new IBAnalyzerPoca();
     ap->SetPocaAlgorithm(processor);
-    ap->SetVariablesAlgorithm(minimizator);
+    //ap->SetVariablesAlgorithm(minimizator);
     ap->SetVoxCollection(&voxels);
 
-    IBAnalyzerWPoca* ap2 = new IBAnalyzerWPoca();
+    IBAnalyzerPoca* ap2 = new IBAnalyzerPoca();
     ap2->SetPocaAlgorithm(proc2);
-    ap2->SetVariablesAlgorithm(minimizator);
+    //ap2->SetVariablesAlgorithm(minimizator);
     ap2->SetVoxCollection(&voxels2);
 
     std::cout << "There are " << reader->getNumberOfEvents() << " events!\n" << std::flush;
@@ -93,8 +94,8 @@ int main() {
     delete ap2;
     std::cout << "There are " << tot << " event actually read\n";
 
-    voxels.ExportToVtk("poca_algorithm_TAPE.vtk",0);
-    voxels2.ExportToVtk("poca_algorithm_LDPE.vtk",0);
+    voxels.ExportToVtk("poca_algorithm_noW_TAPE.vtk",0);
+    voxels2.ExportToVtk("poca_algorithm_noW_LDPE.vtk",0);
 
     abfilt.Run();
     voxels.ExportToVtk("Trimmed_TAPE.vtk", 0);

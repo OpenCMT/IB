@@ -505,9 +505,9 @@ void IBAnalyzerEM::SijCut(float threshold) {
     this->GetVoxCollection()->UpdateDensity(0); // HARDCODE THRESHOLD
 }
 
-void IBAnalyzerEM::UpdatePW(IBAnalyzerEM::PWeigthAlgorithm algorithm)
+void IBAnalyzerEM::UpdatePW()
 {
-    d->UpdatePW(algorithm);
+    d->UpdatePW(parameters().pweigth);
 }
 
 
@@ -730,20 +730,16 @@ static void pweigth_pw(Event *evc, Scalarf nominalp) {
     float pw_A = 1.42857;
     float pw_epsilon = 4.0;
     float Xres = 0;
-    Matrix4f Wij;
     for (int j = evc->elements.size(); j --> 0;) //BACKWARD
     {
-        Wij = evc->elements[j].Wij;
+        float L = evc->elements[j].Wij(0,0);
 
         evc->elements[j].pw = pw_A * (nominalp) *
                 sqrt(pw_epsilon/(Xres + pw_epsilon));
-
-        Xres += (evc->elements[j].voxel->Value * 1.E6 < 2.5) ?
-                    Wij(0,0) * evc->elements[j].voxel->Value * 40000 :
-                    Wij(0,0) * 2.5 * 0.04;
-
-        //Xres += Wij[0] * evc->elements[j].voxel->density * 40000; //<- previous version of
-                                      // p_weight: bugged but enhancing!
+        //        Xres += (evc->elements[j].voxel->Value * 1.E6 < 2.5) ?
+        //                    L * evc->elements[j].voxel->Value * 40000 :
+        //                    L * 2.5 * 0.04;
+        Xres += L * evc->elements[j].voxel->Value * 40000;
     }
 }
 

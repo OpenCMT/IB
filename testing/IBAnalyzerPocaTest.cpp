@@ -33,9 +33,10 @@ int main() {
 
     // voxels //
     IBVoxel zero = {0.1E-6,0,0};
-    IBVoxCollectionCap voxels(Vector3i(160,96,60));
-    voxels.SetSpacing(Vector3f(5,5,5));
-    voxels.SetPosition(Vector3f(-400,-300,-150));
+    IBVoxCollection voxels(Vector3i(140,72,60));
+    voxels.SetSpacing (Vector3f(5,5,5));
+    voxels.SetPosition(Vector3f(-350,-180,-150));
+
     voxels.InitLambda(zero);
 
 

@@ -54,7 +54,7 @@ public:
 
     void SijCut(float threshold);
 
-    void UpdatePW(enum PWeigthAlgorithm algorithm);
+    void UpdatePW();
 
 private:
     friend class IBAnalyzerEMPimpl;
