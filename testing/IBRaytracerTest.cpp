@@ -28,7 +28,7 @@ int main(int argv, char** argc) {
     IBMuonError sigma(11.93,2.03, 18.53,2.05);
 
     // reader //
-    TFile* f = new TFile("/var/local/data/root/run_PDfit_201210/muSteel_PDfit_20121016_v10.root");
+    TFile* f = new TFile("/home/eth/musteel/data/muSteel_PDfit_2012122300_v11.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);

@@ -23,11 +23,11 @@ int main(int argc, char** argv)
         opt.push_back(o);
     }
 
-    float perc_b_t[10][opt.size()];
-    float inte_b_t[10][opt.size()];
-    float iden_b_t[10][opt.size()];
+    float perc_b_t[12][opt.size()];
+    float inte_b_t[12][opt.size()];
+    float iden_b_t[12][opt.size()];
 
-    for (int i=0; i<10; ++i) {
+    for (int i=0; i<12; ++i) {
         for (int j=0; j<opt.size(); ++j) {
             perc_b_t[i][j] = 0.0;
             inte_b_t[i][j] = 0.0;
@@ -35,12 +35,12 @@ int main(int argc, char** argv)
         }
     }
 
-    float perc[10],inte[10],iden[10];
+    float perc[12],inte[12],iden[12];
     float thres;
 
     t.Branch("threshold", &thres, "thres/F");
-    char bnamePerc[10][40],bnameInte[10][40],bnameIden[10][40];
-    for(int i=0; i<10; ++i) {
+    char bnamePerc[12][40],bnameInte[12][40],bnameIden[12][40];
+    for(int i=0; i<12; ++i) {
         perc[i] = 0.0;
         inte[i] = 0.0;
         iden[i] = 0.0;
@@ -137,17 +137,25 @@ int main(int argc, char** argv)
 //        average.SetKernelNumericXZY(kern);
 //        average.Run();
         // grabbing
-//        IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
-//        IBLightCollection imgCont(Vector3i(0,0,0));
-//        imgCont = grabber.GrabRegion<IBLightCollection>(Vector3i(10,10,4),Vector3i(129,61,55));
-        IBVoxImageScanner<IBVoxCollectionCap> scanner;
-        scanner.SetImage(&image);
-        RangeThresholdScan::ScanData res = scanner.ScanImage<RangeThresholdScan>(opt);
-        for(int j=0; j<opt.size(); ++j) {
-            perc_b_t[9][j] += res.at(j).Percent;
-            inte_b_t[9][j] += res.at(j).Intensity;
-            iden_b_t[9][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
-        }
+        IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
+        IBLightCollection imgContBott(Vector3i(0,0,0)), imgContMidd(Vector3i(0,0,0)), imgContTop(Vector3i(0,0,0));
+        imgContBott = grabber.GrabRegion<IBLightCollection>(Vector3i(10,10,4),Vector3i(129,26,55));
+	imgContMidd = grabber.GrabRegion<IBLightCollection>(Vector3i(10,27,4),Vector3i(129,44,55));
+	imgContTop  = grabber.GrabRegion<IBLightCollection>(Vector3i(10,45,4),Vector3i(129,61,55));
+	std::vector<IBLightCollection> boxS;
+	boxS.push_back(imgContBott);
+	boxS.push_back(imgContMidd);
+	boxS.push_back(imgContTop );
+	IBVoxImageScanner<IBLightCollection> scanner;
+	for(int i=0; i<boxS.size(); ++i) {
+	    scanner.SetImage(&boxS.at(i));
+	    RangeThresholdScan::ScanData res = scanner.ScanImage<RangeThresholdScan>(opt);
+	    for(int j=0; j<opt.size(); ++j) {
+	        perc_b_t[9+i][j] += res.at(j).Percent;
+		inte_b_t[9+i][j] += res.at(j).Intensity;
+		iden_b_t[9+i][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
+	    }
+	}
         std::cout << "\rProcessing " << (float)100*ii/atoi(argv[3]) << "\% complete." << std::flush;
     }
 
@@ -156,7 +164,7 @@ int main(int argc, char** argv)
     std::cout << "Finalizing Data and Saving..." << std::flush;
 
     for(int j=0; j<opt.size(); ++j) {
-        for(int i=0; i<10; ++i) {
+        for(int i=0; i<12; ++i) {
             perc[i] = perc_b_t[i][j] / fbulk;
             inte[i] = inte_b_t[i][j] / fbulk;
             iden[i] = iden_b_t[i][j] / fbulk;
@@ -170,4 +178,3 @@ int main(int argc, char** argv)
     std::cout << "done!\nExiting!\n" << std::flush;
     return 0;
 }
-
