@@ -23,14 +23,14 @@ bool IBMuonError::evaluate(MuonScatter &event, int i, int j)
     return false;
 }
 
-void IBMuonError::setScrapsImage(IBLightCollection *image, bool evPM)
+void IBMuonError::setScrapsImage(IBLightCollection &image, bool evPM)
 {
     IBPocaEvaluator * pproc = IBPocaEvaluator::New(IBPocaEvaluator::LineDistance);
-    IBVoxRaytracer trace(&image);
-    IBMEShader * sh(this);
+    IBVoxRaytracer trace(image);
+    IBMEShader sh(this);
     m_shader = &sh;
-    m_shader->m_image  = image;
-    m_shader->m_tracer = trace;
+    m_shader->m_image  = &image;
+    m_shader->m_tracer = &trace;
     m_shader->m_pproc  = pproc;
     m_shader->m_evPM   = evPM;
 }

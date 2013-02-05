@@ -12,24 +12,24 @@ using namespace uLib;
 
 class IBMuonError
 {
+    friend class IBMEShader;
+    friend class IBMESimpler;
 public:
 
     IBMuonError(Scalarf xA, Scalarf zA, Scalarf ratio = 1);
 
     bool evaluate(MuonScatter &event, int i, int j);
-    void setScrapsImage(IBLightCollection * image, bool evPM = false);
+    void setScrapsImage(IBLightCollection &image, bool evPM = false);
 
 private:
-    friend class IBMEShader;
-    friend class IBMESimpler;
-
     class IBMEShader
     {
+        friend class IBMuonError;
     private:
         IBMEShader(IBMuonError * ref) { d = ref; }
-        void setImage(IBLightCollection* image, bool evPM)
+        void setImage(IBLightCollection &image, bool evPM)
         {
-            m_image = image;
+            m_image = &image;
             m_evPM  = evPM;
         }
         bool evaluate(MuonScatter &event, int i, int j);
@@ -44,6 +44,7 @@ private:
 
     class IBMESimpler
     {
+        friend class IBMuonError;
     private:
         IBMESimpler(IBMuonError * ref) { d = ref; }
         bool evaluate(MuonScatter &event, int i, int j);
