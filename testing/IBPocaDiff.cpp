@@ -18,11 +18,11 @@
 
 using namespace uLib;
 
-int main() {
+int main(int argc, char* argv[]) {
     BEGIN_TESTING(IBPoCA);
 
     IBMuonError error(11.93,2.03,18.53,2.05);
-    TFile* f = new TFile("/home/eth/musteel/data/muSteel_PDfit_2012122300_v11.root");
+    TFile* f = new TFile(argv[1]);
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
@@ -67,7 +67,7 @@ int main() {
     ot->Branch("p2i_p2o",  &p2ip2o, "p2ip2o");
     ot->Branch("ldiff",    &rdiff,  "rdiff/F");
 
-    for (int i = 0; i<250000; ++i) {
+    for (int i = 0; i<200000; ++i) {
         MuonScatter event;
         if(reader->readNext(&event)) {
             pi = event.LineIn().origin;

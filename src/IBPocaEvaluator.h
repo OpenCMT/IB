@@ -5,7 +5,6 @@
 #include "Math/Dense.h"
 #include "Math/Utils.h"
 #include "Detectors/MuonScatter.h"
-#include "IBMuonError.h"
 
 using namespace uLib;
 

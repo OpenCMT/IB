@@ -5,7 +5,6 @@
 #include "IBMuonEventTTreeR2DmcReader.h"
 #include "IBMuonEventTTreeLNLmcReader.h"
 #include "IBMuonEventTTreeLNLdataReader.h"
-
 using namespace uLib;
 
 
@@ -14,11 +13,11 @@ IBMuonEventTTreeReader *IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::IBMu
     switch (S) {
     case R3D_MC:
         return new IBMuonEventTTreeR3DmcReader;
-    case R2D_MC:
-        return new IBMuonEventTTreeR2DmcReader;
-    case LNL_MC:
-        return new IBMuonEventTTreeLNLmcReader;
-    case LNL_DATA:
-        return new IBMuonEventTTreeLNLdataReader;
+//    case R2D_MC:
+//        return new IBMuonEventTTreeR2DmcReader;
+//    case LNL_MC:
+//        return new IBMuonEventTTreeLNLmcReader;
+//    case LNL_DATA:
+//        return new IBMuonEventTTreeLNLdataReader;
     }
 }

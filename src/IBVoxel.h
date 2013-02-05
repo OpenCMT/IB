@@ -13,7 +13,12 @@ struct IBVoxel {
     unsigned int  Count;
 };
 
+struct IBPMap {
+    uLib::Scalarf Value;
+    uLib::Scalarf Cj;
+};
+
 
 typedef uLib::VoxImage<uLib::Voxel> IBLightCollection;
-
+typedef uLib::VoxImage<IBPMap> IBShadeCollection;
 #endif // IBVOXEL_H

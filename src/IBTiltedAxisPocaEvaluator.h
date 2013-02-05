@@ -2,6 +2,7 @@
 #define IBTILTEDAXISPOCAEVALUATOR_H
 
 #include "IBPocaEvaluator.h"
+#include "IBMuonError.h"
 
 class IBTiltedAxisPocaEvaluator : public IBPocaEvaluator
 {

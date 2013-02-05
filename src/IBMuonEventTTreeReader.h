@@ -6,8 +6,6 @@
 
 using namespace uLib;
 
-class IBMuonEventTTreeR3DmcReader;
-
 class IBMuonEventTTreeReader {
 
 public:
@@ -23,12 +21,11 @@ public:
     virtual void setTTree(class TTree* tree)        = 0;
     virtual void setHitCuts(int nx_cut, int nz_cut) = 0;
     virtual void setMomentum(Scalarf p)             = 0;
-    virtual void setError(IBMuonError e)            = 0;
+    virtual void setError(IBMuonError &e)           = 0;
     virtual void selectionCode(short code)          = 0;
-    virtual void setAcquisitionTime(float min){}
+    virtual void setAcquisitionTime(float min)        {}
 
-
-    virtual unsigned long getNumberOfEvents() = 0;
+    virtual unsigned long getNumberOfEvents()  = 0;
     virtual unsigned long getCurrentPosition() = 0;
 
     virtual bool readNext(uLib::MuonScatter* event) = 0;
