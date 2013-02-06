@@ -25,6 +25,8 @@ bool IBMuonError::evaluate(MuonScatter &event, int i, int j)
 
 void IBMuonError::setScrapsImage(IBLightCollection &image, bool evPM)
 {
+    m_Axo = m_Axi;
+    m_Azo = m_Axi;
     IBPocaEvaluator * pproc = IBPocaEvaluator::New(IBPocaEvaluator::LineDistance);
     IBVoxRaytracer trace(image);
     IBMEShader sh(this);

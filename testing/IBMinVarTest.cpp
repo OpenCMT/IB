@@ -14,7 +14,7 @@ int main() {
     BEGIN_TESTING(IBMinVar);
 
     // errors //
-    IBMuonError sigma(11.93,2.03, 18.53,2.05); // parameters relative to scattering angles NOT measured angles!!
+    IBMuonError sigma(12.24,18.85); // parameters relative to scattering angles NOT measured angles!!
 
     // reader //
     TFile* f = new TFile

@@ -16,7 +16,7 @@ using namespace uLib;
 int main() {
 
     // errors //
-    IBMuonError sigma(11.93,2.03, 18.53,2.05);
+    IBMuonError sigma(12.24,18.85);
 
     // reader //
     TFile* f = new TFile

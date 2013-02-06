@@ -12,7 +12,7 @@ public:
     void setHitCuts(int nx_cut, int nz_cut);
     void setMomentum(Scalarf p);
     void selectionCode(short code);
-    void setError(IBMuonError e);
+    void setError(IBMuonError &e);
 
     unsigned long getNumberOfEvents();
     unsigned long getCurrentPosition();

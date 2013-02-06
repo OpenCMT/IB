@@ -127,17 +127,7 @@ public:
         muon_event->ErrorIn().direction_error  = Vector4f::Zero();
         muon_event->ErrorOut().direction_error = Vector4f::Zero();
 
-        m_error.evaluateInTrackError(muon_event->GetMomentum(),
-                                     muon_event->LineIn().direction(0),
-                                     muon_event->LineIn().direction(2));
-        muon_event->ErrorIn().direction_error(0)  = m_error.In().Phi();
-        muon_event->ErrorIn().direction_error(2)  = m_error.In().Theta();
-
-        m_error.evaluateOutTrackError(muon_event->GetMomentum(),
-                                      muon_event->LineOut().direction(0),
-                                      muon_event->LineOut().direction(2));
-        muon_event->ErrorOut().direction_error(0) = m_error.Out().Phi();
-        muon_event->ErrorOut().direction_error(2) = m_error.Out().Theta();
+        m_error->evaluate(*muon_event, 2, 2);
     }
 
 
@@ -146,7 +136,7 @@ public:
     MuonTracks    m_track;
     Buffer        m_buffer;
     Scalarf       m_momentum;
-    IBMuonError   m_error;
+    IBMuonError  *m_error;
     bool          m_integrity;
 //    short         m_code;
     int           m_hitX;
@@ -184,9 +174,9 @@ void IBMuonEventTTreeLNLdataReader::selectionCode(short code)
 {
 }
 
-void IBMuonEventTTreeLNLdataReader::setError(IBMuonError e)
+void IBMuonEventTTreeLNLdataReader::setError(IBMuonError &e)
 {
-    d->m_error = e;
+    d->m_error = &e;
 }
 
 unsigned long IBMuonEventTTreeLNLdataReader::getNumberOfEvents()

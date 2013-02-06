@@ -20,7 +20,7 @@ using namespace uLib;
 int main() {
     BEGIN_TESTING(IBPoCA);
 
-    IBMuonError error(11.93,2.03,18.53,2.05);
+    IBMuonError error(12.24,18.85);
     TFile* f = new TFile("/home/eth/musteel/data/muSteel_PDfit_2012122300_v11.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);

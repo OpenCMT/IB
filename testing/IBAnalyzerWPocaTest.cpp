@@ -24,7 +24,7 @@ int main() {
 
     // errors //
 //    IBMuonError sigma(11.93,2.03,18.53,2.05);
-    IBMuonError sigma(12.24,0, 18.85,0);
+    IBMuonError sigma(12.24,18.85);
 
     // reader //
     TFile* f = new TFile ("/var/local/data/root/ROC_sets/201212/20121223/muSteel_PDfit_20121223_1_v11.root");
