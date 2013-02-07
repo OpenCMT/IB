@@ -11,14 +11,15 @@ IBMuonError::IBMuonError(Scalarf xA, Scalarf zA, Scalarf ratio)
     IBMESimpler sp(this);
     m_simpler = &sp;
     m_shader  = NULL;
+    m_useshader = false;
 }
 
 bool IBMuonError::evaluate(MuonScatter &event, int i, int j)
 {
-    if (m_shader == NULL) {
-        return m_simpler->evaluate(event, i, j);
-    } else {
+    if (m_useshader) {
         return m_shader->evaluate(event, i, j);
+    } else {
+        return m_simpler->evaluate(event, i, j);
     }
     return false;
 }
@@ -27,14 +28,15 @@ void IBMuonError::setScrapsImage(IBLightCollection &image, bool evPM)
 {
     m_Axo = m_Axi;
     m_Azo = m_Axi;
-    IBPocaEvaluator * pproc = IBPocaEvaluator::New(IBPocaEvaluator::LineDistance);
-    IBVoxRaytracer trace(image);
+    IBLineDistancePocaEvaluator * pproc = new IBLineDistancePocaEvaluator();
+    IBVoxRaytracer * trace = new IBVoxRaytracer(image);
     IBMEShader sh(this);
     m_shader = &sh;
     m_shader->m_image  = &image;
-    m_shader->m_tracer = &trace;
+    m_shader->m_tracer = trace;
     m_shader->m_pproc  = pproc;
     m_shader->m_evPM   = evPM;
+    m_useshader = true;
 }
 
 

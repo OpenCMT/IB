@@ -27,10 +27,23 @@ int main() {
 
     // errors //
     IBMuonError sigma(12.24,18.85);
-    //sigma.setScrapsImage(?);
+    Voxel Zero = {0.};
+    IBLightCollection scraps(Vector3i(140,72,60));
+    scraps.SetSpacing(Vector3f(5,5,5));
+    scraps.SetPosition(Vector3f(-350,-180,-150));
+    scraps.InitVoxels(Zero);
+    for (int i = 10; i<129; ++i) {
+        for (int j = 10; j<61; ++j) {
+            for (int k = 4; k<55; ++k) {
+                Vector3i id(i,j,k);
+                scraps[id].Value = 0.00427;
+            }
+        }
+    }
+    sigma.setScrapsImage(scraps);
 
     // reader //
-    TFile* f = new TFile ("/var/local/data/root/ROC_sets/201212/20121223/muSteel_PDfit_20121223_1_v11.root");
+    TFile* f = new TFile ("/home/eth/musteel/data/muSteel_PDfit_2012122300_v11.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
@@ -70,7 +83,7 @@ int main() {
 
     std::cout << "There are " << reader->getNumberOfEvents() << " events!\n";
     int tot=0;
-    int ev = 1375250;
+    int ev = 13752;
     for (int i=0; i<ev; i++) {
         MuonScatter mu;
         if(reader->readNext(&mu)) {

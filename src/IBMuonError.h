@@ -27,6 +27,7 @@ private:
         friend class IBMuonError;
     private:
         IBMEShader(IBMuonError * ref) { d = ref; }
+        //~IBMEShader() { delete m_pproc; delete m_tracer; }
         void setImage(IBLightCollection &image, bool evPM)
         {
             m_image = &image;
@@ -55,6 +56,7 @@ private:
     Scalarf mpdEval(Scalarf a, Scalarf p, Scalarf d);
     Scalarf      m_Axi,m_Azi,m_Axo,m_Azo;
     IBMEShader * m_shader;
+    bool         m_useshader;
     IBMESimpler* m_simpler;
 
 };
