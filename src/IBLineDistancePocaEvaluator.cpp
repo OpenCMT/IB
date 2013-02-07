@@ -7,7 +7,7 @@ public:
     IBLineDistancePocaEvaluatorPimpl()
     {
         m_integrity = true;
-        m_poca << 0,0,0;
+        m_poca << 0,0,0,0;
     }
 
     void evaluatePoCA()

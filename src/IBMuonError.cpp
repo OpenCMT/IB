@@ -1,22 +1,34 @@
+
 #include <IBMuonError.h>
+
+#include <IBLineDistancePocaEvaluator.h>
+
 
 using namespace uLib;
 
-IBMuonError::IBMuonError(Scalarf xA, Scalarf zA, Scalarf ratio)
+IBMuonError::IBMuonError(Scalarf xA, Scalarf zA, Scalarf ratio) :
+    m_simpler(new IBMESimpler(this)),
+    m_shader(NULL)
 {
     m_Axi = xA;
     m_Azi = zA;
     m_Axo = ratio * xA;
     m_Azo = ratio * zA;
-    IBMESimpler sp(this);
-    m_simpler = &sp;
-    m_shader  = NULL;
-    m_useshader = false;
+}
+
+IBMuonError::~IBMuonError()
+{
+    delete m_simpler;
+    if(m_shader) {
+        delete m_shader->m_pproc;
+        delete m_shader->m_tracer;
+        delete m_shader;
+    }
 }
 
 bool IBMuonError::evaluate(MuonScatter &event, int i, int j)
 {
-    if (m_useshader) {
+    if (m_shader) {
         return m_shader->evaluate(event, i, j);
     } else {
         return m_simpler->evaluate(event, i, j);
@@ -28,15 +40,18 @@ void IBMuonError::setScrapsImage(IBLightCollection &image, bool evPM)
 {
     m_Axo = m_Axi;
     m_Azo = m_Axi;
-    IBLineDistancePocaEvaluator * pproc = new IBLineDistancePocaEvaluator();
-    IBVoxRaytracer * trace = new IBVoxRaytracer(image);
-    IBMEShader sh(this);
-    m_shader = &sh;
-    m_shader->m_image  = &image;
-    m_shader->m_tracer = trace;
-    m_shader->m_pproc  = pproc;
+
+    if(m_shader) {
+        delete m_shader->m_pproc;
+        delete m_shader->m_tracer;
+        delete m_shader;
+    }
+
+    m_shader = new IBMEShader(this);
+    m_shader->m_pproc = new IBLineDistancePocaEvaluator();
+    m_shader->m_tracer = new IBVoxRaytracer(image);
+    m_shader->m_image = &image;
     m_shader->m_evPM   = evPM;
-    m_useshader = true;
 }
 
 
@@ -88,7 +103,7 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
     event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Azi, pi, event.LineIn().direction(i));
     event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Axo, po, event.LineOut().direction(0));
     event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Azo, po, event.LineOut().direction(j));
-    event.SetMomentum((pi+po)/2.);
+    if(m_evPM) event.SetMomentum((pi+po)/2.);
 
 }
 
