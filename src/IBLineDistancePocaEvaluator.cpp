@@ -7,7 +7,8 @@ public:
     IBLineDistancePocaEvaluatorPimpl()
     {
         m_integrity = true;
-        m_poca << 0,0,0,0;
+        m_cutlength = 0.f;
+        m_poca << 0,0,0;
     }
 
     void evaluatePoCA()
@@ -26,8 +27,12 @@ public:
             Scalarf mu     = (diff.transpose()*((v*prod)*den-w*den));
             m_inPoca       = p + v*lambda;
             m_outPoca      = q + w*mu;
-            Vector4f mdseg = (m_outPoca-m_inPoca)*0.5;
-            m_poca         = m_inPoca + mdseg;
+            Vector4f mdseg = (m_outPoca-m_inPoca);
+            if (unlikely(m_cutlength != 0.f && mdseg > m_cutlength)) {
+                m_integrity = false;
+                return;
+            }
+            m_poca = m_inPoca + (mdseg*0.5);
             m_integrity   = true;
         }
     }
@@ -39,6 +44,7 @@ public:
 
 public:
     bool m_integrity;
+    Scalarf m_cutlength;
     MuonScatterData m_muon;
     HPoint3f m_poca;
     HPoint3f m_inPoca;
@@ -72,6 +78,11 @@ HPoint3f IBLineDistancePocaEvaluator::getPoca()
 HPoint3f IBLineDistancePocaEvaluator::getInTrackPoca()
 {
     return d->m_inPoca;
+}
+
+void IBLineDistancePocaEvaluator::setDistanceCut(Scalarf length)
+{
+    d->m_cutlength = length;
 }
 
 HPoint3f IBLineDistancePocaEvaluator::getOutTrackPoca()
