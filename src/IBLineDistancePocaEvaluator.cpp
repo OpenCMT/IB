@@ -20,15 +20,28 @@ public:
         Vector4f diff = q - p;
         Scalarf  prod = v.transpose() * w;
         Scalarf  den  = 1./(1. - prod*prod);
-        if (unlikely(!isFinite(den)))
-            m_integrity = false;
+        if (unlikely(!isFinite(den))) {
+            if (m_cutlength==0) {
+                m_integrity = false;
+                return;
+            } else {
+                float pr = diff.dot(v);
+                Vector3f proj = v * pr;
+                Vector3f dist = proj.cross(diff);
+                dist /= pr;
+                if (dist.head(3).norm()>m_cutlength) {
+                    m_integrity = false;
+                    return;
+                }
+            }
+        }
         else {
             Scalarf lambda = (diff.transpose()*(v*den-(w*prod*den)));
             Scalarf mu     = (diff.transpose()*((v*prod)*den-w*den));
             m_inPoca       = p + v*lambda;
             m_outPoca      = q + w*mu;
             Vector4f mdseg = (m_outPoca-m_inPoca);
-            if (unlikely(m_cutlength != 0.f && mdseg > m_cutlength)) {
+            if (unlikely(m_cutlength != 0.f && mdseg.head(3).norm() > m_cutlength)) {
                 m_integrity = false;
                 return;
             }

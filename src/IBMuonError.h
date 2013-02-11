@@ -22,16 +22,16 @@ public:
     ~IBMuonError();
 
     bool evaluate(MuonScatter &event, int i, int j);
-    void setScrapsImage(IBLightCollection &image, bool evPM = false);
+    void azimuthalMomentumCorrection(bool enable=true);
+    void averageMomentumCorrection(bool enable=true);
 
 private:
-
+    void setScrapsImage(IBLightCollection &image, bool evPM = false);
     class IBMEShader
     {
         friend class IBMuonError;
     private:
         IBMEShader(IBMuonError * ref) { d = ref; }
-//        ~IBMEShader() { delete m_pproc; delete m_tracer; }
         bool evaluate(MuonScatter &event, int i, int j);
     private:
         bool               m_evPM;
@@ -53,7 +53,10 @@ private:
     };
 
     Scalarf mpdEval(Scalarf a, Scalarf p, Scalarf d);
-    Scalarf      m_Axi,m_Azi,m_Axo,m_Azo;
+    Scalarf      m_Ax,m_Az;
+    Scalarf      m_pratio;
+    bool         m_azimPcorr;
+    bool         m_averPcorr;
     IBMEShader * m_shader;
     IBMESimpler* m_simpler;
 

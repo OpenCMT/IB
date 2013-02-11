@@ -10,10 +10,11 @@ IBMuonError::IBMuonError(Scalarf xA, Scalarf zA, Scalarf ratio) :
     m_simpler(new IBMESimpler(this)),
     m_shader(NULL)
 {
-    m_Axi = xA;
-    m_Azi = zA;
-    m_Axo = ratio * xA;
-    m_Azo = ratio * zA;
+    m_Ax = xA;
+    m_Az = zA;
+    m_pratio = ratio;
+    m_averPcorr = false;
+    m_azimPcorr = false;
 }
 
 IBMuonError::~IBMuonError()
@@ -36,11 +37,18 @@ bool IBMuonError::evaluate(MuonScatter &event, int i, int j)
     return false;
 }
 
+void IBMuonError::azimuthalMomentumCorrection(bool enable)
+{
+    m_azimPcorr = enable;
+}
+
+void IBMuonError::averageMomentumCorrection(bool enable)
+{
+    m_averPcorr = enable;
+}
+
 void IBMuonError::setScrapsImage(IBLightCollection &image, bool evPM)
 {
-    m_Axo = m_Axi;
-    m_Azo = m_Axi;
-
     if(m_shader) {
         delete m_shader->m_pproc;
         delete m_shader->m_tracer;
@@ -51,7 +59,7 @@ void IBMuonError::setScrapsImage(IBLightCollection &image, bool evPM)
     m_shader->m_pproc = new IBLineDistancePocaEvaluator();
     m_shader->m_tracer = new IBVoxRaytracer(image);
     m_shader->m_image = &image;
-    m_shader->m_evPM   = evPM;
+    m_shader->m_evPM = evPM;
 }
 
 
@@ -61,10 +69,23 @@ void IBMuonError::setScrapsImage(IBLightCollection &image, bool evPM)
 
 bool IBMuonError::IBMESimpler::evaluate(MuonScatter &event, int i, int j)
 {
-    event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Axi, event.GetMomentum(), event.LineIn().direction(0));
-    event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Azi, event.GetMomentum(), event.LineIn().direction(i));
-    event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Axo, event.GetMomentum(), event.LineOut().direction(0));
-    event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Azo, event.GetMomentum(), event.LineOut().direction(j));
+    if (unlikely(event.GetMomentum()!=0.f)) {
+        event.SetMomentumPrime(event.GetMomentum()/d->m_pratio);
+    } else {
+        if (d->m_azimPcorr) {
+            float azAngl = atan(sqrt((event.LineIn().direction(0)*event.LineIn().direction(0)+
+                                      event.LineIn().direction(i)*event.LineIn().direction(i))));
+            azAngl = cos(azAngl);
+            float pSqInv = -0.7022*(azAngl*azAngl)+2.0807*azAngl+0.6215;
+            event.SetMomentumPrime(sqrt(1./pSqInv));
+        }
+        event.SetMomentum(event.GetMomentumPrime()*d->m_pratio);
+    }
+    event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Ax, event.GetMomentum(), event.LineIn().direction(0));
+    event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Az, event.GetMomentum(), event.LineIn().direction(i));
+    event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Ax, event.GetMomentumPrime(), event.LineOut().direction(0));
+    event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Az, event.GetMomentumPrime(), event.LineOut().direction(j));
+    if (d->m_averPcorr) event.SetMomentum((event.GetMomentum()+event.GetMomentumPrime())/2.);
     return true;
 }
 
@@ -99,10 +120,10 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
     }
     float pi = event.GetMomentum();
     float po = sqrt((pi*pi)/(1+pi*pi*cL));
-    event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Axi, pi, event.LineIn().direction(0));
-    event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Azi, pi, event.LineIn().direction(i));
-    event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Axo, po, event.LineOut().direction(0));
-    event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Azo, po, event.LineOut().direction(j));
+    event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Ax, pi, event.LineIn().direction(0));
+    event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Az, pi, event.LineIn().direction(i));
+    event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Ax, po, event.LineOut().direction(0));
+    event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Az, po, event.LineOut().direction(j));
     if(m_evPM) event.SetMomentum((pi+po)/2.);
 
 }
