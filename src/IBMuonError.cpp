@@ -119,6 +119,7 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
         float val = (m_image->operator [](el->vox_id)).Value;
         cL += val*L;
     }
+    // end tracing - CL eval
     if (unlikely(event.GetMomentum()!=0.f)) {
         float InvP2in  = 1./pow(event.GetMomentum(),2);
         float Pout = 1./sqrt(InvP2in+cL);
