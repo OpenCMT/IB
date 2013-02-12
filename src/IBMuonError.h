@@ -34,11 +34,11 @@ private:
         IBMEShader(IBMuonError * ref) { d = ref; }
         bool evaluate(MuonScatter &event, int i, int j);
     private:
-        bool               m_evPM;
-        IBLightCollection *m_image;
-        IBVoxRaytracer    *m_tracer;
-        IBLineDistancePocaEvaluator   *m_pproc;
-        IBMuonError       *d;
+        bool                         m_evPM;
+        IBLightCollection           *m_image;
+        IBVoxRaytracer              *m_tracer;
+        IBLineDistancePocaEvaluator *m_pproc;
+        IBMuonError                 *d;
 
     };
 

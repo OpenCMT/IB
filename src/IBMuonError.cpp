@@ -119,13 +119,32 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
         float val = (m_image->operator [](el->vox_id)).Value;
         cL += val*L;
     }
-    float pi = event.GetMomentum();
-    float po = sqrt((pi*pi)/(1+pi*pi*cL));
-    event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Ax, pi, event.LineIn().direction(0));
-    event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Az, pi, event.LineIn().direction(i));
-    event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Ax, po, event.LineOut().direction(0));
-    event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Az, po, event.LineOut().direction(j));
-    if(m_evPM) event.SetMomentum((pi+po)/2.);
+    if (unlikely(event.GetMomentum()!=0.f)) {
+        float InvP2in  = 1./pow(event.GetMomentum(),2);
+        float Pout = 1./sqrt(InvP2in+cL);
+        event.SetMomentumPrime(Pout);
+    } else {
+        if (d->m_azimPcorr) {
+            float azAngl = atan(sqrt((event.LineIn().direction(0)*event.LineIn().direction(0)+
+                                      event.LineIn().direction(i)*event.LineIn().direction(i))));
+            azAngl = cos(azAngl);
+            float InvP2out = 1.58*(-0.7022*(azAngl*azAngl)+2.0807*azAngl+0.1157);
+            InvP2out = (InvP2out<0.57) ? 0.57 : InvP2out;
+            event.SetMomentumPrime(sqrt(1./InvP2out));
+        }
+        float InvP2out = pow(1./event.GetMomentumPrime(),2);
+        if (unlikely((InvP2out-cL)<=0)) {
+            exit(123);
+        }
+        float Pin  = 1./sqrt(InvP2out-cL);
+        event.SetMomentum(Pin);
+    }
+    event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Ax, event.GetMomentum(), event.LineIn().direction(0));
+    event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Az, event.GetMomentum(), event.LineIn().direction(i));
+    event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Ax, event.GetMomentumPrime(), event.LineOut().direction(0));
+    event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Az, event.GetMomentumPrime(), event.LineOut().direction(j));
+    if (d->m_averPcorr) event.SetMomentum((event.GetMomentum()+event.GetMomentumPrime())/2.);
+    return true;
 
 }
 
