@@ -42,13 +42,13 @@ int main() {
         for (int y=10; y < 62; ++y) {
             for (int z=4; z<56; ++z) {
                 Vector3i id(x,y,z);
-                scraps[id].Value = 0.00427;
+                scraps[id].Value = 0.016;
             }
         }
     }
     IBMuonError sigma(12.24,
                       18.85,
-                      1.4);
+                      1.4); // not used if scraps image is set //
     sigma.setScrapsImage(scraps,1);
 
 
@@ -63,7 +63,6 @@ int main() {
     }
 
     TTree* t = (TTree*)f->Get("n");
-//    IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     IBMuonEventTTreeR3DmcReader *reader = new IBMuonEventTTreeR3DmcReader();
     reader->setTTree(t);
     reader->setError(sigma);
@@ -78,8 +77,8 @@ int main() {
     voxels.InitLambda(air);
 
     // MAP Algorithm //
-//    IBMAPPriorTotalWeigth weight_MAP(0.19, 300E-6 * 300E-6);
-//    voxels.SetMAPAlgorithm(&weight_MAP);
+    //    IBMAPPriorTotalWeigth weight_MAP(0.19, 300E-6 * 300E-6);
+    //    voxels.SetMAPAlgorithm(&weight_MAP);
 
     // poca //
     IBPocaEvaluator* processor = IBPocaEvaluator::New(IBPocaEvaluator::LineDistance);
@@ -146,13 +145,13 @@ int main() {
     aem->SetMuonCollection(&muons);
 
 
-//    aem->AddVoxcollectionShift(Vector3f(2,0,0));
-//    aem->AddVoxcollectionShift(Vector3f(0,0,2));
+    //    aem->AddVoxcollectionShift(Vector3f(2,0,0));
+    //    aem->AddVoxcollectionShift(Vector3f(0,0,2));
 
     char file[100];
 
-    int it   = 100;
-    int drop = 4;
+    int it   = 20;
+    int drop = 20;
 
     aem->SijCut(60);
     std::cout << "Spared: [" << aem->Size() << "]\n";
@@ -162,14 +161,14 @@ int main() {
     std::cout << "SGA PXTZ\n";
     for (int i=1; i<=it; ++i) {
         aem->Run(drop,1);
-        sprintf(file, "20130203_PXTZ_p14_%i.vtk", i*drop);
+        sprintf(file, "20130203_PXTZ_%i.vtk", i*drop);
         voxels.ExportToVtk(file,0);
 
-//        IBVoxCollection filtered = voxels;
-//        trim.SetImage(&filtered);
-        trim.Run();
-//        sprintf(file, "20130203_PXTZ_p14_trim_%i.vtk", i*drop);
-//        filtered.ExportToVtk(file,0);
+        //        IBVoxCollection filtered = voxels;
+        //        trim.SetImage(&filtered);
+        //        trim.Run();
+        //        sprintf(file, "20130203_PXTZ_p14_trim_%i.vtk", i*drop);
+        //        filtered.ExportToVtk(file,0);
     }
 
 

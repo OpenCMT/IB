@@ -25,8 +25,8 @@ public:
     void azimuthalMomentumCorrection(bool enable=true);
     void averageMomentumCorrection(bool enable=true);
 
-private:
     void setScrapsImage(IBLightCollection &image, bool evPM = false);
+private:
     class IBMEShader
     {
         friend class IBMuonError;
