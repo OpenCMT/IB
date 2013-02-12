@@ -1,8 +1,8 @@
+
 #include <iostream>
 
 #include <TFile.h>
 #include <TTree.h>
-
 
 #include "IBPocaEvaluator.h"
 #include "IBAnalyzerEM.h"
@@ -31,55 +31,29 @@ using namespace uLib;
 
 int main() {
 
+
+
     // errors //
-    Voxel zero = {0};
-    IBLightCollection scraps(Vector3i(140,72,60));
-    scraps.SetSpacing (Vector3f(5,5,5));
-    scraps.SetPosition(Vector3f(-350,-180,-150));
-    scraps.InitVoxels(zero);
-
-    for(int x=10; x < 130; ++x) {
-        for (int y=10; y < 62; ++y) {
-            for (int z=4; z<56; ++z) {
-                Vector3i id(x,y,z);
-                scraps[id].Value = 0.00427;
-            }
-        }
-    }
-    IBMuonError sigma(12.24,
-                      18.85,
+    IBMuonError sigma(12.24,0.0,
+                      18.85,0.0,
                       1.4);
-    sigma.setScrapsImage(scraps,1);
-
 
     // reader //
     TFile* f = new TFile ("/var/local/data/root/muSteel_PDfit_20130203_v14.root");
-//    TFile* f = new TFile ("/var/local/data/root/ROC_sets/201301/20130111/muSteel_PDfit_20130111_10_v12.root");
-//    TFile* f = new TFile ("/var/local/data/root/ROC_sets/201212/20121223/muSteel_PDfit_20121223_10_v11.root");
-
-    if (f->IsZombie()) {
-        std::cerr << "file not found!\n";
-        exit(1);
-    }
-
     TTree* t = (TTree*)f->Get("n");
-//    IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
-    IBMuonEventTTreeR3DmcReader *reader = new IBMuonEventTTreeR3DmcReader();
+    IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
     reader->setError(sigma);
     reader->setMomentum(0.7);
     reader->selectionCode(IBMuonEventTTreeR3DmcReader::All);
 
     // voxels //
-    IBVoxel air = {0.1E-6,0,0};
+    IBVoxel zero = {0.1E-6,0,0};
     IBVoxCollection voxels(Vector3i(140,72,60));
     voxels.SetSpacing (Vector3f(5,5,5));
     voxels.SetPosition(Vector3f(-350,-180,-150));
-    voxels.InitLambda(air);
+    voxels.InitLambda(zero);
 
-    // MAP Algorithm //
-//    IBMAPPriorTotalWeigth weight_MAP(0.19, 300E-6 * 300E-6);
-//    voxels.SetMAPAlgorithm(&weight_MAP);
 
     // poca //
     IBPocaEvaluator* processor = IBPocaEvaluator::New(IBPocaEvaluator::LineDistance);
@@ -104,10 +78,19 @@ int main() {
 
     // filter //
     IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-    IBFilterGaussShape shape(0.13);
+    IBFilterGaussShape shape(0.2);
     trim.SetKernelSpherical(shape);
-    trim.SetABTrim(0,1);
-    trim.SetImage(&voxels);
+    trim.SetABTrim(0,0);
+
+    // remove center of filter kernel //
+//    int center = trim.GetKernelData().GetCenterData();
+//    trim.GetKernelData()[center].Value = 0;
+
+
+    // MAP Algorithm //
+    IBMAPPriorNeighbourDensity MAP( voxels, 5E-6);
+    MAP.SetFilter(&trim);
+        voxels.SetMAPAlgorithm(&MAP);
 
 
     reader->setAcquisitionTime(5);
@@ -126,37 +109,17 @@ int main() {
 
     std::cout << "Reader events: " << tot << "\n";
 
-//    muons.SetHiPassAngle(0);
-//    for(int i=0; i<muons.size(); ++i)
-//    {
-//        MuonScatter mu = muons.At(i);
-//        mu.SetMomentum(0.4);
-//        muons[i] = mu;
-//    }
-//    muons.SetLowPassAngle(0.005);
-//    for(int i=0; i<muons.size(); ++i)
-//    {
-//        MuonScatter mu = muons.At(i);
-//        mu.SetMomentum(0.9);
-//        muons[i] = mu;
-//    }
-//    muons.SetHiPassAngle(0);
-
     muons.PrintSelf(std::cout);
     aem->SetMuonCollection(&muons);
 
-
-//    aem->AddVoxcollectionShift(Vector3f(2,0,0));
-//    aem->AddVoxcollectionShift(Vector3f(0,0,2));
-
     char file[100];
 
-    int it   = 100;
-    int drop = 4;
+    int it   = 200;
+    int drop = 1;
 
     aem->SijCut(60);
     std::cout << "Spared: [" << aem->Size() << "]\n";
-    voxels.InitLambda(air);
+    voxels.InitLambda(zero);
 
     // SGA //
     std::cout << "SGA PXTZ\n";
@@ -164,15 +127,18 @@ int main() {
         aem->Run(drop,1);
         sprintf(file, "20130203_PXTZ_p14_%i.vtk", i*drop);
         voxels.ExportToVtk(file,0);
-
-//        IBVoxCollection filtered = voxels;
-//        trim.SetImage(&filtered);
-        trim.Run();
-//        sprintf(file, "20130203_PXTZ_p14_trim_%i.vtk", i*drop);
-//        filtered.ExportToVtk(file,0);
+//        trim.SetImage(&voxels);
+//        trim.Run();
     }
 
 
+//    for (int i=11; i<=it; ++i) {
+//        aem->Run(drop,1);
+//        sprintf(file, "20130203_PXTZ_p14_%i.vtk", i*drop);
+//        voxels.ExportToVtk(file,0);
+//        trim.SetImage(&voxels);
+//        trim.Run();
+//    }
 
 
 

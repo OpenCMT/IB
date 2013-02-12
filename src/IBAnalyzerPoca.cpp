@@ -16,7 +16,7 @@ public:
         m_PocaAlgorithm(NULL)
     {}
 
-    void CollectMuon(MuonScatterData &muon)
+    void CollectMuon(const MuonScatterData &muon)
     {
         assert(m_PocaAlgorithm);
         if(m_PocaAlgorithm->evaluate(muon)) {
@@ -52,7 +52,7 @@ IBAnalyzerPoca::~IBAnalyzerPoca()
 }
 
 
-void IBAnalyzerPoca::AddMuon(MuonScatterData &event) {
+void IBAnalyzerPoca::AddMuon(const MuonScatterData &event) {
     d->CollectMuon(event);
 }
 

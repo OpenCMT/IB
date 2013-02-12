@@ -6,6 +6,7 @@
 #include <Detectors/MuonScatter.h>
 #include <Detectors/MuonError.h>
 
+#include "IBMuonCollection.h"
 #include "IBExperiment.h"
 
 using namespace uLib;
@@ -17,41 +18,39 @@ class IBAnalyzerEM;
 class IBPocaEvaluator;
 class IBMinimizationVariablesEvaluator;
 
-class IBVoxCollectionCap;
+class IBVoxCollection;
 
 
 class IBAnalyzer : public Object {
 
 public:
-    enum IBAnalyzerFactoryType {
-        Poca  = 0,
-        WPoca = 1,
-        EM    = 2
-    };
-
-public:
-
-    static IBAnalyzer * New(enum IBAnalyzerFactoryType id);
 
     uLibGetSetMacro(Experiment,IBExperiment *)
-    uLibGetSetMacro(VoxCollection,IBVoxCollectionCap *)
+    uLibGetSetMacro(VoxCollection,IBVoxCollection *)
 
-    virtual void AddMuon(MuonScatterData &event) = 0;
+    uLibGetMacro(MuonCollection,IBMuonCollection *)
+
+    virtual uLibSetMacro(MuonCollection,IBMuonCollection *)
+
+    virtual void AddMuon(const MuonScatterData &event) = 0;
 
     virtual unsigned int Size() {}
 
     virtual void Run(unsigned int iterations, float muons_ratio) = 0;
 
-    virtual void SetPocaAlgorithm(IBPocaEvaluator *poca) {}
-    virtual void SetVariablesAlgorithm(IBMinimizationVariablesEvaluator *evaluator) {}
-
 protected:
-    IBAnalyzer() {}
+    IBAnalyzer() :
+        m_Experiment(NULL),
+        m_VoxCollection(NULL),
+        m_MuonCollection(NULL)
+    {}
+
     virtual ~IBAnalyzer() {}
 
 private:    
     IBExperiment       *m_Experiment;
-    IBVoxCollectionCap *m_VoxCollection;
+    IBVoxCollection    *m_VoxCollection;
+    IBMuonCollection   *m_MuonCollection;
 };
 
 

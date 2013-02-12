@@ -27,7 +27,7 @@ public:
 #endif
     }
 
-    void CollectMuon(MuonScatterData &muon)
+    void CollectMuon(const MuonScatterData &muon)
     {
         assert(m_PocaAlgorithm);
         assert(m_Minimizator);
@@ -87,7 +87,7 @@ IBAnalyzerWPoca::~IBAnalyzerWPoca()
     delete d;
 }
 
-void IBAnalyzerWPoca::AddMuon(MuonScatterData &event)
+void IBAnalyzerWPoca::AddMuon(const MuonScatterData &event)
 {
     d->CollectMuon(event);
 }

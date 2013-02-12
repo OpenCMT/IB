@@ -16,7 +16,7 @@ public:
     IBAnalyzerTrackLengths();
     ~IBAnalyzerTrackLengths();
 
-    void AddMuon(MuonScatterData &muon);
+    void AddMuon(const MuonScatterData &muon);
 
     void Run(unsigned int iterations = 1, float muons_ratio = 1);
 

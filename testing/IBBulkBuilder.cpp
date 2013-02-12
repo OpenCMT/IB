@@ -11,6 +11,8 @@
 #include "IBVoxFilters.h"
 #include "IBAnalyzerWPoca.h"
 
+#include "IBAnalyzerEMAlgorithmSGA.h"
+
 using namespace uLib;
 
 int main(int argc, char* argv[]) {
@@ -35,7 +37,7 @@ int main(int argc, char* argv[]) {
 
     // voxels //
     IBVoxel zero = {0.1E-6,0,0};
-    IBVoxCollectionCap voxels(Vector3i(140,72,60));
+    IBVoxCollection voxels(Vector3i(140,72,60));
     //3cm: 233 120 100
     //5cm:140 72 60;
     // 18: 70;36;30
@@ -70,14 +72,20 @@ int main(int argc, char* argv[]) {
     ap->SetVariablesAlgorithm(minimizator);
     ap->SetVoxCollection(&voxels);
 
+
+    // ML Algorithm //
+    IBAnalyzerEMAlgorithmSGA *ml_algorithm = new IBAnalyzerEMAlgorithmSGA_PXTZ;
+
     // analyzer //
-    IBAnalyzerEM* aem = new IBAnalyzerEM;
-    aem->SetVoxCollection(&voxels);
+    IBAnalyzerEM* aem = new IBAnalyzerEM(voxels);
+    aem->SetMLAlgorithm(ml_algorithm);
     aem->SetPocaAlgorithm(processor);
     aem->SetRaytracer(tracer);
     aem->SetVariablesAlgorithm(minimizator);
 
-    int toBread = 2754500;// 1377250; // 2.7545M = 10 min
+
+    reader->setAcquisitionTime(5);
+    int toBread = reader->getNumberOfEvents(); //2754500;// 1377250; // 2.7545M = 10 min
     for (int i=0; i<toBread; i++) {
         MuonScatter mu;
         if(reader->readNext(&mu)) {

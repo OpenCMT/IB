@@ -24,13 +24,14 @@ int main() {
     IBMuonError sigma(12.24,18.85);
 
     // reader //
-    TFile* f = new TFile("/home/eth/mustee/data/muSteel_PDfit_2012122300_v11.root");
+//    TFile* f = new TFile("/var/local/data/root/run_PDfit_201210/muSteel_PDfit_20121112_v10.root");
+    TFile* f = new TFile ("/var/local/data/root/muSteel_PDfit_20130203_v13.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
     reader->setError(sigma);
     reader->setMomentum(0.7);
-    reader->selectionCode(IBMuonEventTTreeR3DmcReader::Side2Side);
+    reader->selectionCode(IBMuonEventTTreeR3DmcReader::All);
 
     // voxels //
     IBVoxel zero = {0.1E-6,0,0};
@@ -39,61 +40,40 @@ int main() {
     voxels.SetPosition(Vector3f(-350,-180,-150));
 
     voxels.InitLambda(zero);
-    IBVoxCollectionCap voxelS(Vector3i(140,72,60));
-    voxelS.SetSpacing(Vector3f(5,5,5));
-    voxelS.SetPosition(Vector3f(-350,-180,-150));
-    voxelS.InitLambda(zero);
+
 
     IBPocaEvaluator* processor = IBPocaEvaluator::New(IBPocaEvaluator::TiltedAxis);
-    IBPocaEvaluator* processoR = IBPocaEvaluator::New(IBPocaEvaluator::LineDistance);
 
     IBAnalyzerPoca ap;
     ap.SetPocaAlgorithm(processor);
     ap.SetVoxCollection(&voxels);
-    IBAnalyzerPoca aP;
-    ap.SetPocaAlgorithm(processoR);
-    ap.SetVoxCollection(&voxelS);
 
 
     //uLibVtkViewer v_iewer;
     //vtkStructuredGrid v_grid(voxels);
     //v_iewer.AddAbstractProp(v_grid);
 
+    reader->setAcquisitionTime(5);
+
     char file_name[10];
     std::cout << "There are " << reader->getNumberOfEvents() << " events!\n" << std::flush;
 
-
-    int tot = 0;
-    int tot2 = 0;
-    do {
+    int tot;
+    //    int ev = 1375250;
+    int ev = reader->getNumberOfEvents();
+    for (int i=0; i<ev; i++) {
         MuonScatter mu;
         if(reader->readNext(&mu)) {
             ap.AddMuon(mu);
-            aP.AddMuon(mu);
             tot++;
-            if(tot%1000 == 0 ) std::cout<<tot<<"\n"<<std::flush;
         }
-        tot2++;
-    } while (tot<900000);
+    }
 
     ap.Run();
-    aP.Run();
     std::cout << "There are " << tot << " event actually read\n";
 
-    voxels.ExportToVtk("poca_TA.vtk",0);
-    voxelS.ExportToVtk("poca_LD.vtk");
+    voxels.ExportToVtk("20130203_poca_5min",0);
 
-
-    IBVoxFilter_Abtrim abfilt(Vector3i(5,5,5));
-    IBFilterGaussShape shape(0.2);
-    abfilt.SetKernelSpherical(shape);
-    abfilt.SetImage(&voxels);
-    abfilt.SetABTrim(0,2);
-    abfilt.Run();
-    abfilt.SetImage(*voxelS);
-    abfilt.Run();
-    voxels.ExportToVtk("poca_TA_trimm.vtk",0);
-    voxelS.ExportToVtk("poca_LD_trimm.vtk",0);
     return 0;
 
 }

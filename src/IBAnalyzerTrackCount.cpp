@@ -53,7 +53,7 @@ IBAnalyzerTrackCount::~IBAnalyzerTrackCount()
 
 
 
-void IBAnalyzerTrackCount::AddMuon(MuonScatterData &muon)
+void IBAnalyzerTrackCount::AddMuon(const MuonScatterData &muon)
 {
     if(!d->m_RayAlgorithm || !d->m_PocaAlgorithm) return;
     IBAnalyzerTrackCountPimpl::Event evc;

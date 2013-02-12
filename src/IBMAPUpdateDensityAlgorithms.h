@@ -1,9 +1,15 @@
 #ifndef IBMAPUPDATEDENSITYALGORITHMS_H
 #define IBMAPUPDATEDENSITYALGORITHMS_H
 
+#include <math.h>
+
 #include "IBVoxCollection.h"
+#include "IBVoxFilters.h"
+#include <Math/Utils.h>
 
 using namespace uLib;
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /////// GAUSSIAN MAP UPDATE  ///////////////////////////////////////////////////
@@ -55,7 +61,6 @@ IBMAPPriorGaussianUpdateAlgorithm::UpdateDensity(IBVoxCollection *voxels,
     }
 }
 
-#include <Math/Utils.h>
 
 inline float
 IBMAPPriorGaussianUpdateAlgorithm::GetDensity(IBVoxel &voxel)
@@ -135,5 +140,186 @@ IBMAPPriorLaplacianUpdateAlgorithm::UpdateDensity(IBVoxCollection *voxels,
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+////// GIANNI TOTAL WEIGHT   ///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+class IBMAPPriorTotalWeigth :
+        public IBAbstract::IBVoxCollectionMAPAlgorithm {
+
+public:
+    IBMAPPriorTotalWeigth(Scalarf mean_weight, Scalarf var_weight) :
+        m_weigth(mean_weight), m_variance(var_weight) {}
+
+    void UpdateDensity(IBVoxCollection *voxels, unsigned int threshold);
+
+protected:
+
+    Scalarf ComputeFactorA(IBVoxCollection *voxels);
+
+private:
+    Scalarf m_weigth, m_variance;
+};
+
+
+inline void
+IBMAPPriorTotalWeigth::UpdateDensity(IBVoxCollection *voxels,
+                                     unsigned int threshold)
+{
+    Scalarf a = this->ComputeFactorA(voxels);
+    std::cout << "MAP GW .. [a= "<< a << "] \n";
+    for (int i=0; i< voxels->Data().size(); ++i)
+    {
+        IBVoxel &vox = voxels->Data()[i];
+        vox.Value -= a * vox.Value * vox.Value / vox.Count;
+    }
+}
+
+inline Scalarf
+IBMAPPriorTotalWeigth::ComputeFactorA(IBVoxCollection *voxels)
+{
+    Scalarf sum = 0;
+    for(int i=0; i< voxels->Data().size(); ++i)
+        sum += voxels->At(i).Value;
+    std::cout << " [lmean=" << sum/voxels->Data().size() << "] ";
+    return (sum - m_weigth)/m_variance;
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//////  GIANNI NEIGHBOUR DENSITY GAUSSIAN PRIOR  ///////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+class IBMAPPriorNeighbourDensity :
+        public IBAbstract::IBVoxCollectionMAPAlgorithm
+{
+public:
+    IBMAPPriorNeighbourDensity(const IBVoxCollection &image, float sigma) :
+        m_NeighMap(image), m_Sigma(sigma) {}
+
+    uLibSetMacro(Filter,Abstract::VoxImageFilter *)
+
+    void UpdateDensity(IBVoxCollection *voxels, unsigned int threshold);
+
+
+protected:
+    Abstract::VoxImageFilter *m_Filter;
+    IBVoxCollection           m_NeighMap;
+    Scalarf                   m_Sigma;
+};
+
+
+void IBMAPPriorNeighbourDensity::UpdateDensity(IBVoxCollection *voxels,
+                                               unsigned int threshold)
+{
+    //    std::cout << "\n == UPDATE DENSITY == \n";
+    int rcount = 0;
+    for (int i=0; i < voxels->Data().size(); ++i)
+    {
+        IBVoxel &vox = voxels->Data()[i];
+        const IBVoxel &vox_int = this->m_NeighMap.At(i);
+        float Mj = vox.Count;
+
+        // 1) check sigma
+        if(m_Sigma > vox_int.Value / 5)
+        {
+            // 2) update lambda
+            float a = vox_int.Value;
+            float b = Mj * m_Sigma * m_Sigma;
+            float c = - b * vox.Value;
+
+            float p = -a*a/3 + b;
+            float q = -2*a*a*a/27 - a*b/3 + c;
+            float D = sqrt(q*q/4 + p*p*p/27);
+
+            vox.Value = a/3 + cbrtf( -q/2+D ) + cbrtf( -q/2-D );
+            rcount++;
+        }
+    }
+
+    // debug //
+    std::cout << " MAP active: " << rcount * 100 / voxels->Data().size() << "%\n";
+
+
+    // 3) save to local image map
+    this->m_NeighMap = *voxels;
+    this->m_Filter->SetImage(&m_NeighMap);
+    this->m_Filter->Run();
+
+}
+
+
+
+
+
+class IBMAPPriorNeighbourDensity2 :
+        public IBAbstract::IBVoxCollectionMAPAlgorithm
+{
+public:
+    IBMAPPriorNeighbourDensity2(const IBVoxCollection &image, float sigma) :
+        m_NeighMap(image), m_Sigma(sigma) {}
+
+    uLibSetMacro(Filter,Abstract::VoxImageFilter *)
+
+    void UpdateDensity(IBVoxCollection *voxels, unsigned int threshold);
+
+
+protected:
+    Abstract::VoxImageFilter *m_Filter;
+    IBVoxCollection           m_NeighMap;
+    Scalarf                   m_Sigma;
+};
+
+
+void IBMAPPriorNeighbourDensity2::UpdateDensity(IBVoxCollection *voxels,
+                                               unsigned int threshold)
+{
+    //    std::cout << "\n == UPDATE DENSITY == \n";
+    int rcount = 0;
+    for (int i=0; i < voxels->Data().size(); ++i)
+    {
+        IBVoxel &vox = voxels->Data()[i];
+        const IBVoxel &vox_int = this->m_NeighMap.At(i);
+        float Mj = vox.Count;
+
+        // 1) check sigma
+        if(m_Sigma > vox_int.Value / 5)
+        {
+            // 2) update lambda
+            float a = vox_int.Value;
+            float b = Mj * m_Sigma * m_Sigma;
+            float c = - b * vox.Value;
+
+            float p = -a*a/3 + b;
+            float q = -2*a*a*a/27 - a*b/3 + c;
+            float D = sqrt(q*q/4 + p*p*p/27);
+
+            vox.Value = a/3 + cbrtf( -q/2+D ) + cbrtf( -q/2-D );
+            rcount++;
+        }
+    }
+
+    // debug //
+    std::cout << " MAP active: " << rcount * 100 / voxels->Data().size() << "%\n";
+
+
+    // 3) save to local image map
+    this->m_NeighMap = *voxels;
+    this->m_Filter->SetImage(&m_NeighMap);
+    this->m_Filter->Run();
+
+}
+
+
+
+
+
 
 #endif // IBMAPUPDATEDENSITYALGORITHMS_H
+
+
+
+

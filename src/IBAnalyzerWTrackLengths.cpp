@@ -57,7 +57,7 @@ IBAnalyzerWTrackLengths::~IBAnalyzerWTrackLengths()
     delete d;
 }
 
-void IBAnalyzerWTrackLengths::AddMuon(MuonScatterData &muon)
+void IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
 {
     if(!d->m_RayAlgorithm || !d->m_PocaAlgorithm || !d->m_VarAlgorithm) {
         std::cerr << "not all parameters setted\n";

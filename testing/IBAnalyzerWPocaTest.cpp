@@ -27,7 +27,8 @@ int main() {
     IBMuonError sigma(12.24,18.85);
 
     // reader //
-    TFile* f = new TFile ("/var/local/data/root/ROC_sets/201212/20121223/muSteel_PDfit_20121223_1_v11.root");
+//    TFile* f = new TFile ("/var/local/data/root/ROC_sets/201212/20121223/muSteel_PDfit_20121223_1_v11.root");
+    TFile* f = new TFile ("/var/local/data/root/muSteel_PDfit_20130203_v14.root");
     TTree* t = (TTree*)f->Get("n");
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(IBMuonEventTTreeReader::R3D_MC);
     reader->setTTree(t);
@@ -64,18 +65,21 @@ int main() {
 
     IBAnalyzerPoca* ap = new IBAnalyzerPoca();
     ap->SetPocaAlgorithm(processor);
-    //ap->SetVariablesAlgorithm(minimizator);
+//    ap->SetVariablesAlgorithm(minimizator);
     ap->SetVoxCollection(&voxels);
 
     IBAnalyzerPoca* ap2 = new IBAnalyzerPoca();
     ap2->SetPocaAlgorithm(proc2);
-    //ap2->SetVariablesAlgorithm(minimizator);
+//    ap2->SetVariablesAlgorithm(minimizator);
     ap2->SetVoxCollection(&voxels2);
 
     std::cout << "There are " << reader->getNumberOfEvents() << " events!\n" << std::flush;
 
     int tot  = 0;
     int tot2 = 0;
+
+    reader->setAcquisitionTime(5);
+
     do {
         MuonScatter mu;
         if(reader->readNext(&mu)) {
@@ -86,7 +90,7 @@ int main() {
             if(tot%10000 == 0 ) std::cout<<tot<<"\n"<<std::flush;
         }
         tot2++;
-    } while (tot2<2500000);
+    } while (tot2<reader->getNumberOfEvents());
 
     ap->Run();
     ap2->Run();

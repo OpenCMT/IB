@@ -76,7 +76,8 @@ bool IBMuonError::IBMESimpler::evaluate(MuonScatter &event, int i, int j)
             float azAngl = atan(sqrt((event.LineIn().direction(0)*event.LineIn().direction(0)+
                                       event.LineIn().direction(i)*event.LineIn().direction(i))));
             azAngl = cos(azAngl);
-            float pSqInv = -0.7022*(azAngl*azAngl)+2.0807*azAngl+0.6215;
+            float pSqInv = 1.58*(-0.7022*(azAngl*azAngl)+2.0807*azAngl+0.1157);
+            pSqInv = (pSqInv<0.57) ? 0.57 : pSqInv;
             event.SetMomentumPrime(sqrt(1./pSqInv));
         }
         event.SetMomentum(event.GetMomentumPrime()*d->m_pratio);

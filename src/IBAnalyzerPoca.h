@@ -13,7 +13,7 @@ public:
     IBAnalyzerPoca();
     ~IBAnalyzerPoca();
 
-    void AddMuon(MuonScatterData &event);
+    void AddMuon(const MuonScatterData &event);
 
     void Run(unsigned int iterations = 1, float muons_ratio = 1);
 

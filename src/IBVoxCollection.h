@@ -31,7 +31,6 @@ struct IBVoxCollectionStaticUpdateAlgorithm {
 };
 }
 
-
 namespace IBAbstract {
 class IBVoxCollectionMAPAlgorithm {
 public:

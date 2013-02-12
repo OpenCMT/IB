@@ -26,8 +26,9 @@ public:
                 return;
             } else {
                 float pr = diff.dot(v);
-                Vector3f proj = v * pr;
-                Vector3f dist = proj.cross(diff);
+                Vector3f proj = (v * pr).head(3);
+                Vector3f dist = diff.head(3);
+                dist = proj.cross(dist);
                 dist /= pr;
                 if (dist.head(3).norm()>m_cutlength) {
                     m_integrity = false;

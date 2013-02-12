@@ -3,70 +3,80 @@
 
 #include "IBAnalyzer.h"
 #include "IBVoxRaytracer.h"
+#include "IBVoxel.h"
 
 class IBPocaEvaluator;
 class IBMinimizationVariablesEvaluator;
+class IBAnalyzerEMAlgorithm;
+
 
 class IBAnalyzerEM : public IBAnalyzer {
     typedef IBAnalyzer BaseClass;
+
 public:
-    enum Algorithm {
-        PXTZ = 0,
-        PX,
-        TZ,
-        PT,
-        XZ,
-        P,
-        T,
-        X,
-        Z
+    struct Event {
+        struct Element {
+            Matrix2f Wij;
+            union {
+                Scalarf lambda;
+                Scalarf Sij;
+            };
+            IBVoxel *voxel;
+            Scalarf pw;
+        };
+
+        struct {
+            Vector4f Di;
+            Matrix4f E;
+            Scalarf  InitialSqrP;
+        } header;
+        Vector<Element> elements;
     };
 
-    enum PWeigthAlgorithm {
-        PWeigth_disabled = 0,
-        PWeigth_pw,
-        PWeigth_sw,
-        PWeigth_cw
-    };
 
     ULIB_OBJECT_PARAMETERS(BaseClass)
     {
-        Scalarf nominal_momentum;
-        enum Algorithm algorithm;
-        enum PWeigthAlgorithm pweigth;
+        Scalarf nominal_momentum;        
     };
 
 public:
-    IBAnalyzerEM();
+    IBAnalyzerEM(IBVoxCollection &voxels);
     ~IBAnalyzerEM();
 
-    void AddMuon(MuonScatterData &muon);
+    void AddMuon(const MuonScatterData &muon);
+
+    void SetMuonCollection(IBMuonCollection *muons);
 
     unsigned int Size();
 
     void Run(unsigned int iterations, float muons_ratio);
 
-    void SetPocaAlgorithm(IBPocaEvaluator *evaluator);
+    void SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm);
 
-    void SetVariablesAlgorithm(IBMinimizationVariablesEvaluator *evaluator);
-
-    void SetRaytracer(IBVoxRaytracer *raytracer);
+    uLibGetSetMacro(PocaAlgorithm,IBPocaEvaluator *)
+    uLibGetSetMacro(VarAlgorithm,IBMinimizationVariablesEvaluator *)
+    uLibGetSetMacro(RayAlgorithm,IBVoxRaytracer *)
 
     void SijCut(float threshold);
 
-    void UpdatePW();
+    void SetVoxCollection(IBVoxCollection *voxels);
 
-private:
+    void AddVoxcollectionShift(Vector3f shift);
+
+private:    
+    IBPocaEvaluator                  *m_PocaAlgorithm;
+    IBMinimizationVariablesEvaluator *m_VarAlgorithm;
+    IBVoxRaytracer                   *m_RayAlgorithm;
+
     friend class IBAnalyzerEMPimpl;
     class IBAnalyzerEMPimpl *d;
+
 };
 
 
 inline void IBAnalyzerEM::init_parameters() {
     Parameters &p = this->parameters();
     p.nominal_momentum = 3;
-    p.algorithm = PXTZ;
-    p.pweigth = PWeigth_pw;
 }
 
 

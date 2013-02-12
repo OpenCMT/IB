@@ -52,7 +52,7 @@ IBAnalyzerTrackLengths::~IBAnalyzerTrackLengths()
     delete d;
 }
 
-void IBAnalyzerTrackLengths::AddMuon(MuonScatterData &muon)
+void IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
 {
     if(!d->m_RayAlgorithm || !d->m_PocaAlgorithm) return;
     IBAnalyzerTrackLengthsPimpl::Event evc;
