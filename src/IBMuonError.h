@@ -25,7 +25,7 @@ public:
     void azimuthalMomentumCorrection(bool enable=true);
     void averageMomentumCorrection(bool enable=true);
 
-    void setScrapsImage(IBLightCollection &image, bool evPM = false);
+    void setScrapsImage(IBLightCollection &image);
 private:
     class IBMEShader
     {
@@ -34,7 +34,6 @@ private:
         IBMEShader(IBMuonError * ref) { d = ref; }
         bool evaluate(MuonScatter &event, int i, int j);
     private:
-        bool                         m_evPM;
         IBLightCollection           *m_image;
         IBVoxRaytracer              *m_tracer;
         IBLineDistancePocaEvaluator *m_pproc;

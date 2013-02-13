@@ -47,7 +47,7 @@ void IBMuonError::averageMomentumCorrection(bool enable)
     m_averPcorr = enable;
 }
 
-void IBMuonError::setScrapsImage(IBLightCollection &image, bool evPM)
+void IBMuonError::setScrapsImage(IBLightCollection &image)
 {
     if(m_shader) {
         delete m_shader->m_pproc;
@@ -59,7 +59,6 @@ void IBMuonError::setScrapsImage(IBLightCollection &image, bool evPM)
     m_shader->m_pproc = new IBLineDistancePocaEvaluator();
     m_shader->m_tracer = new IBVoxRaytracer(image);
     m_shader->m_image = &image;
-    m_shader->m_evPM = evPM;
 }
 
 
