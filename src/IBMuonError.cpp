@@ -112,17 +112,21 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
             ray = m_tracer->TraceBetweenPoints(entry_pt, exit_pt);
         }
     }
-    float cL = 0;
+    float kL = 0;
     for (int ii=0; ii<ray.Data().size(); ++ii) {
         const IBVoxRaytracer::RayData::Element *el = &ray.Data().at(ii);
         float L   = el->L;
         float val = (m_image->operator [](el->vox_id)).Value;
-        cL += val*L;
+        kL += val*L;
     }
     // end tracing - CL eval
     if (unlikely(event.GetMomentum()!=0.f)) {
-        float InvP2in  = 1./pow(event.GetMomentum(),2);
-        float Pout = 1./sqrt(InvP2in+cL);
+        float P2in  = pow(event.GetMomentum(),2);
+        if(unlikely(P2in-kL<=0)) {
+            std::cout << "WARNING! I'd like to set P<0! ABORT! ABORT!\n";
+            return false;
+        }
+        float Pout  = sqrt(P2in-kL);
         event.SetMomentumPrime(Pout);
     } else {
         if (d->m_azimPcorr) {
@@ -133,11 +137,8 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
             InvP2out = (InvP2out<0.57) ? 0.57 : InvP2out;
             event.SetMomentumPrime(sqrt(1./InvP2out));
         }
-        float InvP2out = pow(1./event.GetMomentumPrime(),2);
-        if (unlikely((InvP2out-cL)<=0)) {
-            exit(123);
-        }
-        float Pin  = 1./sqrt(InvP2out-cL);
+        float P2out = pow(event.GetMomentumPrime(),2);
+        float Pin  = sqrt(P2out+kL);
         event.SetMomentum(Pin);
     }
     event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Ax, event.GetMomentum(), event.LineIn().direction(0));
