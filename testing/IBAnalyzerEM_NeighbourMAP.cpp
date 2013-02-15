@@ -34,9 +34,9 @@ int main() {
 
 
     // errors //
-    IBMuonError sigma(12.24,0.0,
-                      18.85,0.0,
-                      1.4);
+    IBMuonError sigma(12.24,
+                      18.85,
+                      3);
 
     // reader //
     TFile* f = new TFile ("/var/local/data/root/muSteel_PDfit_20130203_v14.root");
@@ -76,21 +76,32 @@ int main() {
     aem->SetRayAlgorithm(tracer);
     aem->SetVarAlgorithm(minimizator);
 
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     // filter //
     IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-    IBFilterGaussShape shape(0.2);
-    trim.SetKernelSpherical(shape);
+    Vector<float> trim_kernel;
+    trim_kernel <<
+            1,1,1,
+            1,1,1,
+            1,1,1,
+
+            1,1,1,
+            1,0,1,
+            1,1,1,
+
+            1,1,1,
+            1,1,1,
+            1,1,1;
+    trim.SetKernelNumericXZY(trim_kernel);
     trim.SetABTrim(0,0);
-
-    // remove center of filter kernel //
-//    int center = trim.GetKernelData().GetCenterData();
-//    trim.GetKernelData()[center].Value = 0;
-
+    trim.SetImage(&voxels);
 
     // MAP Algorithm //
-    IBMAPPriorNeighbourDensity MAP( voxels, 5E-6);
+    IBMAPPriorNeighbourDensity2 MAP( voxels, 0.2);
     MAP.SetFilter(&trim);
-        voxels.SetMAPAlgorithm(&MAP);
+    voxels.SetMAPAlgorithm(&MAP);
 
 
     reader->setAcquisitionTime(5);

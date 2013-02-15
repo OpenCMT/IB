@@ -11,8 +11,16 @@
 #include <Core/Macros.h>
 #include <Core/Object.h>
 
+using namespace uLib;
+
 namespace IB {
 
-using namespace uLib;
+class Version {
+public:
+    static const char *PackageName;
+    static const char *VersionNumber;
+    static const char *Release;
+};
+
 
 }

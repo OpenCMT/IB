@@ -287,6 +287,29 @@ void IBAnalyzerEMAlgorithmSGA_Z::evaluate(Matrix4f &Sigma,
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// STIMA SU P //
 
 
+void IBAnalyzerEMAlgorithmSGA_M::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm::Event *evc)
+{
+    Matrix4f iS = Sigma.inverse();
+    Matrix4f Wij = Matrix4f::Zero();
 
+    Matrix4f Dn = iS * (evc->header.Di * evc->header.Di.transpose());
+
+    Scalarf p = 0;
+    for (unsigned int j = 0; j < evc->elements.size(); ++j) {
+        Wij.block<2,2>(0,0) = evc->elements[j].Wij;
+        Wij.block<2,2>(2,2) = evc->elements[j].Wij;
+
+        Matrix4f Bn = iS * Wij;
+        evc->elements[j].Sij = 0;
+        p += ((Bn * Dn).trace() - Bn.trace()) * evc->elements[j].lambda *
+                pow(evc->elements[j].pw,4) / 2;
+    }
+    evc->header.InitialSqrP += p / evc->elements.size();
+
+}

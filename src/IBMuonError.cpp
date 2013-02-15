@@ -99,7 +99,7 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
     float azAngl = atan(sqrt((event.LineIn().direction(0)*event.LineIn().direction(0)+
                               event.LineIn().direction(i)*event.LineIn().direction(i))));
     float azAngl_deg = azAngl*M_PI/180;
-    float tiltC  = pow(0.00247*azAngl_deg,3)+4.68;
+    float tiltC  = pow(0.00247*azAngl_deg,3)+0.00468;
     IBVoxRaytracer::RayData ray;
     {
         HPoint3f entry_pt, poca, exit_pt;

@@ -254,13 +254,18 @@ void IBMAPPriorNeighbourDensity::UpdateDensity(IBVoxCollection *voxels,
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// Da "Formalismo per ricostruzione tomografica pg. 23,24 (10 febbraio 2013)  //
+
 
 class IBMAPPriorNeighbourDensity2 :
         public IBAbstract::IBVoxCollectionMAPAlgorithm
 {
 public:
-    IBMAPPriorNeighbourDensity2(const IBVoxCollection &image, float sigma) :
-        m_NeighMap(image), m_Sigma(sigma) {}
+    IBMAPPriorNeighbourDensity2(const IBVoxCollection &image, Scalarf a) :
+        m_NeighMap(image) , m_a(a) {}
 
     uLibSetMacro(Filter,Abstract::VoxImageFilter *)
 
@@ -270,47 +275,31 @@ public:
 protected:
     Abstract::VoxImageFilter *m_Filter;
     IBVoxCollection           m_NeighMap;
-    Scalarf                   m_Sigma;
+    Scalarf                   m_a;
 };
 
 
 void IBMAPPriorNeighbourDensity2::UpdateDensity(IBVoxCollection *voxels,
                                                unsigned int threshold)
 {
-    //    std::cout << "\n == UPDATE DENSITY == \n";
-    int rcount = 0;
     for (int i=0; i < voxels->Data().size(); ++i)
     {
-        IBVoxel &vox = voxels->Data()[i];
+        IBVoxel       &vox = voxels->Data()[i];
         const IBVoxel &vox_int = this->m_NeighMap.At(i);
         float Mj = vox.Count;
 
-        // 1) check sigma
-        if(m_Sigma > vox_int.Value / 5)
-        {
-            // 2) update lambda
-            float a = vox_int.Value;
-            float b = Mj * m_Sigma * m_Sigma;
-            float c = - b * vox.Value;
+        // 1) do computation //
+        float p = Mj * vox.Value - vox_int.Value / (m_a * m_a);
+        float q = 2*(Mj + 1);
 
-            float p = -a*a/3 + b;
-            float q = -2*a*a*a/27 - a*b/3 + c;
-            float D = sqrt(q*q/4 + p*p*p/27);
-
-            vox.Value = a/3 + cbrtf( -q/2+D ) + cbrtf( -q/2-D );
-            rcount++;
-        }
+        vox.Value = 1/q * (p + sqrt( p*p + 2*q * pow(vox_int.Value/m_a,2) ));
     }
 
-    // debug //
-    std::cout << " MAP active: " << rcount * 100 / voxels->Data().size() << "%\n";
 
-
-    // 3) save to local image map
+    // 2) save to local image map
     this->m_NeighMap = *voxels;
     this->m_Filter->SetImage(&m_NeighMap);
     this->m_Filter->Run();
-
 }
 
 
