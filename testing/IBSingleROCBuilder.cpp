@@ -64,9 +64,9 @@ int main(int argc, char** argv)
     IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
 
     int fbulk = 0;
-    for(int ii=0; ii<5; ++ii) {
+    for(int y=0; y<3; ++y) {
         char* fname[100];
-        sprintf(fname, "%s%i", argv[1], ii);
+        sprintf(fname, "%s%i", argv[1], y);
         image.ImportFromVtk(fname);
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
         IBFilterGaussShape shape(0.2);
@@ -74,17 +74,17 @@ int main(int argc, char** argv)
         trim.SetABTrim(0,2);
         trim.SetImage(&image);
         trim.Run();
-        Vector3i z(0,0,0);
+        Vector3i zero(0,0,0);
         IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
 
-        for (int x=0; x<5; ++x) {
-            for (int z=0; z<2; ++z) {
+        for (int x=0; x<6; ++x) {
+            for (int z=0; z<3; ++z) {
                 fbulk++;
-                IBLightCollection img(z);
-                img = grabber.GrabRegion<IBLightCollection>(HPoint3f(((-270+(60*((ii+1)%2)))+(x*120)),
-                                                                     (-100+(ii)*50),
-                                                                     ((-90+(60*((ii+1)%2)))+(z*120))),
-                                                            Vector3f(15,15,15));
+                IBLightCollection img(zero);
+                img = grabber.GrabRegion<IBLightCollection>(HPoint3f(-250+x*100,
+                                                                     -100+y*100,
+                                                                     -100+z*100),
+                                                            Vector3f(40,40,40));
                 IBVoxImageScanner<IBLightCollection> scanner;
                 scanner.SetImage(img);
                 RangeThresholdScan::ScanData res = scanner.ScanImage<RangeThresholdScan>(opt);
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
                 }
             }
         }
-        std::cout << "\rProcessing " << (float)100*(ii+1)/atoi(argv[3]) << "\% complete." << std::flush;
+        std::cout << "\rProcessing " << (float)100*(y+1)/atoi(argv[3]) << "\% complete." << std::flush;
     }
     std::cout << "\n...done!\n" << std::flush;
 

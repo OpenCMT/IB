@@ -96,12 +96,17 @@ bool IBMuonError::IBMESimpler::evaluate(MuonScatter &event, int i, int j)
 
 bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
 {
+    float azAngl = atan(sqrt((event.LineIn().direction(0)*event.LineIn().direction(0)+
+                              event.LineIn().direction(i)*event.LineIn().direction(i))));
+    float azAngl_deg = azAngl*M_PI/180;
+    float tiltC  = pow(0.00247*azAngl_deg,3)+4.68;
     IBVoxRaytracer::RayData ray;
     {
         HPoint3f entry_pt, poca, exit_pt;
         if (!m_tracer->GetEntryPoint(event.LineIn(),entry_pt) ||
-                !m_tracer->GetExitPoint(event.LineOut(),exit_pt))
+                !m_tracer->GetExitPoint(event.LineOut(),exit_pt)) {
             return false;
+        }
         bool test = m_pproc->evaluate(event);
         poca = m_pproc->getPoca();
         if (test && m_image->IsInsideBounds(poca)) {
@@ -118,6 +123,7 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
         float val = (m_image->operator [](el->vox_id)).Value;
         kL += val*L;
     }
+    kL*=tiltC;
     // end tracing - CL eval
     if (unlikely(event.GetMomentum()!=0.f)) {
         float P2in  = pow(event.GetMomentum(),2);
@@ -129,8 +135,6 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
         event.SetMomentumPrime(Pout);
     } else {
         if (d->m_azimPcorr) {
-            float azAngl = atan(sqrt((event.LineIn().direction(0)*event.LineIn().direction(0)+
-                                      event.LineIn().direction(i)*event.LineIn().direction(i))));
             azAngl = cos(azAngl);
             float InvP2out = 1.58*(-0.7022*(azAngl*azAngl)+2.0807*azAngl+0.1157);
             InvP2out = (InvP2out<0.57) ? 0.57 : InvP2out;
