@@ -20,6 +20,9 @@ public:
     static const char *PackageName;
     static const char *VersionNumber;
     static const char *Release;
+
+    static void PrintSelf(std::ostream &o);
+
 };
 
 

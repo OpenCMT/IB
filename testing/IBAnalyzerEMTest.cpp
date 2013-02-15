@@ -26,10 +26,13 @@
 #include "IBAnalyzerEMAlgorithmMGA.h"
 
 #include "IBMuonCollection.h"
+#include "IB.h"
 
 using namespace uLib;
 
 int main(int argc, char** argv) {
+
+    IB::Version::PrintSelf(std::cout);
 
     // errors //
     Voxel zero = {0};
