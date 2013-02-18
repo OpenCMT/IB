@@ -66,7 +66,7 @@ int main(int argc, char** argv)
     int fbulk = 0;
     for(int y=0; y<3; ++y) {
         char* fname[100];
-        sprintf(fname, "%s%i", argv[1], y);
+        sprintf(fname, "%s%i_500.vtk", argv[1], y);
         image.ImportFromVtk(fname);
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
         IBFilterGaussShape shape(0.2);
@@ -102,10 +102,10 @@ int main(int argc, char** argv)
     // no lead
     std::cout << "Scanning Unleaded Samples...\n" << std::flush;
     fbulk = 0;
-    for(int ii=1; ii<=100; ++ii) {
+    for(int ii=0; ii<100; ++ii) {
         fbulk++;
         char fname[100];
-        sprintf(fname, "%s%i.vtk",argv[2], ii);
+        sprintf(fname, "%s%i_500.vtk",argv[2], ii);
         image.ImportFromVtk(fname);
         //filtering
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
