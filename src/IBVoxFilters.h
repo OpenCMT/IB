@@ -17,7 +17,7 @@ public:
     IBFilterGaussShape(float sigma) : m_sigma2(sigma) {}
 
     float operator()(float d) {
-        return exp( -0.5*d/m_sigma2);
+        return exp( -d/m_sigma2);
     }
 
     float operator()(const Vector3f &pos) {
