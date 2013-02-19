@@ -52,6 +52,8 @@ typedef uLib::VoxFilterAlgorithmMedian<IBVoxel> IBVoxFilter_Median;
 
 typedef uLib::VoxFilterAlgorithmAbtrim<IBVoxel> IBVoxFilter_Abtrim;
 
+typedef uLib::VoxFilterAlgorithmSPR<IBVoxel> IBVoxFilter_SPR;
+
 typedef VoxImageFilterAlgorithmPlasmon<IBVoxel> IBVoxFilter_Plasmon;
 
 typedef VoxImageFilterAlgorithmGradient<IBVoxel> IBVoxFilter_Gradient;

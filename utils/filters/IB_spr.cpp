@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     }
 
 
-    std::cout << "// --------- [abtrim] ----------------- //\n"
+    std::cout << "// --------- [abtrim spr] ------------- //\n"
               << "size [ " << parameters.size << "] "
               << " a = " << parameters.atrim
               << " b = " << parameters.btrim << "\n"
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     }
 
     int s = parameters.size;
-    IBVoxFilter_Abtrim trim(Vector3i(s,s,s));
+    IBVoxFilter_SPR trim(Vector3i(s,s,s));
     IBFilterGaussShape shape(0.2);
     trim.SetKernelSpherical(shape);
     trim.SetABTrim(parameters.atrim, parameters.btrim);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
     image *= parameters.scale;
 
-    sprintf(filename,"%s_trim%d%d%d_scale%.2f.vtk",
+    sprintf(filename,"%s_trim%d%d%dspr_scale%.2f.vtk",
             GetFileName(parameters.file).c_str(),
             parameters.size, parameters.atrim, parameters.btrim,
             parameters.scale);
@@ -101,3 +101,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
