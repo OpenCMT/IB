@@ -26,6 +26,7 @@ public:
     virtual void setAcquisitionTime(float min)       {}
     virtual void setStartTime(float min)             {}
     virtual void setReadPCut(float pcut)             {}
+    virtual void readPguess(bool yn=true)            {}
     virtual unsigned long getNumberOfEvents()  = 0;
     virtual unsigned long getCurrentPosition() = 0;
 
