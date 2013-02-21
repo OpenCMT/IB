@@ -25,7 +25,7 @@ public:
     virtual void selectionCode(short code)          = 0;
     virtual void setAcquisitionTime(float min)       {}
     virtual void setStartTime(float min)             {}
-
+    virtual void setReadPCut(float pcut)             {}
     virtual unsigned long getNumberOfEvents()  = 0;
     virtual unsigned long getCurrentPosition() = 0;
 
