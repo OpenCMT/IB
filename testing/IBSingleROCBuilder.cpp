@@ -51,29 +51,17 @@ int main(int argc, char** argv)
     std::cout << "done!\n" << std::flush;
     std::cout << "Scanning Leaded Samples...\n" << std::flush;
     // lead
-
-    char* fname = argv[1];
-    image.ImportFromVtk(fname);
-    IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
-    IBFilterGaussShape shape(0.2);
-    trim.SetKernelSpherical(shape);
-    trim.SetABTrim(0,2);
-    trim.SetImage(&image);
-    trim.Run();
-    Vector3i z(0,0,0);
-    IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
-
     int fbulk = 0;
     for(int y=0; y<3; ++y) {
-        char* fname[100];
-        sprintf(fname, "%s%i_500.vtk", argv[1], y);
+        char fname[200];
+        sprintf(fname, "%s%i_200.vtk", argv[1], y);
         image.ImportFromVtk(fname);
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
         IBFilterGaussShape shape(0.2);
         trim.SetKernelSpherical(shape);
         trim.SetABTrim(0,2);
         trim.SetImage(&image);
-        trim.Run();
+        //trim.Run();
         Vector3i zero(0,0,0);
         IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
 
@@ -84,9 +72,9 @@ int main(int argc, char** argv)
                 img = grabber.GrabRegion<IBLightCollection>(HPoint3f(-250+x*100,
                                                                      -100+y*100,
                                                                      -100+z*100),
-                                                            Vector3f(40,40,40));
+                                                            HVector3f(40,40,40));
                 IBVoxImageScanner<IBLightCollection> scanner;
-                scanner.SetImage(img);
+                scanner.SetImage(&img);
                 RangeThresholdScan::ScanData res = scanner.ScanImage<RangeThresholdScan>(opt);
                 for(int j=0; j<opt.size(); ++j) {
                     perc_b_t[0][j] += res.at(j).Percent;
@@ -95,17 +83,17 @@ int main(int argc, char** argv)
                 }
             }
         }
-        std::cout << "\rProcessing " << (float)100*(y+1)/atoi(argv[3]) << "\% complete." << std::flush;
+        std::cout << "\rProcessing " << (float)100*(y+1)/3 << "\% complete." << std::flush;
     }
     std::cout << "\n...done!\n" << std::flush;
 
     // no lead
     std::cout << "Scanning Unleaded Samples...\n" << std::flush;
-    fbulk = 0;
-    for(int ii=0; ii<100; ++ii) {
-        fbulk++;
-        char fname[100];
-        sprintf(fname, "%s%i_500.vtk",argv[2], ii);
+    int fBulk = 0;
+    for(int ii=0; ii<54; ++ii) {
+        fBulk++;
+        char fname[200];
+        sprintf(fname, "%s%i_200.vtk",argv[2], ii);
         image.ImportFromVtk(fname);
         //filtering
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
@@ -113,7 +101,7 @@ int main(int argc, char** argv)
         trim.SetKernelSpherical(shape);
         trim.SetABTrim(0,2);
         trim.SetImage(&image);
-        trim.Run();
+        //trim.Run();
         IBVoxImageScanner<IBVoxCollectionCap> scanner;
         scanner.SetImage(&image);
         RangeThresholdScan::ScanData res = scanner.ScanImage<RangeThresholdScan>(opt);
@@ -122,7 +110,7 @@ int main(int argc, char** argv)
             inte_b_t[1][j] += res.at(j).Intensity;
             iden_b_t[1][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
         }
-        std::cout << "\rProcessing " << (float)100*ii/atoi(argv[3]) << "\% complete." << std::flush;
+        std::cout << "\rProcessing " << (float)100*(ii+1)/54 << "\% complete." << std::flush;
     }
 
     std::cout << "\n...done!\n" << std::flush;
@@ -130,11 +118,12 @@ int main(int argc, char** argv)
     std::cout << "Finalizing Data and Saving..." << std::flush;
 
     for(int j=0; j<opt.size(); ++j) {
-        for(int i=0; i<2; ++i) {
-            perc[i] = perc_b_t[i][j] / fbulk;
-            inte[i] = inte_b_t[i][j] / fbulk;
-            iden[i] = iden_b_t[i][j] / fbulk;
-        }
+        perc[0] = perc_b_t[0][j] / fbulk;
+        inte[0] = inte_b_t[0][j] / fbulk;
+        iden[0] = iden_b_t[0][j] / fbulk;
+        perc[1] = perc_b_t[1][j] / fBulk;
+        inte[1] = inte_b_t[1][j] / fBulk;
+        iden[1] = iden_b_t[1][j] / fBulk;
         thres = opt.at(j).Threshold;
         t.Fill();
     }
