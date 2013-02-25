@@ -306,10 +306,17 @@ void IBAnalyzerEMAlgorithmSGA_M::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm
         Wij.block<2,2>(2,2) = evc->elements[j].Wij;
 
         Matrix4f Bn = iS * Wij;
-        evc->elements[j].Sij = 0;
         p += ((Bn * Dn).trace() - Bn.trace()) * evc->elements[j].lambda *
                 pow(evc->elements[j].pw,4) / 2;
     }
-    evc->header.InitialSqrP += p / evc->elements.size();
+    p /= evc->elements.size();
+
+    // BACK PROJECT //
+    for (unsigned int j = 0; j < evc->elements.size(); ++j) {
+        evc->elements[j].pw += p;
+    }
+    evc->header.InitialSqrP += p;
 
 }
+
+

@@ -63,6 +63,8 @@ public:
 
     void AddVoxcollectionShift(Vector3f shift);
 
+    void DumpP(const char *filename, float x0 = 0, float x1 = 10);
+
 private:    
     IBPocaEvaluator                  *m_PocaAlgorithm;
     IBMinimizationVariablesEvaluator *m_VarAlgorithm;

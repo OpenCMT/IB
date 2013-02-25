@@ -51,6 +51,12 @@ void IBMuonCollection::AddMuon(MuonScatter &mu)
     // FINIRE //
 }
 
+Vector<MuonScatterData> &IBMuonCollection::Data()
+{
+    return d->m_Data;
+}
+
+
 const MuonScatterData &IBMuonCollection::At(int i) const
 {
     return d->m_Data.at(d->m_SliceIndex * d->m_HiPass + i);

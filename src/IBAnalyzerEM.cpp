@@ -2,6 +2,7 @@
 
 #include <TTree.h>
 #include <TFile.h>
+#include <TH1F.h>
 
 #include <Core/Vector.h>
 
@@ -309,6 +310,33 @@ void IBAnalyzerEM::AddVoxcollectionShift(Vector3f shift)
 	this->AddMuon(muons->At(i));
       }   
   }
+}
+
+
+
+void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
+{
+    static int counter = 0;
+    static TFile *file = new TFile(filename,"RECREATE");
+
+    if(!filename) {
+        file->Write();
+        file->Close();
+        delete file;
+        return;
+    }
+
+    if(file) {
+        char name[100];
+        sprintf(name,"p_%i",counter++);
+        gDirectory->cd(file->GetPath());
+        TH1F *h = new TH1F(name,"1/p^2 distribution [1/GeV^2]",1000,x0,x1);
+        float p0 = parameters().nominal_momentum * parameters().nominal_momentum;
+        for(Id_t i=0; i<d->m_Events.size(); ++i)
+            h->Fill(d->m_Events[i].header.InitialSqrP / p0 );
+        h->Write();
+        delete h;
+    }
 }
 
 

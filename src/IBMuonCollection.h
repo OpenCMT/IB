@@ -20,6 +20,8 @@ public:
 
     void AddMuon(MuonScatter &mu);
 
+    Vector<MuonScatterData> &Data();
+
     const MuonScatterData &At(int i) const;
 
     MuonScatterData &operator[](int i);

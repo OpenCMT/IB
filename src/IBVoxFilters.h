@@ -21,7 +21,6 @@ public:
     }
 
     float operator()(const Vector3f &pos) {
-        std::cout << "computing gauss for pos: " << pos.transpose() << "\n";
         return compute_gaussian(pos(0)-0.5, pos(0)+0.5, m_sigma2) *
                 compute_gaussian(pos(1)-0.5, pos(1)+0.5, m_sigma2) *
                 compute_gaussian(pos(2)-0.5, pos(2)+0.5, m_sigma2);
