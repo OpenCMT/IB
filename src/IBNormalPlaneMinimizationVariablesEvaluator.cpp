@@ -15,7 +15,7 @@ public:
         m_tracer    = NULL;
 
 #ifndef NDEBUG
-        m_out  = new TFile("20121030_all_davvero_stat.root", "RECREATE");
+        m_out  = new TFile("1363_stat.root", "RECREATE");
         m_tree = new TTree("stat", "Variables_Statistics");
         m_tree->Branch("dx",        &m_Data(1),          "dx/F");
         m_tree->Branch("dz",        &m_Data(3),          "dz/F");

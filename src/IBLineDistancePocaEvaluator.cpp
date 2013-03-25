@@ -8,7 +8,7 @@ public:
     {
         m_integrity = true;
         m_cutlength = 0.f;
-        m_poca << 0,0,0;
+        m_poca << 0,0,0,1;
     }
 
     void evaluatePoCA()

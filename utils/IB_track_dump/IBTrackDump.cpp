@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include <root/TFile.h>
-#include <root/TTree.h>
+#include <TFile.h>
+#include <TTree.h>
 
 
 #include "IBPocaEvaluator.h"
@@ -13,7 +13,7 @@
 #include "IBMuonError.h"
 #include "Detectors/MuonScatter.h"
 #include "IBMuonEventTTreeReader.h"
-#include "IBMuonEventTTreeR3DmcReader.h"
+#include "IBMuonEventTTreeLNLdataReader.h"
 #include "IBVoxFilters.h"
 #include "IBAnalyzerWPoca.h"
 #include "IBMAPUpdateDensityAlgorithms.h"
@@ -44,13 +44,16 @@ int do_iterations(const char *file_in, const char *file_out, float min, float ma
     ////////////////////////////////////////////////////////////////////////////
     // errors //
     
-    IBMuonError sigma(12.24, 18.85, 1.4);
-    Voxel zero = {0};
-    IBLightCollection scraps(Vector3i(120,50,50));
-    scraps.SetSpacing (Vector3f(5,5,5));
-    scraps.SetPosition(Vector3f(-300,-125,-125));
-    scraps.InitVoxels(zero);
-    
+    IBMuonError sigma(6.02, 7.07, 1.4);
+    /* A_ph = 12.24/6.02 mrad;
+     * A_th = 18.85/7.07 mrad
+     * for DTChambers/CMSChambers
+     */
+//    Voxel zero = {0};
+//    IBLightCollection scraps(Vector3i(120,50,50));
+//    scraps.SetSpacing (Vector3f(5,5,5));
+//    scraps.SetPosition(Vector3f(-300,-125,-125));
+//    scraps.InitVoxels(zero);
 //    for(int x=10; x < 130; ++x) {
 //        for (int y=10; y < 62; ++y) {
 //            for (int z=4; z<56; ++z) {
@@ -76,13 +79,13 @@ int do_iterations(const char *file_in, const char *file_out, float min, float ma
         exit(1);
     }
     
-    TTree* t = (TTree*)f->Get("n");
-    IBMuonEventTTreeR3DmcReader *reader = new IBMuonEventTTreeR3DmcReader();
+    TTree* t = (TTree*)f->Get("RADMU");
+    IBMuonEventTTreeLNLdataReader *reader = new IBMuonEventTTreeLNLdataReader();
     reader->setTTree(t);
     reader->setError(sigma);
     reader->setMomentum(0.7);
 //    reader->readPguess(true);
-    reader->selectionCode(IBMuonEventTTreeR3DmcReader::All);
+//    reader->selectionCode(IBMuonEventTTreeR3DmcReader::All);
     
     
     
@@ -91,11 +94,11 @@ int do_iterations(const char *file_in, const char *file_out, float min, float ma
     ////////////////////////////////////////////////////////////////////////////
     // voxels //
     IBVoxel air = {0.1E-6,0,0};
-    IBVoxCollection voxels(Vector3i(120,50,50));
+    IBVoxCollection voxels(Vector3i(61,32,48));
     voxels.SetSpacing (Vector3f(5,5,5));
-    voxels.SetPosition(Vector3f(-300,-125,-125));
+    voxels.SetPosition(Vector3f(-152.5,-171.8,-120));
     voxels.InitLambda(air);
-    
+    voxels.ExportToVtk("base.vtk",0);
     
     
     
@@ -124,7 +127,7 @@ int do_iterations(const char *file_in, const char *file_out, float min, float ma
     
     IBMuonCollection muons;
     int ev = reader->getNumberOfEvents();
-    for (int i=0; i<200; i++) {
+    for (int i=0; i<1000000; i++) {
         MuonScatter mu;
         if(reader->readNext(&mu)) {
             muons.AddMuon(mu);
@@ -134,31 +137,31 @@ int do_iterations(const char *file_in, const char *file_out, float min, float ma
     
     muons.PrintSelf(std::cout);
             
-    vtkVoxRaytracerRepresentation v_rt(tracer);
+    //vtkVoxRaytracerRepresentation v_rt(tracer);
 
-    char file[100];
-    for (int i=0; i<100; ++i)
+    char file[100];/*
+    for (int i=0; i<500000; ++i)
     {
         MuonScatterData mu = muons.At(i);
         vtkMuonScatter v_mu(mu);
-        if (processor->evaluate(mu))
-            v_mu.AddPocaPoint(processor->getPoca());
-        else
-            std::cout <<"error poca\n";
-        v_rt.SetMuon(v_mu);
+//        if (processor->evaluate(mu))
+//            v_mu.AddPocaPoint(processor->getPoca());
+//        else
+//            std::cout <<"error poca\n";
+//        v_rt.SetMuon(v_mu);
 
         sprintf(file,"%s_ray_%i.vtp",file_out,i);
-        v_rt.SetRepresentationElements(vtkVoxRaytracerRepresentation::RayElements);
-        if(v_rt.GetPolyData())
-            v_rt.SaveToXMLFile(file);
-        else
-            std::cout << " PROBLEMA RAY \n";
+//        v_rt.SetRepresentationElements(vtkVoxRaytracerRepresentation::RayElements);
+//        if(v_rt.GetPolyData())
+            v_mu.SaveToXMLFile(file);
+//        else
+//            std::cout << " PROBLEMA RAY \n";
 
-        sprintf(file,"%s_vox_%i.vtp",file_out,i);
-        v_rt.SetRepresentationElements(vtkVoxRaytracerRepresentation::VoxelsElements);
-        v_rt.SaveToXMLFile(file);
-    }
-
+//        sprintf(file,"%s_vox_%i.vtp",file_out,i);
+//        v_rt.SetRepresentationElements(vtkVoxRaytracerRepresentation::VoxelsElements);
+//        v_rt.SaveToXMLFile(file);
+    } */
+    delete reader;
 }
 
 
@@ -180,7 +183,7 @@ int main(int argc, char **argv) {
         float minutes;
         float a;
     } parameters = {
-        "/var/local/data/root/muSteel_PDfit_20130210_0_v15.root",
+        "/mnt/musteel/var/local/data/root/run_1363/muRadio_1363.root",
         "tracer",
         5,
         1

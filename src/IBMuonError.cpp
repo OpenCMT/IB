@@ -155,6 +155,6 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
 
 Scalarf IBMuonError::mpdEval(Scalarf a, Scalarf p, Scalarf d)
 {
-    return 1E-3 * sqrt(a*a/(p*p)) * (1+d*d);
+    return 1E-3 * (a/p) * (1+d*d);
 }
 

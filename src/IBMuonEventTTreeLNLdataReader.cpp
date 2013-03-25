@@ -1,4 +1,5 @@
 #include <TTree.h>
+#include <TFile.h>
 #include "IBMuonEventTTreeLNLdataReader.h"
 
 using namespace uLib;
@@ -54,6 +55,19 @@ public:
         m_hitZ         = 4;
         m_momentum     = 0.f;
         m_integrity    = true;
+//        m_out = new TFile("evDistro.root","RECREATE");
+//        //m_out = out;
+//        m_dumpster = new TTree("ev","ev");
+//        //m_dumpster = dumpster;
+
+//        m_dumpster->Branch("x_up", &m_xu, "xu");
+//        m_dumpster->Branch("z_up", &m_zu, "zu");
+//        m_dumpster->Branch("p_up", &m_pu, "pu");
+//        m_dumpster->Branch("t_up", &m_tu, "tu");
+//        m_dumpster->Branch("x_down", &m_xd, "xd");
+//        m_dumpster->Branch("z_down", &m_zd, "zd");
+//        m_dumpster->Branch("p_down", &m_pd, "pd");
+//        m_dumpster->Branch("t_down", &m_td, "td");
     }
 
     void init(TTree * tree)
@@ -118,20 +132,33 @@ public:
             return;
         }
 
-        muon_event->LineIn().origin     << m_track.phi_up.position, 0, m_track.theta_up.position;  // HARDCODED
-        muon_event->LineIn().direction  << m_track.phi_up.slope, -1, m_track.theta_up.slope;
-        muon_event->LineOut().origin    << m_track.phi_down.position, -183.43, m_track.theta_down.position; // HARDCODED
-        muon_event->LineOut().direction << m_track.phi_down.slope, -1, m_track.theta_down.slope;
+        muon_event->LineIn().origin     << m_track.phi_up.position, 0, m_track.theta_up.position,1;  // HARDCODED
+        muon_event->LineIn().direction  << -m_track.phi_up.slope, -1, -m_track.theta_up.slope,0;
+        muon_event->LineOut().origin    << m_track.phi_down.position-1.15, -183.43, m_track.theta_down.position-0.06,1; // HARDCODED
+        muon_event->LineOut().direction << -m_track.phi_down.slope, -1, -m_track.theta_down.slope,0;
         muon_event->SetMomentum(m_momentum);
 
         muon_event->ErrorIn().direction_error  = Vector4f::Zero();
         muon_event->ErrorOut().direction_error = Vector4f::Zero();
 
         m_error->evaluate(*muon_event, 2, 2);
+
+//        m_xu = muon_event->LineIn().origin(0);
+//        m_zu = muon_event->LineIn().origin(2);
+//        m_pu = muon_event->LineIn().direction(0);
+//        m_tu = muon_event->LineIn().direction(2);
+//        m_xd = muon_event->LineOut().origin(0);
+//        m_zd = muon_event->LineOut().origin(2);
+//        m_pd = muon_event->LineOut().direction(0);
+//        m_td = muon_event->LineOut().direction(2);
+//        m_dumpster->Fill();
     }
 
 
 public:
+//    TFile*        m_out;
+//    TTree*        m_dumpster;
+//    float         m_xu, m_zu, m_xd, m_zd, m_pu, m_tu, m_pd, m_td;
     TTree*        m_tree;
     MuonTracks    m_track;
     Buffer        m_buffer;
@@ -151,6 +178,9 @@ IBMuonEventTTreeLNLdataReader::IBMuonEventTTreeLNLdataReader() :
 
 IBMuonEventTTreeLNLdataReader::~IBMuonEventTTreeLNLdataReader()
 {
+//    d->m_out->cd();
+//    d->m_dumpster->Write();
+//    d->m_out->Close();
     delete d;
 }
 

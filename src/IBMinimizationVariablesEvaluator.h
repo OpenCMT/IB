@@ -10,12 +10,14 @@
 using namespace uLib;
 
 class IBNormalPlaneMinimizationVariablesEvaluator;
+class IBSimpleTwoViewsMinimizationVariablesEvaluator;
 
 class IBMinimizationVariablesEvaluator
 {
 public:
     enum IBMinVarEvaluatorAlgorithm {
-        NormalPlane
+        NormalPlane,
+        SimpleTwoViews
     };
 
     static IBMinimizationVariablesEvaluator* New(IBMinVarEvaluatorAlgorithm S);
