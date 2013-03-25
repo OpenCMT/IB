@@ -16,7 +16,6 @@ class IBAnalyzerEMAlgorithmMGA : public IBAnalyzerEMAlgorithm {
 public:
     void SetGaussians(Vector<Vector2f> &WS);
     void SetGaussians(Scalarf *w, Scalarf *s);
-
     void GetNominalMomentum() const { return m_P; }
 
 protected:
@@ -30,14 +29,6 @@ private:
     Scalarf  m_P;
 };
 
-template < int size >
-void IBAnalyzerEMAlgorithmMGA<size>::SetGaussians(Scalarf *w, Scalarf *s)
-{
-    Vector<Vector2f> ws;
-    for(int i=0 ; i<size ; ++i)
-        ws.push_back(Vector2f(w[i], s[i]));
-    this->SetGaussians(ws);
-}
 
 
 template < int size >
@@ -58,6 +49,15 @@ IBAnalyzerEMAlgorithmMGA<size>::normalizeScaling(Vector<Vector2f> &ws)
     return out;
 }
 
+
+template < int size >
+void IBAnalyzerEMAlgorithmMGA<size>::SetGaussians(Scalarf *w, Scalarf *s)
+{
+    Vector<Vector2f> ws;
+    for(int i=0 ; i<size ; ++i)
+        ws.push_back(Vector2f(w[i], s[i]));
+    this->SetGaussians(ws);
+}
 
 template < int size >
 void IBAnalyzerEMAlgorithmMGA<size>::SetGaussians(Vector<Vector2f> &WS)

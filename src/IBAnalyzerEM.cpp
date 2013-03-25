@@ -187,7 +187,7 @@ IBAnalyzerEM::~IBAnalyzerEM()
 
 void IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
 {
-    if(unlikely(!m_PocaAlgorithm || !m_RayAlgorithm || !m_VarAlgorithm)) return;
+    if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)) return;
     Event evc;
 
     evc.header.InitialSqrP = parameters().nominal_momentum/muon.GetMomentum();
@@ -214,9 +214,13 @@ void IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
         if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
                 !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
             return;
-        bool test = m_PocaAlgorithm->evaluate(muon);
-        poca = m_PocaAlgorithm->getPoca();
-        if(test && this->GetVoxCollection()->IsInsideBounds(poca)) {
+
+        bool use_poca = false;
+        if(m_PocaAlgorithm) {
+            use_poca = m_PocaAlgorithm->evaluate(muon);
+            poca = m_PocaAlgorithm->getPoca();
+        }
+        if(use_poca && this->GetVoxCollection()->IsInsideBounds(poca)) {
             poca = m_PocaAlgorithm->getPoca();
             ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,poca);
             ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(poca,exit_pt) );
