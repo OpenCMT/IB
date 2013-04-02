@@ -14,6 +14,8 @@
 #include "Detectors/MuonScatter.h"
 #include "IBMuonEventTTreeReader.h"
 #include "IBMuonEventTTreeLNLdataReader.h"
+#include "IBMuonEventTTreeLNLmcReader.h"
+
 #include "IBVoxFilters.h"
 #include "IBAnalyzerWPoca.h"
 #include "IBMAPUpdateDensityAlgorithms.h"
@@ -79,8 +81,8 @@ int do_iterations(const char *file_in, const char *file_out, float min, float ma
         exit(1);
     }
     
-    TTree* t = (TTree*)f->Get("RADMU");
-    IBMuonEventTTreeLNLdataReader *reader = new IBMuonEventTTreeLNLdataReader();
+    TTree* t = (TTree*)f->Get("n");
+    IBMuonEventTTreeLNLmcReader *reader = new IBMuonEventTTreeLNLmcReader();
     reader->setTTree(t);
     reader->setError(sigma);
     reader->setMomentum(0.7);
@@ -127,7 +129,7 @@ int do_iterations(const char *file_in, const char *file_out, float min, float ma
     
     IBMuonCollection muons;
     int ev = reader->getNumberOfEvents();
-    for (int i=0; i<1000000; i++) {
+    for (int i=0; i<2000; i++) {
         MuonScatter mu;
         if(reader->readNext(&mu)) {
             muons.AddMuon(mu);
@@ -139,8 +141,8 @@ int do_iterations(const char *file_in, const char *file_out, float min, float ma
             
     //vtkVoxRaytracerRepresentation v_rt(tracer);
 
-    char file[100];/*
-    for (int i=0; i<500000; ++i)
+    char file[100];
+    for (int i=0; i<100; ++i)
     {
         MuonScatterData mu = muons.At(i);
         vtkMuonScatter v_mu(mu);
@@ -160,7 +162,7 @@ int do_iterations(const char *file_in, const char *file_out, float min, float ma
 //        sprintf(file,"%s_vox_%i.vtp",file_out,i);
 //        v_rt.SetRepresentationElements(vtkVoxRaytracerRepresentation::VoxelsElements);
 //        v_rt.SaveToXMLFile(file);
-    } */
+    }
     delete reader;
 }
 
@@ -183,8 +185,8 @@ int main(int argc, char **argv) {
         float minutes;
         float a;
     } parameters = {
-        "/mnt/musteel/var/local/data/root/run_1363/muRadio_1363.root",
-        "tracer",
+        "/mnt/musteel/var/local/data/root/run_2004x/muRadio_20040.root",
+        "tracer_mc",
         5,
         1
     };

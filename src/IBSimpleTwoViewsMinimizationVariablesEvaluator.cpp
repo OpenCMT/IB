@@ -31,8 +31,8 @@ public:
         m_tree->Branch("Cszdx",     &m_ErrorMatrix(1,2), "szdx/F");
         m_tree->Branch("Cdxdz",     &m_ErrorMatrix(1,3), "dxdz/F");
         m_tree->Branch("Cszdz",     &m_ErrorMatrix(2,3), "szdz/F");
-        m_tree->Branch("Phi",       &t_phi,              "phi/F");
-        m_tree->Branch("Theta",     &t_theta,            "theta/F");
+        m_tree->Branch("DisplN",    &DT.displNorm,       "dn/F");
+        m_tree->Branch("PoutLinN",  &DT.poutLinNorm,     "polin/F");
         m_tree->Branch("mx_in",     &EV.mx_in,           "mx_in/F");
         m_tree->Branch("my_in",     &EV.my_in,           "my_in/F");
         m_tree->Branch("mz_in",     &EV.mz_in,           "mz_in/F");
@@ -65,8 +65,8 @@ public:
 
         m_Data        = this->evaluateVariables();
 
-        if (unlikely((fabs(m_Data(0)) > 1)||(fabs(m_Data(2)) > 1))) // << HARDCODED!!!
-            m_integrity = false;
+//        if (unlikely((fabs(m_Data(0)) > 1)||(fabs(m_Data(2)) > 1))) // << HARDCODED!!!
+//            m_integrity = false;
 
         m_ErrorMatrix = this->evaluateErrorMatrix();
 
@@ -134,6 +134,12 @@ public:
             e2.computeInverseWithCheck(e2_inv, check);
             chi2.xz = data.transpose() * e2_inv * data;
 
+            DT.displNorm = sqrt(m_Data(1)*m_Data(1)+m_Data(3)*m_Data(3));
+            HVector3f n = getDirectorCosines(m_muon.LineIn().direction);
+            HVector3f diff = m_muon.LineIn().origin-m_muon.LineOut().origin;
+            float scal = diff.transpose()*n;
+            HVector3f b = diff-scal*n;
+            DT.poutLinNorm = b.head(3).norm();
             m_tree->Fill();
         }
 #endif
@@ -220,6 +226,9 @@ public:
     struct CHI {
         float p, t, x, z, px, tz, pxtz, pt, xz;
     } chi2;
+    struct DaTa {
+        float displNorm, poutLinNorm;
+    } DT;
 
 #endif
 
