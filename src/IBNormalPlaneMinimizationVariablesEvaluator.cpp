@@ -15,7 +15,7 @@ public:
         m_tracer    = NULL;
 
 #ifndef NDEBUG
-        m_out  = new TFile("1363_stat.root", "RECREATE");
+        m_out  = new TFile("20040_aXY.root", "RECREATE");
         m_tree = new TTree("stat", "Variables_Statistics");
         m_tree->Branch("dx",        &m_Data(1),          "dx/F");
         m_tree->Branch("dz",        &m_Data(3),          "dz/F");
@@ -333,8 +333,8 @@ public:
 
     void evaluateAlpha(Scalarf& phi, Scalarf& theta) {
         // if configuration X, Z or BOTH choose combination!
-        m_alpha = (getAlphaZ(phi,theta)+getAlphaX(phi,theta))/2.;
-        //m_alpha = getAlphaX(phi,theta);
+        //m_alpha = (getAlphaZ(phi,theta)+getAlphaX(phi,theta))/2.;
+        m_alpha = getAlphaX(phi,theta);
         //m_alpha = 0;
     }
 

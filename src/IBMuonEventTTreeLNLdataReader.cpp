@@ -50,6 +50,7 @@ public:
     {
         m_tree         = NULL;
         m_total_events = 0;
+        m_max_event    = 0;
         m_pos          = 0;
         m_hitX         = 6;
         m_hitZ         = 4;
@@ -70,10 +71,30 @@ public:
 //        m_dumpster->Branch("t_down", &m_td, "td");
     }
 
+    void init(TFile * file)
+    {
+        if (file->IsZombie()) {
+            printf("Requested file not found!\nAborting...\n");
+            exit(0);
+        }
+        TTree* t = (TTree*)file->Get("RADMU");
+        if (t) {
+            init(t);
+        } else {
+            printf("Requested TTree not found in file! Maybe wrong TTree name?\nAborting...\n");
+            exit(0);
+        }
+    }
+
     void init(TTree * tree)
     {
         m_tree = tree;
-        m_total_events = m_tree->GetEntries();
+        m_max_event = m_tree->GetEntries();
+        if (m_total_events == 0.f) m_total_events = m_max_event;
+        if(m_total_events+m_pos>m_max_event) {
+            printf("Requested time interval rejected at TTree initialization.\nAborting...\n");
+            exit(0);
+        }
         tree->SetBranchAddress("EVENT",      &m_buffer.event);
         tree->SetBranchAddress("SEG_ns_glo", &m_buffer.iseg);
         tree->SetBranchAddress("SEG_sx_glo",  m_buffer.sx);
@@ -86,7 +107,7 @@ public:
     void AcquireEvent()
     {
         m_integrity = true;
-        if (likely(m_pos <= m_total_events)) {
+        if (likely(m_pos <= m_max_event)) {
             m_tree->GetEntry(m_pos);
         } else m_integrity = false;
         m_pos++;
@@ -169,6 +190,7 @@ public:
     int           m_hitX;
     int           m_hitZ;
     unsigned long m_total_events;
+    unsigned long m_max_event;
     unsigned long m_pos;
 
 };
@@ -187,6 +209,11 @@ IBMuonEventTTreeLNLdataReader::~IBMuonEventTTreeLNLdataReader()
 void IBMuonEventTTreeLNLdataReader::setTTree(TTree *tree)
 {
     d->init(tree);
+}
+
+void IBMuonEventTTreeLNLdataReader::setTFile(TFile* file)
+{
+    d->init(file);
 }
 
 void IBMuonEventTTreeLNLdataReader::setHitCuts(int nx_cut, int nz_cut)
@@ -209,6 +236,16 @@ void IBMuonEventTTreeLNLdataReader::setError(IBMuonError &e)
     d->m_error = &e;
 }
 
+void IBMuonEventTTreeLNLdataReader::setAcquisitionTime(float min)
+{
+    d->m_total_events = min * 6.7E4;
+    if(d->m_total_events+d->m_pos>d->m_max_event) {
+        printf("Requested time interval rejected at acquisition time setting.\nAborting...\n");
+        exit(0);
+    }
+    printf("Processing %.2f minutes (%i events)\n", min, d->m_total_events);
+}
+
 unsigned long IBMuonEventTTreeLNLdataReader::getNumberOfEvents()
 {
     return d->m_total_events;
@@ -224,4 +261,15 @@ bool IBMuonEventTTreeLNLdataReader::readNext(MuonScatter *event)
     d->AcquireEvent();
     d->GetMuonEvent(event);
     return d->m_integrity;
+}
+
+
+void IBMuonEventTTreeLNLdataReader::setStartTime(float min)
+{
+    d->m_pos = min * 6.7E4;
+    if (unlikely(d->m_total_events+d->m_pos>d->m_max_event)) {
+        printf("Requested time interval rejected at start time setting\nAborting...\n");
+        exit(0);
+    }
+    printf("Starting processing from %.2f minutes (event n. %i)\n", min, d->m_pos);
 }

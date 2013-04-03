@@ -15,7 +15,7 @@ public:
         m_tracer    = NULL;
 
 #ifndef NDEBUG
-        m_out  = new TFile("1363_stat_old.root", "RECREATE");
+        m_out  = new TFile("20040_s2v.root", "RECREATE");
         m_tree = new TTree("stat", "Variables_Statistics");
         m_tree->Branch("dx",        &m_Data(1),          "dx/F");
         m_tree->Branch("dz",        &m_Data(3),          "dz/F");
@@ -65,8 +65,8 @@ public:
 
         m_Data        = this->evaluateVariables();
 
-//        if (unlikely((fabs(m_Data(0)) > 1)||(fabs(m_Data(2)) > 1))) // << HARDCODED!!!
-//            m_integrity = false;
+        if (unlikely((fabs(m_Data(0)) > 1)||(fabs(m_Data(2)) > 1))) // << HARDCODED!!!
+            m_integrity = false;
 
         m_ErrorMatrix = this->evaluateErrorMatrix();
 
@@ -176,7 +176,7 @@ public:
     {
         Matrix4f covariance;
         float dy = m_muon.LineIn().origin(1) - m_muon.LineOut().origin(1);
-        HVector3f dc   = getDirectorCosines(m_muon.LineIn().direction);
+        HVector3f dc   = getDirectorCosines(-m_muon.LineIn().direction);
         float cosphi   = cos(atan2(dc(0),dc(1)));
         float costheta = cos(atan2(dc(2),dc(1)));
         float csx =  dy/cosphi;

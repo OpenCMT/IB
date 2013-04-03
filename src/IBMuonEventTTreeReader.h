@@ -19,6 +19,7 @@ public:
     static IBMuonEventTTreeReader* New(enum IBMuonEventTTreeReaderSources S);
 
     virtual void setTTree(class TTree* tree)        = 0;
+    virtual void setTFile(class TFile* file)        = 0;
     virtual void setHitCuts(int nx_cut, int nz_cut) = 0;
     virtual void setMomentum(Scalarf p)             = 0;
     virtual void setError(IBMuonError &e)           = 0;
