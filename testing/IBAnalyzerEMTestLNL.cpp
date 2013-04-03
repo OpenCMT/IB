@@ -32,7 +32,8 @@ using namespace uLib;
 int do_iterations(const char *file_in,
                   const char *file_out,
                   float min,
-                  float start_min=0)
+                  float start_min=0,
+                  float vox_size=10)
 {
 
     IB::Version::PrintSelf(std::cout);
@@ -76,7 +77,7 @@ int do_iterations(const char *file_in,
 //    }
     
 //    TTree* t = (TTree*)f->Get("n");
-    IBMuonEventTTreeLNLmcReader *reader = new IBMuonEventTTreeLNLmcReader();
+    IBMuonEventTTreeLNLdataReader *reader = new IBMuonEventTTreeLNLdataReader();
     reader->setTFile(f);
     reader->setError(sigma);
     reader->setMomentum(0.7);    
@@ -86,9 +87,22 @@ int do_iterations(const char *file_in,
     ////////////////////////////////////////////////////////////////////////////
     // voxels //
     IBVoxel air = {0.1E-6,0,0};
-    IBVoxCollection voxels(Vector3i(60,34,48));
-    voxels.SetSpacing (Vector3f(5,5,5));
-    voxels.SetPosition(Vector3f(-150,-182,-120));
+//    IBVoxCollection voxels(Vector3i(60,34,48));
+//    voxels.SetSpacing (Vector3f(5,5,5));
+//    voxels.SetPosition(Vector3f(-150,-182,-120));
+
+    Vector3f vox_bounding(300,161,240); // centered bounding size //
+
+    IBVoxCollection voxels(Vector3i(vox_bounding(0)/vox_size,
+                                    vox_bounding(1)/vox_size,
+                                    vox_bounding(2)/vox_size));
+    voxels.SetSpacing (Vector3f(vox_size,
+                                vox_size,
+                                vox_size));
+    voxels.SetPosition(Vector3f( - 150,
+                                 - 172,
+                                 - 120 ));
+
     voxels.InitLambda(air);
     
     ////////////////////////////////////////////////////////////////////////////
@@ -143,7 +157,7 @@ int do_iterations(const char *file_in,
     int tot=0;
     
     IBMuonCollection muons;
-    int ev = 500000;//reader->getNumberOfEvents();
+    int ev = reader->getNumberOfEvents();
     IBAnalyzerWPoca ap;
     ap.SetPocaAlgorithm(processor);
     ap.SetVoxCollection(&voxels);
@@ -153,43 +167,40 @@ int do_iterations(const char *file_in,
         MuonScatter mu;
         if(reader->readNext(&mu)) {
             muons.AddMuon(mu);
-            ap.AddMuon(mu);
             tot++;
         }
     }        
     muons.PrintSelf(std::cout);
     aem->SetMuonCollection(&muons);
-//    delete minimizator;
-//    exit(0);
-    ap.Run(1,1);
-    voxels.ExportToVtk("poca.vtk");
+
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     // ITERATIONS //
 
 
-    int it   = 40;
-    int drop = 5;
+    int it   = 10;
+    int drop = 50;
 
-    // SGA PRIMA DELLA STIMA //
     char file[100];
 
     IBAnalyzerEMAlgorithmSGA_PXTZ ml_algorithm;
     aem->SetMLAlgorithm(&ml_algorithm);
-    aem->SijCut(60);
-    voxels.InitLambda(air);
-    std::cout << "SGA PXTZ ------------------------ \n";
-    for (int i=1; i<=it; ++i) {
-        aem->Run(drop,1);
-        //trim.Run();
-        sprintf(file, "%s_%i.vtk",file_out, i*drop);
-        voxels.ExportToVtk(file,0);
-    }
+
+//    aem->SijCut(60);
+//    voxels.InitLambda(air);
+//    std::cout << "SGA PXTZ ------------------------ \n";
+//    for (int i=1; i<=it; ++i) {
+//        aem->Run(drop,1);
+//        //trim.Run();
+//        sprintf(file, "%s_%i.vtk",file_out, i*drop);
+//        voxels.ExportToVtk(file,0);
+//    }
 
     
     delete aem;
     delete minimizator;
+    delete reader;
 }
 
 
@@ -210,26 +221,31 @@ int main(int argc, char **argv) {
         char  *file_out;
         float minutes;
         float start_min;
+        float vox_size;
     } parameters = {
-        "/mnt/musteel/var/local/data/root/run_2004x/muRadio_20040.root",
-        "muRadio_2004_npX_TZ",
+        "/var/local/data/root/run_1363/muRadio_1363.root",
+        "image_1363",
         5,
-        0
+        0,
+        5
     };
-    
 
-
-
-    if(argc == 4) {
+    if(argc == 6) {
         parameters.file_in  = argv[1];
         parameters.file_out = argv[2];
         parameters.minutes  = atof(argv[3]);
+        parameters.start_min  = atof(argv[4]);
+        parameters.vox_size  = atof(argv[5]);
     }
     
     do_iterations(parameters.file_in,
                   parameters.file_out,
                   parameters.minutes,
-                  parameters.start_min);
+                  parameters.start_min,
+                  parameters.vox_size);
+
+
+
     return 0;
 }
 
