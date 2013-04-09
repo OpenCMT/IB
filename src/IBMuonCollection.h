@@ -29,8 +29,11 @@ public:
     size_t size() const;
 
     void SetHiPassAngle(float angle);
-
     void SetLowPassAngle(float angle);
+
+    void SetHiPassMomentumPrime(float momenutm);
+    void SetLowPassMomentumPrime(float momentum);
+
 
     void PrintSelf(std::ostream &o);
 

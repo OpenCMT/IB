@@ -57,7 +57,6 @@ public:
 };
 
 
-
 void IBAnalyzerEMPimpl::Project(Event *evc)
 {
     // compute sigma //
@@ -184,6 +183,12 @@ IBAnalyzerEM::~IBAnalyzerEM()
 {
     delete d;
 }
+
+Vector<IBAnalyzerEM::Event> &IBAnalyzerEM::Events()
+{
+    return d->m_Events;
+}
+
 
 void IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
 {
@@ -342,6 +347,7 @@ void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
         delete h;
     }
 }
+
 
 
 

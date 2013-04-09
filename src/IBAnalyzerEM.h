@@ -43,7 +43,7 @@ public:
     IBAnalyzerEM(IBVoxCollection &voxels);
     ~IBAnalyzerEM();
 
-    void AddMuon(const MuonScatterData &muon);
+    virtual void AddMuon(const MuonScatterData &muon);
 
     void SetMuonCollection(IBMuonCollection *muons);
 
@@ -65,14 +65,14 @@ public:
 
     void DumpP(const char *filename, float x0 = 0, float x1 = 10);
 
+    Vector<Event> &Events();
+
 private:    
     IBPocaEvaluator                  *m_PocaAlgorithm;
     IBMinimizationVariablesEvaluator *m_VarAlgorithm;
     IBVoxRaytracer                   *m_RayAlgorithm;
-
     friend class IBAnalyzerEMPimpl;
     class IBAnalyzerEMPimpl *d;
-
 };
 
 

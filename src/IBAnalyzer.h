@@ -26,6 +26,7 @@ class IBAnalyzer : public Object {
 public:
 
     uLibGetSetMacro(Experiment,IBExperiment *)
+
     uLibGetSetMacro(VoxCollection,IBVoxCollection *)
 
     uLibGetMacro(MuonCollection,IBMuonCollection *)

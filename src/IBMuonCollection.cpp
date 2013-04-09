@@ -13,6 +13,12 @@ class IBMuonCollectionPimpl {
             return MuonScatterAngle(data) <= value;
         }
     };
+    struct _PCmp {
+        bool operator()(const MuonScatterData &data, const float value)
+        {
+            return data.GetMomentumPrime() <= value;
+        }
+    };
 
     static float MuonScatterAngle(const MuonScatterData &mu) {
         Vector3f in = mu.LineIn().direction.head(3);
@@ -48,7 +54,7 @@ IBMuonCollection::~IBMuonCollection()
 void IBMuonCollection::AddMuon(MuonScatter &mu)
 {
     d->m_Data.push_back(mu);
-    // FINIRE //
+    // FINIRE o PENSARE perche non si puo' fare add muon dopo set Hi/LowPass //
 }
 
 Vector<MuonScatterData> &IBMuonCollection::Data()
@@ -90,14 +96,30 @@ void IBMuonCollection::SetLowPassAngle(float angle)
     d->m_HiPass = 0;
 }
 
+void IBMuonCollection::SetHiPassMomentumPrime(float momenutm)
+{
+    d->m_SliceIndex =
+    VectorSplice(d->m_Data.begin(),d->m_Data.end(),momenutm,
+                 IBMuonCollectionPimpl::_PCmp());
+    d->m_HiPass = 1;
+}
+
+void IBMuonCollection::SetLowPassMomentumPrime(float momentum)
+{
+    d->m_SliceIndex =
+    VectorSplice(d->m_Data.begin(),d->m_Data.end(),momentum,
+                 IBMuonCollectionPimpl::_PCmp());
+    d->m_HiPass = 0;
+}
+
 
 
 void IBMuonCollection::PrintSelf(std::ostream &o)
 {
     o << "---- Muon Collection: ----- \n";
     o << " Data size: " << d->m_Data.size() << "\n";
-
-    //    o << " Muons over cut : " << this->size() << "\n";
+    if(this->size()!=0)
+        o << " Muons passed: " << this->size() << "\n";
 }
 
 

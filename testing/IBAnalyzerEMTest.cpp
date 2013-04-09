@@ -6,6 +6,7 @@
 
 #include "IBPocaEvaluator.h"
 #include "IBAnalyzerEM.h"
+#include "IBAnalyzerEM3p.h"
 #include "IBAnalyzerEMAlgorithm.h"
 #include "IBVoxRaytracer.h"
 #include "IBMinimizationVariablesEvaluator.h"
@@ -56,9 +57,9 @@ int do_iterations(const char *file_in,
             }
         }
     }
-    sigma.setScrapsImage(scraps);
-    sigma.averageMomentumCorrection(true);
-    sigma.azimuthalMomentumCorrection(true);
+//    sigma.setScrapsImage(scraps);
+//    sigma.averageMomentumCorrection(true);
+//    sigma.azimuthalMomentumCorrection(true);
 
     
     
@@ -78,7 +79,8 @@ int do_iterations(const char *file_in,
     IBMuonEventTTreeR3DmcReader *reader = new IBMuonEventTTreeR3DmcReader();
     reader->setTTree(t);
     reader->setError(sigma);
-    reader->setMomentum(0.7);
+//    reader->setMomentum(0.7);
+    reader->readPguess(true);
     reader->selectionCode(IBMuonEventTTreeR3DmcReader::All);
     
     
@@ -122,7 +124,7 @@ int do_iterations(const char *file_in,
     IBAnalyzerEMAlgorithmSGA *ml_algorithm = new IBAnalyzerEMAlgorithmSGA_PXTZ;
     
     // analyzer //
-    IBAnalyzerEM* aem = new IBAnalyzerEM(voxels);
+    IBAnalyzerEM3p* aem = new IBAnalyzerEM3p(voxels);
     aem->SetMLAlgorithm(ml_algorithm);
     aem->SetPocaAlgorithm(processor);
     aem->SetRayAlgorithm(tracer);
@@ -192,48 +194,28 @@ int do_iterations(const char *file_in,
     ////////////////////////////////////////////////////////////////////////////
     // ITERATIONS //
     
-    int it   = 120;
+    int it   = 100;
     int drop = 5;
     
     aem->SijCut(60);
     voxels.InitLambda(air);
 
-    // SGA PRIMA DELLA STIMA //
     char file[100];
-//    std::cout << "SGA PXTZ -------------------------- \n";
-//    for (int i=1; i<=it; ++i) {
-//        aem->Run(drop,1);
-//        trim.Run();
-//        sprintf(file, "%s_%i.vtk",file_out, i*drop);
-//        voxels.ExportToVtk(file,0);
-//    }
 
-    std::cout << "SGA PXTZ M ------------------------ \n";
+    std::cout << "SGA PXTZ 3+ ------------------------ \n";
     for (int i=1; i<=it; ++i) {
         aem->Run(drop,1);
         trim.Run();
-
-        IBAnalyzerEMAlgorithmSGA_M ml_algorithm_m;
-        aem->SetMLAlgorithm(&ml_algorithm_m);
-        aem->Run(1,1);
-        aem->SetMLAlgorithm(ml_algorithm);
-
         sprintf(file, "%s_%i.vtk",file_out, i*drop);
         voxels.ExportToVtk(file,0);
     }
-
-//    // SGA DOPO LA STIMA //
-//    std::cout << "SGA PXTZ -------------------------- \n";
-//    for (int i=61; i<=it; ++i) {
-//        aem->Run(drop,1);
-//        trim.Run();
-//        sprintf(file, "%s_%i.vtk",file_out, i*drop);
-//        voxels.ExportToVtk(file,0);
-//    }
-
     
-    delete aem;
+
+    delete aem;    
     delete minimizator;
+    delete tracer;
+    delete reader;
+    delete f;
 }
 
 
@@ -255,10 +237,9 @@ int main(int argc, char **argv) {
         float minutes;
         float start_min;
     } parameters = {
-        //        "/var/local/data/root/muSteel_PDfit_20130203_v14.root", // blocchi
-        "/var/local/data/root/muSteel_PDfit_20130210_0_v14.root", // tappeto 5l y=0
-//        "/var/local/data/root/ROC_sets/20130214/muSteel_PDfit_20130214_1_v14.root",
-        "Source_PXTZ_M",
+        "/var/local/data/root/muSteel_PDfit_20130220_1_v15.root", // blocchi 2l
+        //"/var/local/data/root/ROC_sets/20130214_v15/muSteel_PDfit_20130214_0_v15.root",
+        "2lpg_notrim_3p_PXTZ",
         5,
         0
     };
