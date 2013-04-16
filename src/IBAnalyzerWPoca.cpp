@@ -27,7 +27,7 @@ public:
 #endif
     }
 
-    void CollectMuon(const MuonScatterData &muon)
+    bool CollectMuon(const MuonScatterData &muon)
     {
         assert(m_PocaAlgorithm);
         assert(m_Minimizator);
@@ -47,7 +47,9 @@ public:
 #ifndef NDEBUG
             m_tree->Fill();
 #endif
+            return true;
         }
+        return false;
     }
 
     void SetVoxels(IBVoxCollection *voxels) {
@@ -87,9 +89,9 @@ IBAnalyzerWPoca::~IBAnalyzerWPoca()
     delete d;
 }
 
-void IBAnalyzerWPoca::AddMuon(const MuonScatterData &event)
+bool IBAnalyzerWPoca::AddMuon(const MuonScatterData &event)
 {
-    d->CollectMuon(event);
+    return d->CollectMuon(event);
 }
 
 void IBAnalyzerWPoca::Run(unsigned int iteration, float muons_ratio)

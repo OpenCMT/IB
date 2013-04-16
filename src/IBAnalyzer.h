@@ -33,7 +33,7 @@ public:
 
     virtual uLibSetMacro(MuonCollection,IBMuonCollection *)
 
-    virtual void AddMuon(const MuonScatterData &event) = 0;
+    virtual bool AddMuon(const MuonScatterData &event) = 0;
 
     virtual unsigned int Size() {}
 

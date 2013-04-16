@@ -16,12 +16,13 @@ public:
         m_PocaAlgorithm(NULL)
     {}
 
-    void CollectMuon(const MuonScatterData &muon)
+    bool CollectMuon(const MuonScatterData &muon)
     {
         assert(m_PocaAlgorithm);
         if(m_PocaAlgorithm->evaluate(muon)) {
             m_Data.push_back(m_PocaAlgorithm->getPoca());
-        }
+            return true;
+        } else return false;
     }
 
     void SetVoxels(IBVoxCollection *voxels)
@@ -52,8 +53,8 @@ IBAnalyzerPoca::~IBAnalyzerPoca()
 }
 
 
-void IBAnalyzerPoca::AddMuon(const MuonScatterData &event) {
-    d->CollectMuon(event);
+bool IBAnalyzerPoca::AddMuon(const MuonScatterData &event) {
+    return d->CollectMuon(event);
 }
 
 void IBAnalyzerPoca::Run(unsigned int iterations, float muons_ratio) {

@@ -30,9 +30,9 @@ void IBAnalyzerEM3p::SetPocaAlgorithm(IBPocaEvaluator *PocaAlgorithm)
 
 
 
-void IBAnalyzerEM3p::AddMuon(const MuonScatterData &muon)
+bool IBAnalyzerEM3p::AddMuon(const MuonScatterData &muon)
 {
-    if(unlikely(!GetRayAlgorithm() || !GetVarAlgorithm())) return;
+    if(unlikely(!GetRayAlgorithm() || !GetVarAlgorithm())) return false;
     Event evc;
 
     evc.header.InitialSqrP = parameters().nominal_momentum/muon.GetMomentum();
@@ -51,7 +51,7 @@ void IBAnalyzerEM3p::AddMuon(const MuonScatterData &muon)
         //evc.header.E /= 2;
 
     }
-    else return;
+    else return false;
 
     IBLineDistancePocaEvaluator *PocaAlgorithm =
             static_cast<IBLineDistancePocaEvaluator *>(GetPocaAlgorithm());
@@ -63,7 +63,7 @@ void IBAnalyzerEM3p::AddMuon(const MuonScatterData &muon)
             HPoint3f entry_pt,poca,exit_pt;
             if( !GetRayAlgorithm()->GetEntryPoint(muon.LineIn(),entry_pt) ||
                     !GetRayAlgorithm()->GetExitPoint(muon.LineOut(),exit_pt) )
-                return;
+                return false;
 
             bool use_poca = false;
             if(PocaAlgorithm) {
@@ -98,10 +98,10 @@ void IBAnalyzerEM3p::AddMuon(const MuonScatterData &muon)
             elc.pw = evcc.header.InitialSqrP;
             evcc.elements.push_back(elc);
         }
-#       pragma omp critical
+//#       pragma omp critical
         this->Events().push_back(evcc);
     }
-
+    return true;
 }
 
 

@@ -37,13 +37,14 @@ public:
     ULIB_OBJECT_PARAMETERS(BaseClass)
     {
         Scalarf nominal_momentum;        
+        Scalarf SijCutEM;
     };
 
 public:
     IBAnalyzerEM(IBVoxCollection &voxels);
     ~IBAnalyzerEM();
 
-    virtual void AddMuon(const MuonScatterData &muon);
+    virtual bool AddMuon(const MuonScatterData &muon);
 
     void SetMuonCollection(IBMuonCollection *muons);
 
@@ -79,6 +80,7 @@ private:
 inline void IBAnalyzerEM::init_parameters() {
     Parameters &p = this->parameters();
     p.nominal_momentum = 3;
+    p.SijCutEM         = 0.0;
 }
 
 

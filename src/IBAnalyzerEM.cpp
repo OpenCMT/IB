@@ -42,6 +42,8 @@ public:
 
     void BackProject(Event *evc);
 
+    void BackProjectCut(Event *evc);
+
     void Evaluate(float muons_ratio);
 
 //    template < AlgorithmT >
@@ -77,6 +79,19 @@ void IBAnalyzerEMPimpl::BackProject(Event *evc)
     }
 }
 
+void IBAnalyzerEMPimpl::BackProjectCut(Event *evc)
+{
+    IBVoxel *vox;
+    // sommatoria della formula 38 //
+    for (unsigned int j = 0; j < evc->elements.size(); ++j) {
+        if(likely(evc->elements[j].Sij < m_parameters->SijCutEM)) {
+            vox = evc->elements[j].voxel;
+            vox->SijCap += evc->elements[j].Sij;
+            vox->Count++;
+        }
+    }
+}
+
 void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
 {
     // TODO: Move to iterators !!! //
@@ -84,18 +99,26 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
     unsigned int end = (unsigned int) (m_Events.size() * muons_ratio);
 
     if(m_SijAlgorithm) {
-    // Projection
-    #pragma omp parallel for
-    for (unsigned int i = start; i < end; ++i)
-        this->Project(&m_Events[i]);
+        // Projection
+#       pragma omp parallel for
+        for (unsigned int i = start; i < end; ++i)
+            this->Project(&m_Events[i]);
+#       pragma omp barrier
 
-    #pragma omp barrier  
-
-    // Backprojection
-    #pragma omp parallel for
-    for (unsigned int i = start; i < end; ++i)
-        this->BackProject(&m_Events[i]);
-    #pragma omp barrier
+        // Backprojection
+        if(likely(m_parameters->SijCutEM > 0.))
+        {
+#           pragma omp parallel for
+            for (unsigned int i = start; i < end; ++i)
+                this->BackProjectCut(&m_Events[i]);
+#           pragma omp barrier
+        }
+        else {
+#           pragma omp parallel for
+            for (unsigned int i = start; i < end; ++i)
+                this->BackProject(&m_Events[i]);
+#           pragma omp barrier
+        }
     }
     else {
         std::cerr << "Error: Lamda ML Algorithm not setted\n";
@@ -190,9 +213,9 @@ Vector<IBAnalyzerEM::Event> &IBAnalyzerEM::Events()
 }
 
 
-void IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
+bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
 {
-    if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)) return;
+    if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)) return false;
     Event evc;
 
     evc.header.InitialSqrP = parameters().nominal_momentum/muon.GetMomentum();
@@ -218,14 +241,14 @@ void IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
         //evc.header.E /= 2;
 
     }
-    else return;
+    else return false;
 
     IBVoxRaytracer::RayData ray;
     { // Get RayTrace RayData //
         HPoint3f entry_pt,poca,exit_pt;
         if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
                 !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
-            return;
+            return false;
 
         bool use_poca = false;
         if(m_PocaAlgorithm) {
@@ -259,9 +282,9 @@ void IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
 
         evc.elements.push_back(elc);        
     }
-#   pragma omp critical
+//#   pragma omp critical
     d->m_Events.push_back(evc);
-
+    return true;
 }
 
 void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons)

@@ -57,20 +57,19 @@ IBAnalyzerWTrackLengths::~IBAnalyzerWTrackLengths()
     delete d;
 }
 
-void IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
+bool IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
 {
     if(!d->m_RayAlgorithm || !d->m_PocaAlgorithm || !d->m_VarAlgorithm) {
         std::cerr << "not all parameters setted\n";
-        return;
+        return false;
     }
     IBAnalyzerWTrackLengthsPimpl::Event evc;
 
     // VARIABLES //
     if(likely(d->m_VarAlgorithm->evaluate(muon))) {
         evc.Variables = d->m_VarAlgorithm->getDataVector();
-
     }
-    else return;
+    else return false;
 
     // RAY //
     IBVoxRaytracer::RayData ray;
@@ -78,7 +77,7 @@ void IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
         HPoint3f entry_pt,poca,exit_pt;
         if( !d->m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
                 !d->m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
-            return;
+            return false;
         bool test = d->m_PocaAlgorithm->evaluate(muon);
         poca = d->m_PocaAlgorithm->getPoca();
         if(test && this->GetVoxCollection()->IsInsideBounds(poca)) {
@@ -111,6 +110,7 @@ void IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
         evc.elements.push_back(elc);
     }
     d->m_Events.push_back(evc);
+    return true;
 }
 
 void IBAnalyzerWTrackLengths::Run(unsigned int iterations, float muons_ratio)

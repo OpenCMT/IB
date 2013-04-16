@@ -14,7 +14,7 @@ public:
     IBAnalyzerWPoca();
     ~IBAnalyzerWPoca();
 
-    void AddMuon(const MuonScatterData &event);
+    bool AddMuon(const MuonScatterData &event);
 
     void Run(unsigned int iteration = 1, float muons_ratio = 1);
 

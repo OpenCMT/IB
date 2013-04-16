@@ -11,7 +11,7 @@ public:
 
     void SetPocaAlgorithm(IBPocaEvaluator *PocaAlgorithm);
 
-    virtual void AddMuon(const MuonScatterData &muon);
+    virtual bool AddMuon(const MuonScatterData &muon);
 
 };
 

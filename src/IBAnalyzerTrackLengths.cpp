@@ -52,9 +52,9 @@ IBAnalyzerTrackLengths::~IBAnalyzerTrackLengths()
     delete d;
 }
 
-void IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
+bool IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
 {
-    if(!d->m_RayAlgorithm || !d->m_PocaAlgorithm) return;
+    if(!d->m_RayAlgorithm || !d->m_PocaAlgorithm) return false;
     IBAnalyzerTrackLengthsPimpl::Event evc;
 
     IBVoxRaytracer::RayData ray;
@@ -62,7 +62,7 @@ void IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
         HPoint3f entry_pt,poca,exit_pt;
         if( !d->m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
                 !d->m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
-            return;
+            return false;
         bool test = d->m_PocaAlgorithm->evaluate(muon);
         poca = d->m_PocaAlgorithm->getPoca();
         if(test && this->GetVoxCollection()->IsInsideBounds(poca)) {
@@ -94,6 +94,7 @@ void IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
         evc.elements.push_back(elc);
     }
     d->m_Events.push_back(evc);
+    return true;
 }
 
 void IBAnalyzerTrackLengths::Run(unsigned int iterations, float muons_ratio)
