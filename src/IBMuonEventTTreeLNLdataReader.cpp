@@ -161,6 +161,16 @@ public:
         muon_event->LineOut().direction << -m_track.phi_down.slope -0.0004, -1, -m_track.theta_down.slope -0.0027, 0;
         muon_event->SetMomentum(m_momentum);
 
+        // HardCoded cuts on potition and delta slope
+        if (fabs(muon_event->LineIn().origin(0))>308. ||
+                fabs(muon_event->LineIn().origin(2))>250. ||
+                fabs(muon_event->LineOut().origin(0))>308. ||
+                fabs(muon_event->LineOut().origin(2))>250. ||
+                (muon_event->LineOut().direction(0)-muon_event->LineIn().direction(0))>0.5 ||
+                (muon_event->LineOut().direction(2)-muon_event->LineIn().direction(0))>0.5) {
+            m_integrity = false;
+        }
+
         muon_event->ErrorIn().direction_error  = Vector4f::Zero();
         muon_event->ErrorOut().direction_error = Vector4f::Zero();
 
