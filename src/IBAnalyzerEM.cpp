@@ -202,9 +202,16 @@ void IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
         evc.header.Di = m_VarAlgorithm->getDataVector();
         evc.header.E  = m_VarAlgorithm->getCovarianceMatrix();
 
+        // HARDCODED ... ZERO CROSS CORRELATION BETWEEN VARS //
+        //        evc.header.E(0,1) = 0.;
+        //        evc.header.E(1,0) = 0.;
+        //        evc.header.E(2,3) = 0.;
+        //        evc.header.E(3,2) = 0.;
+        // .................................................. //
+
         // HARDCODED ... ZERO CROSS CORRELATION BETWEEN VIEWS //
-//        evc.header.E.block<2,2>(2,0) = Matrix2f::Zero();
-//        evc.header.E.block<2,2>(0,2) = Matrix2f::Zero();
+        //        evc.header.E.block<2,2>(2,0) = Matrix2f::Zero();
+        //        evc.header.E.block<2,2>(0,2) = Matrix2f::Zero();
         // .................................................. //
 
         // HARDCODED ... LESS ERROR ! //
@@ -252,6 +259,7 @@ void IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
 
         evc.elements.push_back(elc);        
     }
+#   pragma omp critical
     d->m_Events.push_back(evc);
 
 }
@@ -315,9 +323,7 @@ void IBAnalyzerEM::AddVoxcollectionShift(Vector3f shift)
     voxels->SetPosition(pos + shift);
     IBMuonCollection *muons = this->GetMuonCollection();
     for(int i=0; i<muons->size(); ++i)
-      {
-	this->AddMuon(muons->At(i));
-      }   
+        this->AddMuon(muons->At(i));
   }
 }
 

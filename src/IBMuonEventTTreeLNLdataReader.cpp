@@ -157,8 +157,8 @@ public:
 
         muon_event->LineIn().origin     << m_track.phi_up.position, 0, m_track.theta_up.position,1;  // HARDCODED
         muon_event->LineIn().direction  << -m_track.phi_up.slope, -1, -m_track.theta_up.slope,0;
-        muon_event->LineOut().origin    << m_track.phi_down.position, -183.43, m_track.theta_down.position,1; // HARDCODED
-        muon_event->LineOut().direction << -m_track.phi_down.slope, -1, -m_track.theta_down.slope,0;
+        muon_event->LineOut().origin    << m_track.phi_down.position -1.004 , -183.43, m_track.theta_down.position -0.112 ,1; // HARDCODED
+        muon_event->LineOut().direction << -m_track.phi_down.slope -0.0004, -1, -m_track.theta_down.slope -0.0027, 0;
         muon_event->SetMomentum(m_momentum);
 
         muon_event->ErrorIn().direction_error  = Vector4f::Zero();

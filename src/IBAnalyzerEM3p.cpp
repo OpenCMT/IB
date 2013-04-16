@@ -98,6 +98,7 @@ void IBAnalyzerEM3p::AddMuon(const MuonScatterData &muon)
             elc.pw = evcc.header.InitialSqrP;
             evcc.elements.push_back(elc);
         }
+#       pragma omp critical
         this->Events().push_back(evcc);
     }
 
