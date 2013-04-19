@@ -4,6 +4,7 @@
 #include "TH1F.h"
 #endif
 
+#include <stdio.h>
 #include <vector>
 #include "IBSimpleTwoViewsMinimizationVariablesEvaluator.h"
 
@@ -66,7 +67,10 @@ public:
         m_Data        = this->evaluateVariables();
 
         if (unlikely((fabs(m_Data(0)) > 1)||(fabs(m_Data(2)) > 1))) // << HARDCODED!!!
+        {
+            printf("this shouldn't actually happen!\n");
             m_integrity = false;
+        }
 
         m_ErrorMatrix = this->evaluateErrorMatrix();
 
@@ -152,16 +156,16 @@ public:
         HVector3f disp;
         HVector3f dc  = getDirectorCosines(m_muon.LineIn().direction);
         HVector3f dco = getDirectorCosines(m_muon.LineOut().direction);
-        float mx = (atan2(dc(0),dc(1)));
-        float mz = (atan2(dc(2),dc(1)));
-        float mxo = (atan2(dco(0),dco(1)));
-        float mzo = (atan2(dco(2),dco(1)));
+        float mx = (atan2(dc(0),-dc(1)));
+        float mz = (atan2(dc(2),-dc(1)));
+        float mxo = (atan2(dco(0),-dco(1)));
+        float mzo = (atan2(dco(2),-dco(1)));
         float Lxy = m_muon.LineIn().direction.head(3).norm();
         HPoint3f in, out;
         projectionOnContainer(in, out);
-        HVector3f oi = in-out;
-        float dx = oi(0) - tan(mx)*oi(1);
-        float dz = oi(2) - tan(mz)*oi(1);
+        HVector3f oi = out-in;
+        float dx = oi(0) + tan(mx)*oi(1);
+        float dz = oi(2) + tan(mz)*oi(1);
         float dx_corr = cos(mx)*Lxy*(cos(mxo)/cos(mxo-mx));
         float dz_corr = cos(mz)*Lxy*(cos(mzo)/cos(mzo-mz));
         disp << dx*dx_corr, 0, dz*dz_corr, 0;
@@ -176,7 +180,7 @@ public:
     {
         Matrix4f covariance;
         float dy = m_muon.LineIn().origin(1) - m_muon.LineOut().origin(1);
-        HVector3f dc   = getDirectorCosines(-m_muon.LineIn().direction);
+        HVector3f dc   = getDirectorCosines(m_muon.LineIn().direction);
         float cosphi   = cos(atan2(dc(0),dc(1)));
         float costheta = cos(atan2(dc(2),dc(1)));
         float csx =  dy/cosphi;
@@ -187,10 +191,10 @@ public:
                      m_muon.ErrorIn().direction_error(1);
         s2x *= s2x;
         s2z *= s2z;
-        covariance << 2*s2x,  csx*s2x,    0,  0,
-                      csx*s2x,csx*csx*s2x,0,  0,
-                      0,  0,              2*s2z,  csz*s2z,
-                      0,  0,              csz*s2z,csz*csz*s2z;
+        covariance << 2*s2x,  -csx*s2x,    0,  0,
+                      -csx*s2x,csx*csx*s2x,0,  0,
+                      0,  0,              2*s2z,  -csz*s2z,
+                      0,  0,              -csz*s2z,csz*csz*s2z;
         return covariance;
     }
 

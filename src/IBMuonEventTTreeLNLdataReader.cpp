@@ -162,12 +162,13 @@ public:
         muon_event->SetMomentum(m_momentum);
 
         // HardCoded cuts on potition and delta slope
-        if (fabs(muon_event->LineIn().origin(0))>308. ||
-                fabs(muon_event->LineIn().origin(2))>250. ||
-                fabs(muon_event->LineOut().origin(0))>308. ||
-                fabs(muon_event->LineOut().origin(2))>250. ||
-                fabs ( atan(muon_event->LineOut().direction(0)) - atan(muon_event->LineIn().direction(0)) ) > 0.5 ||
-                fabs ( atan(muon_event->LineOut().direction(2)) - atan(muon_event->LineIn().direction(2)) ) > 0.5) {
+        if (fabs(muon_event->LineIn().origin(0))>308.                                      ||
+            fabs(muon_event->LineIn().origin(2))>250.                                      ||
+            fabs(muon_event->LineOut().origin(0))>308.                                     ||
+            fabs(muon_event->LineOut().origin(2))>250.                                     ||
+            fabs(muon_event->LineOut().direction(0)-muon_event->LineIn().direction(0))>0.5 ||
+            fabs(muon_event->LineOut().direction(2)-muon_event->LineIn().direction(2))>0.5  )
+        {
             m_integrity = false;
         }
 

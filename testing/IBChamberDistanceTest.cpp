@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    IBMuonEventTTreeLNLmcReader *reader = new IBMuonEventTTreeLNLmcReader();
+    IBMuonEventTTreeLNLdataReader *reader = new IBMuonEventTTreeLNLdataReader();
     reader->setTFile(f);
     reader->setError(sigma);
     reader->setMomentum(0.7);
@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
 
     // variables //
     IBMinimizationVariablesEvaluator* minimizator =
-            IBMinimizationVariablesEvaluator::New(IBMinimizationVariablesEvaluator::NormalPlane);
+            IBMinimizationVariablesEvaluator::New(IBMinimizationVariablesEvaluator::SimpleTwoViews);
     minimizator->setRaytracer(tracer);
 
     reader->setAcquisitionTime(5);
