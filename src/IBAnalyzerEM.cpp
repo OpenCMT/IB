@@ -148,8 +148,17 @@ void IBAnalyzerEMPimpl::SijCut(float threshold)
     Vector< Event >::iterator itr = this->m_Events.begin();
     do {
         if(em_test_SijCut(itr.base(), threshold))
+        {
+            // REMOVE SOLUTION //
             this->m_Events.remove_element(*itr);
-        else ++itr;
+
+            // GUESS SOLUTION //
+            //            itr->header.InitialSqrP = m_parameters->nominal_momentum/0.4;
+            //            itr->header.InitialSqrP *= itr->header.InitialSqrP;
+        }
+        //        itr++;    // guess solution
+        else ++itr; // remove solution
+
     } while (itr != this->m_Events.end());
 }
 
@@ -219,7 +228,10 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
     Event evc;
 
     evc.header.InitialSqrP = parameters().nominal_momentum/muon.GetMomentum();
+//    evc.header.InitialSqrP = parameters().nominal_momentum/0.7;
     evc.header.InitialSqrP *= evc.header.InitialSqrP;
+
+
 
     if(likely(m_VarAlgorithm->evaluate(muon))) {
         evc.header.Di = m_VarAlgorithm->getDataVector();

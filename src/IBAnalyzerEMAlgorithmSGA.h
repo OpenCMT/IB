@@ -50,6 +50,11 @@ public:
     void evaluate(Matrix4f &Sigma, Event *evc);
 };
 
+class IBAnalyzerEMAlgorithmSGA_PXT : public IBAnalyzerEMAlgorithmSGA {
+public:
+    void evaluate(Matrix4f &Sigma, Event *evc);
+};
+
 class IBAnalyzerEMAlgorithmSGA_TZ : public IBAnalyzerEMAlgorithmSGA {
 public:
     void evaluate(Matrix4f &Sigma, Event *evc);

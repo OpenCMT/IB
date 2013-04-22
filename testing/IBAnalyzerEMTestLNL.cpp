@@ -187,15 +187,15 @@ int do_iterations(const char *file_in,
     IBAnalyzerEMAlgorithmSGA_PXTZ ml_algorithm;
     aem->SetMLAlgorithm(&ml_algorithm);
 
-//    aem->SijCut(60);
-//    voxels.InitLambda(air);
-//    std::cout << "SGA PXTZ ------------------------ \n";
-//    for (int i=1; i<=it; ++i) {
-//        aem->Run(drop,1);
-//        //trim.Run();
-//        sprintf(file, "%s_%i.vtk",file_out, i*drop);
-//        voxels.ExportToVtk(file,0);
-//    }
+    aem->SijCut(60);
+    voxels.InitLambda(air);
+    std::cout << "SGA PXTZ ------------------------ \n";
+    for (int i=1; i<=it; ++i) {
+        aem->Run(drop,1);
+        //trim.Run();
+        sprintf(file, "%s_%i.vtk",file_out, i*drop);
+        voxels.ExportToVtk(file,0);
+    }
 
     
     delete aem;

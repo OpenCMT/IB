@@ -164,6 +164,38 @@ void IBAnalyzerEMAlgorithmSGA_TZ::evaluate(Matrix4f &Sigma,
 }
 
 
+/************************************************
+ * Sij 2 HIDDEN DATA (S,X) EIGEN IMPLEMENTATION *
+ ************************************************/
+
+void IBAnalyzerEMAlgorithmSGA_PXT::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm::Event *evc)
+{
+    Matrix4f Si = Sigma;
+    Si(3,0) = 0;
+    Si(3,1) = 0;
+    Si(3,2) = 0;
+    Si(3,3) = 1;
+    Si(2,3) = 0;
+    Si(1,3) = 0;
+    Si(0,3) = 0;
+    Matrix4f iS = Si.inverse();
+
+    Matrix4f Wij = Matrix4f::Identity();
+    Vector4f Di = evc->header.Di; Di(3) = 0;
+    Matrix4f Dn = iS * (Di * Di.transpose());
+
+    for (unsigned int j = 0; j < evc->elements.size(); ++j) {
+        Wij.block<2,2>(0,0) = evc->elements[j].Wij;
+        Wij(2,2) = Wij(0,0);
+
+        Matrix4f Bn = iS * Wij;
+        evc->elements[j].Sij =  ((Bn * Dn).trace() - Bn.trace()) *
+                evc->elements[j].lambda * evc->elements[j].lambda *
+                evc->elements[j].pw / 2;
+    }
+
+}
+
 
 
 /******************************************
@@ -318,5 +350,6 @@ void IBAnalyzerEMAlgorithmSGA_M::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm
     evc->header.InitialSqrP += p;
 
 }
+
 
 
