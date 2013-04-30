@@ -149,12 +149,13 @@ public:
             *track_ptr++ = m_buffer.ersx[is];
             *track_ptr =   m_buffer.erss[is];
         }
+
         if (    hit_count.phi_up < m_hitX     ||
                 hit_count.phi_up > 8          ||
                 hit_count.phi_down < m_hitX   ||
-                hit_count.phi_down > 4        ||
+                hit_count.phi_down > 8        ||
                 hit_count.theta_up < m_hitZ   ||
-                hit_count.theta_up > 8        ||
+                hit_count.theta_up > 4        ||
                 hit_count.theta_down < m_hitZ ||
                 hit_count.theta_down > 4       )
         {

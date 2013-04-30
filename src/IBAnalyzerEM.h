@@ -60,6 +60,8 @@ public:
 
     void SijCut(float threshold);
 
+    void Chi2Cut(float threshold);
+
     void SetVoxCollection(IBVoxCollection *voxels);
 
     void AddVoxcollectionShift(Vector3f shift);

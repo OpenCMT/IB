@@ -51,6 +51,8 @@ public:
 
     void SijCut(float threshold);
 
+    void Chi2Cut(float threshold);
+
     // members //
     IBAnalyzerEM::Parameters     *m_parameters;
     IBAnalyzerEMAlgorithm        *m_SijAlgorithm;
@@ -161,6 +163,24 @@ void IBAnalyzerEMPimpl::SijCut(float threshold)
 
     } while (itr != this->m_Events.end());
 }
+
+
+
+void IBAnalyzerEMPimpl::Chi2Cut(float threshold)
+{
+    std::vector< Event >::iterator itr = this->m_Events.begin();
+    do {
+        Matrix4f Sigma;
+        Event &evc = *itr;
+        this->m_SijAlgorithm->ComputeSigma(Sigma,&evc);
+        Matrix4f iS = Sigma.inverse();
+        Matrix4f Dn = iS * (evc.header.Di * evc.header.Di.transpose());
+        if ( Dn.trace() > threshold )
+            this->m_Events.remove_element(*itr);
+        else ++itr;
+    } while (itr != this->m_Events.end());
+}
+
 
 
 
@@ -335,6 +355,13 @@ void IBAnalyzerEM::SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm)
 void IBAnalyzerEM::SijCut(float threshold) {
     d->Evaluate(1);
     d->SijCut(threshold);
+    this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
+}
+
+void IBAnalyzerEM::Chi2Cut(float threshold)
+{
+    d->Evaluate(1);
+    d->Chi2Cut(threshold);
     this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
 }
 
