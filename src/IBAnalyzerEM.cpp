@@ -170,7 +170,7 @@ void IBAnalyzerEMPimpl::Chi2Cut(float threshold)
 {
     std::vector< Event >::iterator itr = this->m_Events.begin();
     do {
-        Matrix4f Sigma;
+        Matrix4f Sigma = Matrix4f::Zero();
         Event &evc = *itr;
         this->m_SijAlgorithm->ComputeSigma(Sigma,&evc);
         Matrix4f iS = Sigma.inverse();
@@ -361,8 +361,8 @@ void IBAnalyzerEM::SijCut(float threshold) {
 void IBAnalyzerEM::Chi2Cut(float threshold)
 {
     d->Evaluate(1);
-    d->Chi2Cut(threshold);
     this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
+    d->Chi2Cut(threshold);
 }
 
 

@@ -32,18 +32,19 @@ using namespace uLib;
 
 void dump_chi2(IBAnalyzerEM *aem, const char *name, int index, float max_bound = 1000){
 
+    std::cout << "chi2 dump " << name << " \n ";
 
     // 2 PX //
     {
         char str[100];
         sprintf(str,"%s_PX_%i",name,index);
-        TH1F  *histo = new TH1F(str,str,1000,-max_bound,max_bound);
+        TH1F  *histo = new TH1F(str,str,1000,0,max_bound);
         IBAnalyzerEMAlgorithmSGA_PX ml_algorithm;
 
         float chi2 = 0;
 
         for (unsigned int i = 0; i< aem->Events().size(); ++i) {
-            Matrix4f Sigma;
+            Matrix4f Sigma = Matrix4f::Zero();
             IBAnalyzerEM::Event &evc = aem->Events().at(i);
             ml_algorithm.ComputeSigma(Sigma,&evc);
 
@@ -54,25 +55,25 @@ void dump_chi2(IBAnalyzerEM *aem, const char *name, int index, float max_bound =
                 iS = S.inverse();
             }
             Vector2f Di(evc.header.Di(0),evc.header.Di(1));
-            Matrix2f Dn = iS * (Di * Di.transpose());
-            chi2 = Dn.trace();
+//            Matrix2f Dn = iS * (Di * Di.transpose());
+            chi2 = Di.transpose() * iS * Di;
             histo->Fill(chi2);
         }
         histo->Write();
-//        histo->Delete();
+        histo->Delete();
     }
 
     // 2 //
     {
         char str[100];
         sprintf(str,"%s_TZ_%i",name,index);
-        TH1F  *histo = new TH1F(str,str,1000,-max_bound,max_bound);
+        TH1F  *histo = new TH1F(str,str,1000,0,max_bound);
         IBAnalyzerEMAlgorithmSGA_TZ ml_algorithm;
 
         float chi2 = 0;
 
         for (unsigned int i = 0; i< aem->Events().size(); ++i) {
-            Matrix4f Sigma;
+            Matrix4f Sigma = Matrix4f::Zero();
             IBAnalyzerEM::Event &evc = aem->Events().at(i);
             ml_algorithm.ComputeSigma(Sigma,&evc);
 
@@ -83,37 +84,37 @@ void dump_chi2(IBAnalyzerEM *aem, const char *name, int index, float max_bound =
                 iS = S.inverse();
             }
             Vector2f Di(evc.header.Di(2),evc.header.Di(3));
-            Matrix2f Dn = iS * (Di * Di.transpose());
-            chi2 = Dn.trace();
+//            Matrix2f Dn = iS * (Di * Di.transpose());
+            chi2 = Di.transpose() * iS * Di;
             histo->Fill(chi2);
         }
 
         histo->Write();
-//        histo->Delete();
+        histo->Delete();
     }
 
     // 4 //
     {
         char str[100];
         sprintf(str,"%s_PXTZ_%i",name,index);
-        TH1F  *histo = new TH1F(str,str,1000,-max_bound,max_bound);
+        TH1F  *histo = new TH1F(str,str,1000,0,max_bound);
         IBAnalyzerEMAlgorithmSGA_PXTZ ml_algorithm;
 
         float chi2 = 0;
 
         for (unsigned int i = 0; i< aem->Events().size(); ++i) {
-            Matrix4f Sigma;
+            Matrix4f Sigma = Matrix4f::Zero();
             IBAnalyzerEM::Event &evc = aem->Events().at(i);
             ml_algorithm.ComputeSigma(Sigma,&evc);
 
             Vector4f Di = evc.header.Di;
             Matrix4f iS = Sigma.inverse();
-            Matrix4f Dn = iS * (Di * Di.transpose());
-            chi2 = Dn.trace();
+            chi2 = Di.transpose() * iS * Di;
+//            chi2 = Dn.trace();
             histo->Fill(chi2);
         }
         histo->Write();
-//        histo->Delete();
+        histo->Delete();
     }
 
 
@@ -268,8 +269,37 @@ int do_iterations(const char *file_in,
     }        
     std::cout << "\n";
 
+    IBAnalyzerEMAlgorithmSGA_PXT ml_algorithm;
+    aem->SetMLAlgorithm(&ml_algorithm);
+
     muons.PrintSelf(std::cout);
     aem->SetMuonCollection(&muons);
+
+//    std::cout << "-- TEST: removing E cross correlation\n";
+//    for(int i=0; i< aem->Size(); ++i)
+//    {
+//        IBAnalyzerEM::Event &evc = aem->Events()[i];
+//        //        evc.header.E.block<2,2>(2,0) = Matrix2f::Zero();
+//        //        evc.header.E.block<2,2>(0,2) = Matrix2f::Zero();
+//        //        evc.header.E(3,0) = 0;
+//        //        evc.header.E(3,1) = 0;
+//        //        evc.header.E(0,3) = 0;
+//        //        evc.header.E(1,3) = 0;
+//        //        std::cout << aem->Events()[i].header.E << "\n\n";
+
+//        Matrix4f Sigma;
+
+//        ml_algorithm.ComputeSigma(Sigma,evc);
+
+//        std::cout << " -------------------------------------------------------- \n"
+//                  << " -- EVENT: << " << i << "\n";
+//        std::cout << " Di: " << evc.header.Di.transpose() << "\n\n"
+//                  << " E: \n" << evc.header.E << "\n\n"
+//                  << " Sigma: \n" << Sigma << "\n\n";
+
+//    }
+
+
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -286,8 +316,6 @@ int do_iterations(const char *file_in,
 
     char file[100];
 
-    IBAnalyzerEMAlgorithmSGA_PXT ml_algorithm;
-    aem->SetMLAlgorithm(&ml_algorithm);
 
 
     // Sij CUT //
@@ -302,28 +330,23 @@ int do_iterations(const char *file_in,
 
 
     voxels.InitLambda(air);
-//    aem->Run(1,1);
-
-    dump_cut_file->cd();
-    dump_chi2(aem,"chi2",1,1000);
-    voxels.InitLambda(air);
     aem->Run(9,1);
 
     dump_cut_file->cd();
-    dump_chi2(aem,"chi2",10,1000);
+    dump_chi2(aem,"chi2_precut",9,5000);
 
+    // Chi2Cut //
+    {
+        int size = aem->Events().size();
+        std::cout << " ////////////////////////////////////////////////////// \n"
+                  << " // Chi2 Cut ////////////////////////////////////////// \n"
+                  << " // total events : " << aem->Events().size() << "\n";
+        aem->Chi2Cut(300);
+        std::cout << " // cutted events: " << size - aem->Events().size() << "\n\n";
+    }
 
-//    // Chi2Cut //
-//    {
-//        int size = aem->Events().size();
-//        std::cout << " ////////////////////////////////////////////////////// \n"
-//                  << " // Chi2 Cut ////////////////////////////////////////// \n"
-//                  << " // total events : " << aem->Events().size() << "\n";
-//        aem->Chi2Cut(300);
-//        std::cout << " // cutted events: " << size - aem->Events().size() << "\n\n";
-//    }
-
-
+    dump_cut_file->cd();
+    dump_chi2(aem,"chi2_postcut",10,5000);
 
     voxels.InitLambda(air);
     std::cout << "SGA PXTZ ------------------------ \n";
@@ -332,10 +355,10 @@ int do_iterations(const char *file_in,
         //trim.Run();
         sprintf(file, "%s_%i.vtk",file_out, i*drop);
         voxels.ExportToVtk(file,0);
+        dump_cut_file->cd();
+        dump_chi2(aem,"chi2",i*drop,5000);
     }
 
-    dump_cut_file->cd();
-    dump_chi2(aem,"chi2",310,1000);
 
     
     dump_cut_file->Close();
