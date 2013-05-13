@@ -137,11 +137,11 @@ int main(int argc, char** argv)
 //        average.SetKernelNumericXZY(kern);
 //        average.Run();
         // grabbing
-//        IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
-//        IBLightCollection imgCont(Vector3i(0,0,0));
-//        imgCont = grabber.GrabRegion<IBLightCollection>(Vector3i(10,10,4),Vector3i(129,61,55));
-        IBVoxImageScanner<IBVoxCollectionCap> scanner;
-        scanner.SetImage(&image);
+        IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
+        IBLightCollection imgCont(Vector3i(0,0,0));
+        imgCont = grabber.GrabRegion<IBLightCollection>(Vector3i(10,10,4),Vector3i(129,61,55));
+        IBVoxImageScanner<IBLightCollection> scanner;
+        scanner.SetImage(&imgCont);
         RangeThresholdScan::ScanData res = scanner.ScanImage<RangeThresholdScan>(opt);
         for(int j=0; j<opt.size(); ++j) {
             perc_b_t[9][j] += res.at(j).Percent;

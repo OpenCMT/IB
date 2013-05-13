@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     voxels.InitLambda(zero);
 
     // poca //
-    IBPocaEvaluator* processor = IBPocaEvaluator::New(IBPocaEvaluator::TiltedAxis);
+    IBPocaEvaluator* processor = IBPocaEvaluator::New(IBPocaEvaluator::LineDistance);
 
     // tracer //
     IBVoxRaytracer* tracer = new IBVoxRaytracer(voxels);
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
 
     aem->SijCut(60);
 
-    aem->Run(200,1);
+    aem->Run(500,1);
 
     voxels.ExportToVtk(outfile,0);
 

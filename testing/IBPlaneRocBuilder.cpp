@@ -152,8 +152,8 @@ int main(int argc, char** argv)
 	    RangeThresholdScan::ScanData res = scanner.ScanImage<RangeThresholdScan>(opt);
 	    for(int j=0; j<opt.size(); ++j) {
 	        perc_b_t[9+i][j] += res.at(j).Percent;
-		inte_b_t[9+i][j] += res.at(j).Intensity;
-		iden_b_t[9+i][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
+			inte_b_t[9+i][j] += res.at(j).Intensity;
+			iden_b_t[9+i][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
 	    }
 	}
         std::cout << "\rProcessing " << (float)100*ii/atoi(argv[3]) << "\% complete." << std::flush;

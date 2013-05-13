@@ -219,6 +219,7 @@ int do_iterations(const char *file_in,
 }
 
 
+    voxels.InitLambda(zero);
 
 
 

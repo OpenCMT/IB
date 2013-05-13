@@ -13,12 +13,16 @@ int main(int argc, char** argv)
 
     TTree t("ROC", argv[3]);
     RangeThresholdScan::ScanOption opt;
-    for(int i=0; i<200; ++i) {
+    float start = atof(argv[5]);
+    float stop = atof(argv[6]);
+    float step = atof(argv[7]);
+    int howmany = floor((stop-start)/step);
+    for(int i=0; i<howmany; ++i) {
         SimpleThresholdScan::ScanOption o;
-        o.Threshold = (0.1e-6)*i;
+        o.Threshold = (1E-6)*(start+i*step);
         opt.push_back(o);
     }
-
+	std::cout << "Scanning thresholds from " << (1E-6)*(start) << " to "<< (1E-6)*(start+howmany*step) << std::endl;
     float perc_b_t[2][opt.size()];
     float inte_b_t[2][opt.size()];
     float iden_b_t[2][opt.size()];
@@ -52,16 +56,16 @@ int main(int argc, char** argv)
     std::cout << "Scanning Leaded Samples...\n" << std::flush;
     // lead
     int fbulk = 0;
-    for(int y=0; y<3; ++y) {
+    for(int y=0; y<5; ++y) {
         char fname[200];
-        sprintf(fname, "%s%i_200.vtk", argv[1], y);
+        sprintf(fname, "%s%i_%i.vtk", argv[1], y, atoi(argv[4]));
         image.ImportFromVtk(fname);
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
         IBFilterGaussShape shape(0.2);
         trim.SetKernelSpherical(shape);
         trim.SetABTrim(0,2);
         trim.SetImage(&image);
-        //trim.Run();
+        trim.Run();
         Vector3i zero(0,0,0);
         IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
 
@@ -70,7 +74,7 @@ int main(int argc, char** argv)
                 fbulk++;
                 IBLightCollection img(zero);
                 img = grabber.GrabRegion<IBLightCollection>(HPoint3f(-250+x*100,
-                                                                     -100+y*100,
+                                                                     -100+y*50,
                                                                      -100+z*100),
                                                             HVector3f(40,40,40));
                 IBVoxImageScanner<IBLightCollection> scanner;
@@ -83,17 +87,17 @@ int main(int argc, char** argv)
                 }
             }
         }
-        std::cout << "\rProcessing " << (float)100*(y+1)/3 << "\% complete." << std::flush;
+        std::cout << "\rProcessing " << (float)100*(y+1)/5 << "\% complete." << std::flush;
     }
-    std::cout << "\n...done!\n" << std::flush;
+    std::cout << "\n...done!\nExamined " << fbulk << " samples\n" << std::flush;
 
     // no lead
     std::cout << "Scanning Unleaded Samples...\n" << std::flush;
     int fBulk = 0;
-    for(int ii=0; ii<54; ++ii) {
+    for(int ii=0; ii<100; ++ii) {
         fBulk++;
         char fname[200];
-        sprintf(fname, "%s%i_200.vtk",argv[2], ii);
+        sprintf(fname, "%s%i_%i.vtk",argv[2], ii, atoi(argv[4]));
         image.ImportFromVtk(fname);
         //filtering
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
@@ -101,7 +105,7 @@ int main(int argc, char** argv)
         trim.SetKernelSpherical(shape);
         trim.SetABTrim(0,2);
         trim.SetImage(&image);
-        //trim.Run();
+        trim.Run();
         IBVoxImageScanner<IBVoxCollectionCap> scanner;
         scanner.SetImage(&image);
         RangeThresholdScan::ScanData res = scanner.ScanImage<RangeThresholdScan>(opt);
@@ -110,10 +114,10 @@ int main(int argc, char** argv)
             inte_b_t[1][j] += res.at(j).Intensity;
             iden_b_t[1][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
         }
-        std::cout << "\rProcessing " << (float)100*(ii+1)/54 << "\% complete." << std::flush;
+        std::cout << "\rProcessing " << (float)100*(ii+1)/100 << "\% complete." << std::flush;
     }
 
-    std::cout << "\n...done!\n" << std::flush;
+    std::cout << "\n...done!\nExamined " << fBulk << " samples\n" << std::flush;
 
     std::cout << "Finalizing Data and Saving..." << std::flush;
 
