@@ -333,8 +333,8 @@ public:
 
     void evaluateAlpha(Scalarf& phi, Scalarf& theta) {
         // if configuration X, Z or BOTH choose combination!
-        m_alpha = (getAlphaZ(phi,theta)+getAlphaX(phi,theta))/2.;
-        //m_alpha = getAlphaX(phi,theta);
+        //        m_alpha = (getAlphaZ(phi,theta)+getAlphaX(phi,theta))/2.;
+        m_alpha = getAlphaX(phi,theta);
         //m_alpha = 0;
     }
 

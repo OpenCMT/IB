@@ -33,7 +33,7 @@ private:
         float sum = 0;
         for (int i=0; i<divs; ++i) {
             float x = x0 + (x1-x0)/divs * (i+0.5);
-            sum += 1/(sqrt(2*M_PI) * sigma2) * exp(-0.5*x*x/sigma2);
+            sum += 1/(sqrt(2*M_PI * sigma2)) * exp(-0.5*x*x/sigma2);
         }
         return sum;
     }
@@ -50,6 +50,8 @@ typedef uLib::VoxFilterAlgorithmLinear<IBVoxel> IBVoxFilter_Linear;
 typedef uLib::VoxFilterAlgorithmMedian<IBVoxel> IBVoxFilter_Median;
 
 typedef uLib::VoxFilterAlgorithmAbtrim<IBVoxel> IBVoxFilter_Abtrim;
+
+typedef uLib::VoxFilterAlgorithmBilateral<IBVoxel> IBVoxFilter_Bilateral;
 
 typedef uLib::VoxFilterAlgorithmSPR<IBVoxel> IBVoxFilter_SPR;
 

@@ -225,7 +225,8 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels) :
     d(new IBAnalyzerEMPimpl(&parameters())),
     m_PocaAlgorithm(NULL),
     m_VarAlgorithm(NULL),
-    m_RayAlgorithm(NULL)
+    m_RayAlgorithm(NULL),
+    m_UpdateAlgorithm(NULL)
 {
     BaseClass::SetVoxCollection(&voxels);
     init_parameters();
@@ -342,7 +343,11 @@ void IBAnalyzerEM::Run(unsigned int iterations, float muons_ratio)
         fprintf(stderr,"\r[%d muons] EM -> performing iteration %i",
                 (int) d->m_Events.size(), it);
         d->Evaluate(muons_ratio);          // run single iteration of proback //
-        this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(10);  // update lambda         // //HARDCODE
+        if(!m_UpdateAlgorithm)
+            this->GetVoxCollection()->
+                UpdateDensity<UpdateDensitySijCapAlgorithm>(10);                // HARDCODE THRESHOLD
+        else
+            this->m_UpdateAlgorithm->operator()(this->GetVoxCollection(),10);   // HARDCODE THRESHOLD
     }
     printf("\nEM -> done\n");
 }

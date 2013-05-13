@@ -18,24 +18,25 @@
 class IBVoxCollection;
 
 namespace IBInterface {
-struct IBVoxCollectionUpdateAlgorithm {
-    template <class Self> void check_structural() {
-        uLibCheckFunction(Self,operator(),void,IBVoxCollection *, unsigned int);
-    }
-};
 
 struct IBVoxCollectionStaticUpdateAlgorithm {
     template <class Self> void check_structural() {
         //uLibCheckStaticFunction(Self, UpdateDensity , void ,IBVoxCollection *, unsigned int);
     }
 };
+
 }
 
 namespace IBAbstract {
-class IBVoxCollectionMAPAlgorithm {
-public:
+
+struct IBVoxCollectionUpdateAlgorithm {
+    virtual void operator()(IBVoxCollection*,unsigned int) = 0;
+};
+
+struct IBVoxCollectionMAPAlgorithm {
     virtual void UpdateDensity(IBVoxCollection *voxels, unsigned int threshold) = 0;
 };
+
 }
 
 
@@ -94,9 +95,6 @@ inline void IBVoxCollection::InitCount(unsigned int count)
 template < class UpdateAlgT >
 void IBVoxCollection::UpdateDensity(UpdateAlgT &algorithm,
                                     unsigned int threshold) {
-
-    // check structural for UpdateAlgorithm //
-    uLib::Interface::IsA<UpdateAlgT, IBInterface::IBVoxCollectionUpdateAlgorithm>();
 
     // Analyzer Update //
     algorithm(this, threshold);

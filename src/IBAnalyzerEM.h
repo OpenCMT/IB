@@ -2,6 +2,7 @@
 #define IBANALYZEREM_H
 
 #include "IBAnalyzer.h"
+#include "IBVoxCollection.h"
 #include "IBVoxRaytracer.h"
 #include "IBVoxel.h"
 
@@ -44,7 +45,7 @@ public:
     IBAnalyzerEM(IBVoxCollection &voxels);
     ~IBAnalyzerEM();
 
-    virtual bool AddMuon(const MuonScatterData &muon);
+    bool AddMuon(const MuonScatterData &muon);
 
     void SetMuonCollection(IBMuonCollection *muons);
 
@@ -57,6 +58,7 @@ public:
     uLibGetSetMacro(PocaAlgorithm,IBPocaEvaluator *)
     uLibGetSetMacro(VarAlgorithm,IBMinimizationVariablesEvaluator *)
     uLibGetSetMacro(RayAlgorithm,IBVoxRaytracer *)
+    uLibGetSetMacro(UpdateAlgorithm,IBAbstract::IBVoxCollectionUpdateAlgorithm *)
 
     void SijCut(float threshold);
 
@@ -71,9 +73,10 @@ public:
     Vector<Event> &Events();
 
 private:    
-    IBPocaEvaluator                  *m_PocaAlgorithm;
-    IBMinimizationVariablesEvaluator *m_VarAlgorithm;
-    IBVoxRaytracer                   *m_RayAlgorithm;
+    IBPocaEvaluator                            *m_PocaAlgorithm;
+    IBMinimizationVariablesEvaluator           *m_VarAlgorithm;
+    IBVoxRaytracer                             *m_RayAlgorithm;
+    IBAbstract::IBVoxCollectionUpdateAlgorithm *m_UpdateAlgorithm;
     friend class IBAnalyzerEMPimpl;
     class IBAnalyzerEMPimpl *d;
 };
