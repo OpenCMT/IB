@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     int s = parameters.size;
     IBVoxFilter_Abtrim trim(Vector3i(s,s,s));
     IBFilterGaussShape shape(0.2);
-    trim.SetKernelSpherical(shape);
+    trim.SetKernelWeightFunction(shape);
     trim.SetABTrim(parameters.atrim, parameters.btrim);
     trim.SetImage(&image);
     trim.Run();

@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     int s = parameters.size;
     IBVoxFilter_Median trim(Vector3i(s,s,s));
     IBFilterGaussShape shape(0.2);
-    trim.SetKernelSpherical(shape);
+    trim.SetKernelWeightFunction(shape);
     trim.SetImage(&image);
     trim.Run();
 

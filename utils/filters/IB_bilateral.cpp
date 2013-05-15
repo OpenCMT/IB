@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     int s = parameters.size;
     IBVoxFilter_Bilateral filter(Vector3i(s,s,s));
     IBFilterGaussShape shape(sqrt(parameters.ssigma));
-    filter.SetKernelSpherical(shape);
+    filter.SetKernelWeightFunction(shape);
     filter.SetIntensitySigma(parameters.isigma);
     filter.SetImage(&image);
     filter.Run();
