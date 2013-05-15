@@ -7,7 +7,7 @@ STEP_THRES=0.05
 RUN_NUM=1388
 IT=300
 
-declare -a RECIPE=("R5" "R4" "R4_NoSijCut")
+declare -a RECIPE=("R5") #"R4" "R4_NoSijCut")
 declare -a MIN=(2 5)
 declare -a SS_CNT=(100 100)
 declare -a NS_CNT=(100 75)
