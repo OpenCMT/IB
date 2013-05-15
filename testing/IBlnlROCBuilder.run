@@ -1,0 +1,27 @@
+
+#!/bin/bash
+
+START_THRES=0
+STOP_THRES=100
+STEP_THRES=0.05
+RUN_NUM=1388
+IT=300
+
+declare -a RECIPE=("R5" "R4" "R4_NoSijCut")
+declare -a MIN=(2 5)
+declare -a SS_CNT=(100 100)
+declare -a NS_CNT=(100 75)
+declare -a VOX=(10 5)
+declare -a ROC=("ROC_Trim" "ROC_Average" "ROC_Gauss" "ROC_Median" "ROC_Trim")
+
+for ((id_r=0; id_r<${#RECIPE[@]}; id_r++)) do
+	for ((id_v=0; id_v<${#VOX[@]}; id_v++)) do
+		for ((id_m=0; id_m<${#MIN[@]}; id_m++)) do
+				$(pwd)/../IBlnlROCBuilder \
+				/var/local/data/vtk/ROC/ROC_LNL_${RUN_NUM}/Source_12l/vtk_${RECIPE[id_r]}_${VOX[id_v]}cm/min_${MIN[id_m]}/image_ \
+				/var/local/data/vtk/ROC/ROC_LNL_${RUN_NUM}/NOSource/vtk_${RECIPE[id_v]}_${VOX[id_v]}cm/min_${MIN[id_m]}/image_ \
+				ROC_%s_lnl${RUN_NUM}_PXT_P1_${RECIPE[id_r]}_vox${VOX[id_v]}_${MIN[id_m]}min_${IT}it.csv \
+				${IT} ${START_THRES} ${STOP_THRES} ${STEP_THRES} ${SS_CNT[id_m]} ${NS_CNT[id_m]}
+		done;
+	done;
+done;
