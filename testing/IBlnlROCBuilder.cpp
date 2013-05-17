@@ -8,6 +8,10 @@
 #include "IBVoxImageScanner.h"
 #include <IBVoxFilters.h>
 
+#include "testing-prototype.h"
+
+#define CSV_SEPARATOR ";"
+
 
 namespace Recipes {
 
@@ -118,6 +122,39 @@ struct Trim3 {
     }
 };
 
+struct Trim3s5 {
+    static const char *name() { return "Trim3s5"; }
+    static bool Run(IBVoxCollection *image) {
+        // RECIPE // -------------------------------------------------------- //
+        IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
+        IBFilterGaussShape shape(0.5);
+        trim.SetKernelWeightFunction(shape);
+        trim.SetABTrim(0,1);
+        trim.SetImage(image);
+        trim.Run();
+        // ------------------------------------------------------------------ //
+        return true;
+    }
+};
+
+struct Trim3u {
+    static const char *name() { return "Trim3u"; }
+    static bool Run(IBVoxCollection *image) {
+        // RECIPE // -------------------------------------------------------- //
+        IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
+        Vector <float> values;
+        for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
+            values.push_back(1.);
+        }
+        trim.SetKernelNumericXZY(values);
+        trim.SetABTrim(0,1);
+        trim.SetImage(image);
+        trim.Run();
+        // ------------------------------------------------------------------ //
+        return true;
+    }
+};
+
 struct Trim5 {
     static const char *name() { return "Trim5"; }
     static bool Run(IBVoxCollection *image) {
@@ -187,7 +224,8 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
         t.Branch(bnameIden[i], &iden[i], "iden/F");
     }
     
-    IBVoxCollectionCap image(Vector3i(0,0,0));
+    IBVoxCollection image(Vector3i::Zero());
+    IBVoxCollection image_mean[2] = { IBVoxCollection(Vector3i::Zero()), IBVoxCollection(Vector3i::Zero()) };
 
     std::cout << "done!\n" << std::flush;
     std::cout << "Scanning Leaded Samples...\n" << std::flush;
@@ -197,7 +235,6 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
     ///  L E A D     D A T A S E T   ///
     ////////////////////////////////////
     int fbulk = 0;
-    Vector3i zero(0,0,0);
     float iron_average_accumulator_1 = 0.;
 
     for(int y=0; y<atoi(argv[8]); ++y) {
@@ -209,16 +246,16 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
         if(!read_status) {
             std::cerr << "ERROR file not found !!";
             exit(1);
-        }
+        }        
 
         // FILTER RECIPE //
         RecipeT::Run(&image);
 
         // GRAB IMAGE //
         IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
-        IBLightCollection img(zero);
-        IBLightCollection ref_1(zero);
-        IBLightCollection ref_2(zero);
+        IBLightCollection img(Vector3i::Zero());
+        IBLightCollection ref_1(Vector3i::Zero());
+        IBLightCollection ref_2(Vector3i::Zero());
 
         img = grabber.GrabRegion<IBLightCollection>(HPoint3f(-5,-95,-5),//65-95
                                                     HVector3f(55,70,50));//40-70
@@ -251,10 +288,18 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
 	        inte_b_t[0][j] += res.at(j).Intensity;
 	        iden_b_t[0][j] += (res.at(j).Percent>0.f) ? 1.0 : 0.0;
         }
+
+        // ACCUMULATE IMAGE MEAN //
+        if(unlikely(y==0))
+            image_mean[0] = image;
+        else
+            image_mean[0] += image;
+
         std::cout << "\rProcessing " << (int)100*(y)/atoi(argv[8]) << "\% complete." << std::flush;
     }
     iron_average_accumulator_1 /= fbulk;
-    
+    image_mean[0] /= fbulk;
+
 
     std::cout << "\n...done!\nExamined " << fbulk << " samples\n" << std::flush;
     
@@ -280,9 +325,9 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
 
         // GRAB IMAGE //
         IBSubImageGrabber<IBVoxCollectionCap> grabber(image);
-        IBLightCollection img(zero);
-        IBLightCollection ref_1(zero);
-        IBLightCollection ref_2(zero);
+        IBLightCollection img(Vector3i::Zero());
+        IBLightCollection ref_1(Vector3i::Zero());
+        IBLightCollection ref_2(Vector3i::Zero());
         img = grabber.GrabRegion<IBLightCollection>(HPoint3f(-5,-95,-5),
                                                     HVector3f(55,70,50));
         ref_1 = grabber.GrabRegion<IBLightCollection>(HPoint3f(-96,-162,-69),
@@ -314,9 +359,17 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
         }
         std::cout << "\rProcessing " << (int)100*(ii)/atoi(argv[9])
                   << "\% complete." << std::flush;
+
+        // ACCUMULATE IMAGE MEAN //
+        if(unlikely(ii==0))
+            image_mean[1] = image;
+        else
+            image_mean[1] += image;
     }
     iron_average_accumulator_2 /= fBulk;
-    
+    image_mean[1] /= fBulk;
+
+
     std::cout << "\n...done!\nExamined " << fBulk << " samples\n\n" << std::flush;
     float norm = 14.2/((iron_average_accumulator_1 + iron_average_accumulator_2) / 2);
     std::cout << "Threshold Normalization Factor: " << norm << "\n\n" << std::flush;
@@ -334,8 +387,11 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
 
     //TFile f(argv[3],"RECREATE");
 
+    //    image_mean[0].ExportToVtkXml( std::string(FileNameRemoveExtension(fname)+"SS.vti").c_str() );
+    //    image_mean[1].ExportToVtkXml( std::string(FileNameRemoveExtension(fname)+"NS.vti").c_str() );
+
     // csv header //
-    fout << fname << "," << "Owa,Awo\n";
+    fout << fname << CSV_SEPARATOR << "Owa" << CSV_SEPARATOR << "Awo\n";
     for(int j=0; j<opt.size(); ++j) {
         perc[0] = perc_b_t[0][j] / fbulk;
         inte[0] = inte_b_t[0][j] / fbulk;
@@ -345,7 +401,7 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
         iden[1] = 100*(iden_b_t[1][j] / fBulk);
         thres = norm * opt.at(j).Threshold;
         //        t.Fill();
-		fout << 1E6*thres << "," << 100-iden[0] << "," << iden[1] << "\n"; 
+        fout << 1E6*thres << CSV_SEPARATOR << 100-iden[0] << CSV_SEPARATOR << iden[1] << "\n";
     }
 	fout.close();
     //    t.Write();
@@ -362,12 +418,14 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
 int main(int argc, char **argv)
 {
 
-    process_ROC<Recipes::NoFilter>(argc,argv);
-    process_ROC<Recipes::Gauss3>(argc,argv);
-    process_ROC<Recipes::Gauss5>(argc,argv);
-    process_ROC<Recipes::Avg>(argc,argv);
-    process_ROC<Recipes::Median>(argc,argv);
-    process_ROC<Recipes::Trim3>(argc,argv);
-    process_ROC<Recipes::Trim5>(argc,argv);
+//    process_ROC<Recipes::NoFilter>(argc,argv);
+//    process_ROC<Recipes::Gauss3>(argc,argv);
+//    process_ROC<Recipes::Gauss5>(argc,argv);
+//    process_ROC<Recipes::Avg>(argc,argv);
+//    process_ROC<Recipes::Median>(argc,argv);
+//    process_ROC<Recipes::Trim3s5>(argc,argv);
+    process_ROC<Recipes::Trim3u>(argc,argv);
+//    process_ROC<Recipes::Trim3>(argc,argv);
+//    process_ROC<Recipes::Trim5>(argc,argv);
     return 0;
 }

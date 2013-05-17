@@ -62,6 +62,8 @@ public:
 
     void SijCut(float threshold);
 
+    void SijGuess(Vector<Vector2f> tpv);
+
     void Chi2Cut(float threshold);
 
     void SetVoxCollection(IBVoxCollection *voxels);

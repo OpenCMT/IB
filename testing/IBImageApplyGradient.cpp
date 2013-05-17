@@ -6,7 +6,7 @@
 
 using namespace uLib;
 
-std::string GetFileName(const std::string& FileName)
+std::string FileNameRemoveExtension(const std::string& FileName)
 {
     std::string file;
 

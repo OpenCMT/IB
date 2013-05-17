@@ -18,7 +18,7 @@ std::string GetFileExtension(const std::string& FileName)
     return "";
 }
 
-std::string GetFileName(const std::string& FileName)
+std::string FileNameRemoveExtension(const std::string& FileName)
 {
     if(FileName.find_last_of(".") != std::string::npos)
         return FileName.substr(0,FileName.find_last_of("."));
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     image *= parameters.scale;
 
     sprintf(filename,"%s_bilateral%d_s%.2f_i%.2f_scale%.2f.vtk",
-            GetFileName(parameters.file).c_str(),
+            FileNameRemoveExtension(parameters.file).c_str(),
             parameters.size, parameters.ssigma, parameters.isigma,
             parameters.scale);
     image.ExportToVtk(filename,0);

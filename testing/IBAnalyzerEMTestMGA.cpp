@@ -34,7 +34,7 @@ std::string GetFileExtension(const std::string& FileName)
     return "";
 }
 
-std::string GetFileName(const std::string& FileName)
+std::string FileNameRemoveExtension(const std::string& FileName)
 {
     std::string file;
 
@@ -130,7 +130,7 @@ int run_set(float ps, IBAnalyzerEMAlgorithm *ml_algorithm, const char *filename)
         std::cout << "*** PROCESSING: " << filename << " *****************\n";
         for (int i=1; i<=it; ++i) {
             aem->Run(drop,1);
-            sprintf(file, "%s_%i.vtk",GetFileName(std::string(filename)).c_str(), i*drop);
+            sprintf(file, "%s_%i.vtk",FileNameRemoveExtension(std::string(filename)).c_str(), i*drop);
             voxels.ExportToVtk(file,0);
         }
     }

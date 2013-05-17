@@ -51,6 +51,8 @@ public:
 
     void SijCut(float threshold);
 
+    void SijGuess(float threshold, float p);
+
     void Chi2Cut(float threshold);
 
     // members //
@@ -133,7 +135,7 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
 ////// CUTS ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// true if cut proposed //
+// SijCut RECIPE1:  (true if Sij cut proposed) //
 static int em_test_SijCut(Event *evc, float cut_level)
 {
     int n_cuts = 0;
@@ -151,19 +153,25 @@ void IBAnalyzerEMPimpl::SijCut(float threshold)
     do {
         if(em_test_SijCut(itr.base(), threshold))
         {
-            // REMOVE SOLUTION //
             this->m_Events.remove_element(*itr);
-
-            // GUESS SOLUTION //
-            //            itr->header.InitialSqrP = m_parameters->nominal_momentum/0.4;
-            //            itr->header.InitialSqrP *= itr->header.InitialSqrP;
         }
-        //        itr++;    // guess solution
         else ++itr; // remove solution
 
     } while (itr != this->m_Events.end());
 }
 
+void IBAnalyzerEMPimpl::SijGuess(float threshold, float p)
+{
+    Vector< Event >::iterator itr = this->m_Events.begin();
+    do {
+        if(em_test_SijCut(itr.base(), threshold))
+        {
+            itr->header.InitialSqrP = m_parameters->nominal_momentum / p;
+            itr->header.InitialSqrP *= itr->header.InitialSqrP;
+        }
+        itr++;    // guess solution
+    } while (itr != this->m_Events.end());
+}
 
 
 void IBAnalyzerEMPimpl::Chi2Cut(float threshold)
@@ -360,6 +368,15 @@ void IBAnalyzerEM::SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm)
 void IBAnalyzerEM::SijCut(float threshold) {
     d->Evaluate(1);
     d->SijCut(threshold);
+    this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
+}
+
+void IBAnalyzerEM::SijGuess(Vector<Vector2f> tpv)
+{
+    d->Evaluate(1);
+    // ATTENZIONE!! il vettore deve essere ordinato per threshold crescenti   //
+    for (int i=0; i<tpv.size(); ++i)
+        d->SijGuess( tpv[i](0), tpv[i](1) );
     this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
 }
 
