@@ -20,6 +20,11 @@ using namespace uLib;
 
 // --- CTR ------------------------------------------------------------------ //
 
+IBVoxCollection::IBVoxCollection() :
+    BaseClass(),
+    m_MAPAlgorithm(NULL)
+{}
+
 IBVoxCollection::IBVoxCollection(const Vector3i size) :
     BaseClass(size),
     m_MAPAlgorithm(NULL)

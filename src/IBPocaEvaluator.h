@@ -14,6 +14,8 @@ class IBLineDistancePocaEvaluator;
 class IBPocaEvaluator
 {
 public:
+    virtual ~IBPocaEvaluator() {}
+
     enum IBPocaEvaluationAlgorithms {
         TiltedAxis,
         LineDistance
@@ -26,7 +28,6 @@ public:
 
 protected:
     IBPocaEvaluator() {}
-    virtual ~IBPocaEvaluator() {}
 };
 
 #endif // IBPOCAEVALUATOR_H
