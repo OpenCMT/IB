@@ -75,15 +75,14 @@ int do_iterations(const char *file_in,
         exit(1);
     }
     
-    TTree* t = (TTree*)f->Get("n");
-    IBMuonEventTTreeR3DmcReader *reader = new IBMuonEventTTreeR3DmcReader();
-    reader->setTTree(t);
+    IBMuonEventTTreeReader *reader = IBMuonEventTTreeReader::New(f);
     reader->setError(sigma);
 //    reader->setMomentum(0.7);
     reader->readPguess(true);
     reader->selectionCode(IBMuonEventTTreeR3DmcReader::All);
     
-    
+    std::cout << "It Works!\n";
+    exit(0);
     
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
@@ -219,7 +218,7 @@ int do_iterations(const char *file_in,
 }
 
 
-    voxels.InitLambda(zero);
+    //voxels.InitLambda(zero);
 
 
 

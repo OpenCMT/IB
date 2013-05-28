@@ -17,7 +17,7 @@ public:
     };
 
     static IBMuonEventTTreeReader* New(enum IBMuonEventTTreeReaderSources S);
-
+    static IBMuonEventTTreeReader* New (class TFile* f);
     virtual void setTTree(class TTree* tree)        = 0;
     virtual void setTFile(class TFile* file)        = 0;
     virtual void setHitCuts(int nx_cut, int nz_cut) = 0;
@@ -33,9 +33,9 @@ public:
 
     virtual bool readNext(uLib::MuonScatter* event) = 0;
 
+    virtual ~IBMuonEventTTreeReader() {}
 protected:
     IBMuonEventTTreeReader() {}
-    virtual ~IBMuonEventTTreeReader() {}
 
 };
 
