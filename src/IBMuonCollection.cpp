@@ -8,19 +8,25 @@ class IBMuonCollectionPimpl {
 
     friend class IBMuonCollection;
     struct _Cmp {
-        bool operator()(const MuonScatterData &data, const float value)
+        bool operator()(MuonScatter &data, const float value)
         {
             return MuonScatterAngle(data) <= value;
         }
     };
     struct _PCmp {
-        bool operator()(const MuonScatterData &data, const float value)
+        bool operator()(const MuonScatter &data, const float value)
         {
             return data.GetMomentumPrime() <= value;
         }
     };
+    struct _PPCmp {
+        bool operator()(const MuonScatter &data, const float value)
+        {
+            return data.GetMomentum() <= value;
+        }
+    };
 
-    static float MuonScatterAngle(const MuonScatterData &mu) {
+    static float MuonScatterAngle(MuonScatter &mu) {
         Vector3f in = mu.LineIn().direction.head(3);
         Vector3f out = mu.LineOut().direction.head(3);
         float a = in.transpose() * out;
@@ -37,7 +43,7 @@ public:
     // members //
     bool m_HiPass;
     unsigned int m_SliceIndex;
-    Vector<MuonScatterData> m_Data;
+    Vector<MuonScatter> m_Data;
 };
 
 
@@ -57,18 +63,18 @@ void IBMuonCollection::AddMuon(MuonScatter &mu)
     // FINIRE o PENSARE perche non si puo' fare add muon dopo set Hi/LowPass //
 }
 
-Vector<MuonScatterData> &IBMuonCollection::Data()
+Vector<MuonScatter> &IBMuonCollection::Data()
 {
     return d->m_Data;
 }
 
 
-const MuonScatterData &IBMuonCollection::At(int i) const
+const MuonScatter &IBMuonCollection::At(int i) const
 {
     return d->m_Data.at(d->m_SliceIndex * d->m_HiPass + i);
 }
 
-MuonScatterData &IBMuonCollection::operator [](int i)
+MuonScatter &IBMuonCollection::operator [](int i)
 {    
     return d->m_Data[d->m_SliceIndex * d->m_HiPass + i];
 }
@@ -96,7 +102,7 @@ void IBMuonCollection::SetLowPassAngle(float angle)
     d->m_HiPass = 0;
 }
 
-void IBMuonCollection::SetHiPassMomentumPrime(float momenutm)
+void IBMuonCollection::SetHiPassMomentum(float momenutm)
 {
     d->m_SliceIndex =
     VectorSplice(d->m_Data.begin(),d->m_Data.end(),momenutm,
@@ -104,11 +110,27 @@ void IBMuonCollection::SetHiPassMomentumPrime(float momenutm)
     d->m_HiPass = 1;
 }
 
-void IBMuonCollection::SetLowPassMomentumPrime(float momentum)
+void IBMuonCollection::SetLowPassMomentum(float momentum)
 {
     d->m_SliceIndex =
     VectorSplice(d->m_Data.begin(),d->m_Data.end(),momentum,
                  IBMuonCollectionPimpl::_PCmp());
+    d->m_HiPass = 0;
+}
+
+void IBMuonCollection::SetHiPassMomentumPrime(float momenutm)
+{
+    d->m_SliceIndex =
+    VectorSplice(d->m_Data.begin(),d->m_Data.end(),momenutm,
+                 IBMuonCollectionPimpl::_PPCmp());
+    d->m_HiPass = 1;
+}
+
+void IBMuonCollection::SetLowPassMomentumPrime(float momentum)
+{
+    d->m_SliceIndex =
+    VectorSplice(d->m_Data.begin(),d->m_Data.end(),momentum,
+                 IBMuonCollectionPimpl::_PPCmp());
     d->m_HiPass = 0;
 }
 

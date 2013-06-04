@@ -57,16 +57,18 @@ int main (int argc,char **argv)
     struct {
         char *file_in1;
         char *file_out;
-        float bulk;
+        float match_prc;
+        float bulk;        
     } arg;
 
-    if(argc==4) {
+    if(argc==5) {
         arg.file_in1 = argv[1];
         arg.file_out = argv[2];
-        arg.bulk = atof(argv[3]);
+        arg.match_prc = atof(argv[3]);
+        arg.bulk = atof(argv[4]);
     }
     else {
-        std::cerr << "requires 3 argumets\n";
+        std::cerr << "requires 4 argumets: file in , file out, match pt, target th \n";
         exit(1);
     }
 
@@ -80,17 +82,21 @@ int main (int argc,char **argv)
 
     // first point 50%
     ROC::Iterator itr = roc1.begin();
-    while (itr != roc1.end() && itr->Awo() > 50 ) itr++;
+    while (itr != roc1.end() && itr->Awo() > arg.match_prc ) itr++;
     float begin = itr->X();
+    std::cout << "\nbegin: " << begin << "\n";
 
     // second point 50%
-    itr = roc1.begin();
-    while (itr != roc1.end() && itr->Owa() < 50 ) itr++;
+    itr = roc1.end()-1;
+    while (itr != roc1.begin() && itr->Owa() > arg.match_prc ) itr--;
     float end = itr->X();
+    std::cout << "end: " << end << "\n";
 
 
-    float scale_factor = arg.bulk / (begin + end) * 2;
+    float scale_factor = arg.bulk / ((begin + end) / 2);
+    std::cout << "scale factor: " << scale_factor << "\n";
     scale_roc( roc1, scale_factor );
+
 
 
     std::ofstream fout;

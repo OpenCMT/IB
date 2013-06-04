@@ -20,16 +20,19 @@ public:
 
     void AddMuon(MuonScatter &mu);
 
-    Vector<MuonScatterData> &Data();
+    Vector<MuonScatter> &Data();
 
-    const MuonScatterData &At(int i) const;
+    const MuonScatter &At(int i) const;
 
-    MuonScatterData &operator[](int i);
+    MuonScatter &operator[](int i);
 
     size_t size() const;
 
     void SetHiPassAngle(float angle);
     void SetLowPassAngle(float angle);
+
+    void SetHiPassMomentum(float momenutm);
+    void SetLowPassMomentum(float momentum);
 
     void SetHiPassMomentumPrime(float momenutm);
     void SetLowPassMomentumPrime(float momentum);

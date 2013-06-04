@@ -370,16 +370,19 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
 
     // csv header //
     fout << fname << CSV_SEPARATOR << "Awo" << CSV_SEPARATOR << "Owa\n";
+    std::cout << fname << CSV_SEPARATOR << "Awo" << CSV_SEPARATOR << "Owa\n";
     for(int j=0; j<opt.size(); ++j) {
-        perc[0] = perc_b_t[0][j] / fbulk;
-        inte[0] = inte_b_t[0][j] / fbulk;
-        iden[0] = 100*(iden_b_t[0][j] / fbulk);
-        perc[1] = perc_b_t[1][j] / fBulk;
-        inte[1] = inte_b_t[1][j] / fBulk;
-        iden[1] = 100*(iden_b_t[1][j] / fBulk);
+        perc[0] = perc_b_t[0][j] / (float)fbulk;
+        inte[0] = inte_b_t[0][j] / (float)fbulk;
+        iden[0] = 100*(iden_b_t[0][j] / (float)fbulk);
+        perc[1] = perc_b_t[1][j] / (float)fBulk;
+        inte[1] = inte_b_t[1][j] / (float)fBulk;
+        iden[1] = 100*(iden_b_t[1][j] / (float)fBulk);
         thres = norm * opt.at(j).Threshold;
 
         fout << 1E6*thres << CSV_SEPARATOR <<  iden[1] << CSV_SEPARATOR << 100-iden[0]   << "\n";
+//        std::cout << 1E6*thres << CSV_SEPARATOR <<  (float)iden[1] << CSV_SEPARATOR << (float)(100-iden[0])   << "\n";
+        printf("%f == %f == %f \n",1E6*thres , iden[1] ,100-iden[0]);
     }
 	fout.close();
 
@@ -396,7 +399,7 @@ int main(int argc, char **argv)
 {
 
     process_ROC<Recipes::NoFilter>(argc,argv);
-//    process_ROC<Recipes::Gauss3>(argc,argv);
+    process_ROC<Recipes::Gauss3>(argc,argv);
 //    process_ROC<Recipes::Gauss5>(argc,argv);
     process_ROC<Recipes::Avg>(argc,argv);
 //    process_ROC<Recipes::Median>(argc,argv);
