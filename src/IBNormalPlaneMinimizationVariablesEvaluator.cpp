@@ -7,6 +7,11 @@
 #include <vector>
 #include "IBNormalPlaneMinimizationVariablesEvaluator.h"
 
+// remove after test //
+#include <stdio.h>
+#include "Vtk/vtkMuonScatter.h"
+#include "Vtk/uLibVtkViewer.h"
+
 class IBNormalPlaneMinimizationVariablesEvaluatorPimpl {
 
 public:
@@ -52,6 +57,10 @@ public:
 
     }
 
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // EVALUATE //
 
     bool evaluate(MuonScatterData muon) {
 
@@ -158,6 +167,11 @@ public:
         return m_integrity;
     }
 
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // EVALUATE VARIABLES //
+
     Vector4f evaluateVariables(const HLine3f &ingoing_track, const HLine3f &outgoing_track)
     {
         Matrix4f  rotation_matrix = this->getRotationMatrix(ingoing_track.direction);
@@ -165,7 +179,7 @@ public:
         HPoint3f  prj  = this->projectOnContainer(outgoing_track);
 
         HVector3f disp = rotation_matrix * (prj - ingoing_track.origin);
-        HVector3f scat = rotation_matrix * this->getDirectorCosines(outgoing_track.direction);
+        HVector3f scat = rotation_matrix * outgoing_track.direction; //this->getDirectorCosines(outgoing_track.direction);
 
         Scalarf scat_x = atan2(scat(0),scat(1));
         Scalarf scat_z = atan2(scat(2),scat(1));
@@ -175,6 +189,10 @@ public:
         return out;
     }
 
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // EVALUATE ERRORS //
 
     Matrix4f evaluateErrorMatrix(const HLine3f &ingoing_track, const HLine3f &outgoing_track)
     {
@@ -291,17 +309,38 @@ public:
     {
         // directors cosines
         HVector3f dc = this->getDirectorCosines(track_direction);
-        // rotation angles
-        t_theta = acos(dc(1));
-        t_phi   = atan2(dc(2),dc(0));
-        //alpha
-        this->evaluateAlpha(t_phi,t_theta);
-        // YZY rotations
-        Matrix4f first_y_rotation = compileYRotation(-t_phi);
-        Matrix4f first_z_rotation = compileZRotation(t_theta);
-        Matrix4f secnd_y_rotation = compileYRotation(m_alpha); //<<< seems legit
+
+        // YZY rotations with angels
+        //        t_theta = acos(dc(1));
+        //        t_phi   = atan2(dc(2),dc(0));
+        //        this->evaluateAlpha(t_phi,t_theta);
+
+        //        Matrix4f first_y_rotation = compileYRotation(-t_phi);
+        //        Matrix4f first_z_rotation = compileZRotation(t_theta);
+        //        Matrix4f secnd_y_rotation = compileYRotation(-t_phi);
+        //        Matrix4f out = secnd_y_rotation * first_z_rotation * first_y_rotation;
+        //        return out;
+
+
+        // YZY rotations without angles (only for AlphaX)
+        Vector2f dc02 = Vector2f(dc(0),dc(2));       // phi
+        Vector2f dc1  = Vector2f(dc(1),dc02.norm()); // theta
+        Vector2f alphaX(dc(0),-dc(2)*dc(1));         // alphaX
+
+        Matrix4f first_y_rotation = compileYRotation(dc02);
+        Matrix4f first_z_rotation = compileZRotation(dc1);
+        Matrix4f secnd_y_rotation = compileYRotation(alphaX);
         Matrix4f out = secnd_y_rotation * first_z_rotation * first_y_rotation;
         return out;
+
+        // Eigen YZY
+        //        Eigen::Affine3f  transform(Matrix4f::Identity());
+        //        Matrix3f mat;
+        //        mat =     Eigen::AngleAxisf(m_alpha, Vector3f::UnitY())
+        //                * Eigen::AngleAxisf(t_theta, Vector3f::UnitZ())
+        //                * Eigen::AngleAxisf(t_phi, Vector3f::UnitY());
+        //        transform.rotate(mat);
+        //        return transform.matrix();
     }
 
     Matrix4f compileYRotation(Scalarf angle)
@@ -314,6 +353,18 @@ public:
         return out;
     }
 
+    Matrix4f compileYRotation(Vector2f v)
+    {
+        float cos = v(0)/v.norm();
+        float sin = v(1)/v.norm();
+        Matrix4f out;
+        out << cos, 0,  sin, 0,
+               0,   1,  0,   0,
+              -sin, 0,  cos, 0,
+               0,   0,  0,   1;
+        return out;
+    }
+
     Matrix4f compileZRotation(Scalarf angle)
     {
         Matrix4f out;
@@ -321,6 +372,18 @@ public:
                 sin(angle),  cos(angle), 0, 0,
                 0,           0,          1, 0,
                 0,           0,          0, 1;
+        return out;
+    }
+
+    Matrix4f compileZRotation(Vector2f v)
+    {
+        float cos = v(0)/v.norm();
+        float sin = v(1)/v.norm();
+        Matrix4f out;
+        out <<  cos, -sin, 0, 0,
+                sin,  cos, 0, 0,
+                0,    0,   1, 0,
+                0,    0,   0, 1;
         return out;
     }
 
@@ -335,18 +398,20 @@ public:
         // if configuration X, Z or BOTH choose combination!
         //        m_alpha = (getAlphaZ(phi,theta)+getAlphaX(phi,theta))/2.;
         m_alpha = getAlphaX(phi,theta);
-        //m_alpha = 0;
+        //        m_alpha = 0;
     }
 
     Scalarf getAlphaX(Scalarf& phi, Scalarf& theta) {
-        Scalarf den = sqrt(cos(phi)*cos(phi)+(sin(phi)*sin(phi))*(cos(theta)*cos(theta)));
+        //        Scalarf den = sqrt(cos(phi)*cos(phi)+(sin(phi)*sin(phi))*(cos(theta)*cos(theta)));
+        Scalarf den = 1;
         Scalarf a1  = (-sin(phi)*cos(theta))/den;
         Scalarf a2  = cos(phi)/den;
         return atan2(a1,a2);
     }
 
     Scalarf getAlphaZ(Scalarf& phi, Scalarf& theta) {
-        Scalarf den = sqrt(cos(phi)*cos(phi)+(sin(phi)*sin(phi))/(cos(theta)*cos(theta)));
+        //        Scalarf den = sqrt(cos(phi)*cos(phi)+(sin(phi)*sin(phi))/(cos(theta)*cos(theta)));
+        Scalarf den = 1;
         Scalarf a1  = (-sin(phi)/cos(theta))/den;
         Scalarf a2  = cos(phi)/den;
         return atan2(a1,a2);
@@ -380,6 +445,21 @@ public:
 
 
 };
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// CLASS
+
+
 
 IBNormalPlaneMinimizationVariablesEvaluator::IBNormalPlaneMinimizationVariablesEvaluator() :
     d(new IBNormalPlaneMinimizationVariablesEvaluatorPimpl) {}

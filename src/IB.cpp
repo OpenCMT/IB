@@ -12,8 +12,9 @@ const char *IB::Version::Release = SVN_REVISION;
 void IB::Version::PrintSelf(std::ostream &o)
 {
 
-    o << " --------------------------------- \n" <<
-         " INFN - Muon Tomography Project    \n" <<
-         " IMAGE BUILDER Ver. " << VersionNumber << "\n" <<
-         " Release: " << Release << "\n";
+    o << " --------------------------------- \n"
+      << " INFN - Muon Tomography Project    \n"
+      << " IMAGE BUILDER Ver. " << VersionNumber << "\n"
+      << " Release: " << Release << "\n"
+      << " --------------------------------- \n";
 }
