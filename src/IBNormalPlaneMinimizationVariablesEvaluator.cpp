@@ -313,11 +313,11 @@ public:
         // YZY rotations with angels
         //        t_theta = acos(dc(1));
         //        t_phi   = atan2(dc(2),dc(0));
-        //        this->evaluateAlpha(t_phi,t_theta);
+        //                this->evaluateAlpha(t_phi,t_theta);
 
         //        Matrix4f first_y_rotation = compileYRotation(-t_phi);
         //        Matrix4f first_z_rotation = compileZRotation(t_theta);
-        //        Matrix4f secnd_y_rotation = compileYRotation(-t_phi);
+        //        Matrix4f secnd_y_rotation = compileYRotation(m_alpha);
         //        Matrix4f out = secnd_y_rotation * first_z_rotation * first_y_rotation;
         //        return out;
 

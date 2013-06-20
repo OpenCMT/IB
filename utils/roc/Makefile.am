@@ -7,7 +7,8 @@ bin_PROGRAMS = 	IB_lnlROCBuilder \
                 IB_lnlROCBuilder2 \
 		IB_ROCScaleToMidpt \
 		IB_ROCScaleToMidAwo \
-		IB_ROCScaleToMideff
+		IB_ROCScaleToMideff \
+		IB_ROCPlot
 
 
 
