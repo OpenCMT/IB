@@ -29,7 +29,11 @@ struct ROCElement : public Vector3f {
 
 
 class IBROC : public Vector<ROCElement>{
+    typedef Vector<ROCElement> BaseClass;
   public:
+
+    IBROC() : BaseClass() {}
+    IBROC(unsigned int i) :  BaseClass(i) {}
 
     virtual void Update() {}
 
