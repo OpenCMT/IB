@@ -151,6 +151,22 @@ struct Trim5 {
     }
 };
 
+struct BilateralTrim {
+    static const char *name() { return "BilateralTrim"; }
+    static bool Run(IBVoxCollection *image) {
+        // RECIPE // -------------------------------------------------------- //
+        IBVoxFilter_BilateralTrim trim(Vector3i(3,3,3));
+        IBFilterGaussShape shape(0.5);
+        trim.SetKernelWeightFunction(shape);
+        trim.SetIntensitySigma(3);
+        trim.SetABTrim(0,1);
+        trim.SetImage(image);
+        trim.Run();
+        // ------------------------------------------------------------------ //
+        return true;
+    }
+};
+
 
 
 }
@@ -416,13 +432,14 @@ int main(int argc, char **argv)
     }
 
     process_ROC<Recipes::NoFilter>(argc,argv);
-    process_ROC<Recipes::Gauss3>(argc,argv);
+//    process_ROC<Recipes::Gauss3>(argc,argv);
 //    process_ROC<Recipes::Gauss5>(argc,argv);
     process_ROC<Recipes::Avg>(argc,argv);
 //    process_ROC<Recipes::Median>(argc,argv);
 //    process_ROC<Recipes::Trim3s2>(argc,argv);
     process_ROC<Recipes::Trim3u>(argc,argv);
     process_ROC<Recipes::Trim3>(argc,argv);
+    process_ROC<Recipes::BilateralTrim>(argc,argv);
 //    process_ROC<Recipes::Trim5>(argc,argv);
     return 0;
 }

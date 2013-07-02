@@ -53,6 +53,8 @@ typedef uLib::VoxFilterAlgorithmAbtrim<IBVoxel> IBVoxFilter_Abtrim;
 
 typedef uLib::VoxFilterAlgorithmBilateral<IBVoxel> IBVoxFilter_Bilateral;
 
+typedef uLib::VoxFilterAlgorithmBilateralTrim<IBVoxel> IBVoxFilter_BilateralTrim;
+
 typedef uLib::VoxFilterAlgorithmSPR<IBVoxel> IBVoxFilter_SPR;
 
 typedef VoxImageFilterAlgorithmPlasmon<IBVoxel> IBVoxFilter_Plasmon;
