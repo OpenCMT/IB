@@ -30,7 +30,7 @@ struct Gauss3 {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Linear trim(Vector3i(3,3,3));
-        IBFilterGaussShape shape(0.5);
+        IBFilterGaussShape shape(0.7);
         trim.SetKernelWeightFunction(shape);
         trim.SetImage(image);
         trim.Run();
@@ -44,7 +44,7 @@ struct Gauss5 {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Linear trim(Vector3i(5,5,5));
-        IBFilterGaussShape shape(0.5);
+        IBFilterGaussShape shape(0.7);
         trim.SetKernelWeightFunction(shape);
         trim.SetImage(image);
         trim.Run();
@@ -88,27 +88,13 @@ struct Median {
     }
 };
 
-struct Trim3s2 {
-    static const char *name() { return "Trim3s2"; }
-    static bool Run(IBVoxCollection *image) {
-        // RECIPE // -------------------------------------------------------- //
-        IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-        IBFilterGaussShape shape(0.2);
-        trim.SetKernelWeightFunction(shape);
-        trim.SetABTrim(0,1);
-        trim.SetImage(image);
-        trim.Run();
-        // ------------------------------------------------------------------ //
-        return true;
-    }
-};
 
 struct Trim3 {
     static const char *name() { return "Trim3"; }
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-        IBFilterGaussShape shape(0.5);
+        IBFilterGaussShape shape(0.7);
         trim.SetKernelWeightFunction(shape);
         trim.SetABTrim(0,1);
         trim.SetImage(image);
@@ -141,7 +127,7 @@ struct Trim5 {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
-        IBFilterGaussShape shape(0.5);
+        IBFilterGaussShape shape(0.7);
         trim.SetKernelWeightFunction(shape);
         trim.SetABTrim(0,2);
         trim.SetImage(image);
@@ -155,11 +141,11 @@ struct BilateralTrim {
     static const char *name() { return "BilateralTrim"; }
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
-        IBVoxFilter_BilateralTrim trim(Vector3i(3,3,3));
-        IBFilterGaussShape shape(0.5);
+        IBVoxFilter_BilateralTrim trim(Vector3i(5,5,5));
+        IBFilterGaussShape shape(0.7);
         trim.SetKernelWeightFunction(shape);
-        trim.SetIntensitySigma(3);
-        trim.SetABTrim(0,1);
+        trim.SetIntensitySigma(30);
+        trim.SetABTrim(0,2);
         trim.SetImage(image);
         trim.Run();
         // ------------------------------------------------------------------ //
@@ -431,15 +417,18 @@ int main(int argc, char **argv)
         exit(1);
     }
 
+    // used
     process_ROC<Recipes::NoFilter>(argc,argv);
-//    process_ROC<Recipes::Gauss3>(argc,argv);
-//    process_ROC<Recipes::Gauss5>(argc,argv);
     process_ROC<Recipes::Avg>(argc,argv);
-//    process_ROC<Recipes::Median>(argc,argv);
-//    process_ROC<Recipes::Trim3s2>(argc,argv);
     process_ROC<Recipes::Trim3u>(argc,argv);
     process_ROC<Recipes::Trim3>(argc,argv);
     process_ROC<Recipes::BilateralTrim>(argc,argv);
-//    process_ROC<Recipes::Trim5>(argc,argv);
+
+    // not used
+    //    process_ROC<Recipes::Gauss3>(argc,argv);
+    //    process_ROC<Recipes::Gauss5>(argc,argv);
+    //    process_ROC<Recipes::Median>(argc,argv);
+    //    process_ROC<Recipes::Trim3s2>(argc,argv);
+    //    process_ROC<Recipes::Trim5>(argc,argv);
     return 0;
 }

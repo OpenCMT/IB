@@ -41,12 +41,15 @@ int main(int argc, char *argv[])
         int size;
         float ssigma;
         float isigma;
+        float a,b;
         Scalarf scale;
     } parameters = {
         argv[1],
-                5, // default size
-                0.5, // default ssigma
-                1, // default isigma
+                5,   // default size
+                0.7, // default ssigma
+                1,   // default isigma
+                0,
+                0,
                 1  // default scaling factor
     };
 
@@ -61,6 +64,16 @@ int main(int argc, char *argv[])
         parameters.ssigma = atof(argv[3]);
         parameters.isigma = atof(argv[4]);
         parameters.scale = atof(argv[5]);
+    }
+
+    if(argc == 8)
+    {
+        parameters.size = atoi(argv[2]);
+        parameters.ssigma = atof(argv[3]);
+        parameters.isigma = atof(argv[4]);
+        parameters.a      = atof(argv[5]);
+        parameters.a      = atof(argv[6]);
+        parameters.scale  = atof(argv[7]);
     }
 
 
@@ -82,8 +95,8 @@ int main(int argc, char *argv[])
     }
 
     int s = parameters.size;
-    IBVoxFilter_Bilateral filter(Vector3i(s,s,s));
-    IBFilterGaussShape shape(sqrt(parameters.ssigma));
+    IBVoxFilter_BilateralTrim filter(Vector3i(s,s,s));
+    IBFilterGaussShape shape(parameters.ssigma);
     filter.SetKernelWeightFunction(shape);
     filter.SetIntensitySigma(parameters.isigma);
     filter.SetImage(&image);
@@ -91,10 +104,10 @@ int main(int argc, char *argv[])
 
     image *= parameters.scale;
 
-    sprintf(filename,"%s_bilateral%d_s%.2f_i%.2f_scale%.2f.vtk",
+    sprintf(filename,"%s_bilateral_%d%d%d_s%.2f_i%.2f_scale%.2f.vtk",
             FileNameRemoveExtension(parameters.file).c_str(),
-            parameters.size, parameters.ssigma, parameters.isigma,
-            parameters.scale);
+            parameters.size,parameters.a,parameters.b, parameters.ssigma,
+            parameters.isigma, parameters.scale);
     image.ExportToVtk(filename,0);
 
 

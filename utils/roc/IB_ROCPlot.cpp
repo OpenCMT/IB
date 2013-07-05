@@ -20,14 +20,15 @@ namespace ROCPlot {
 // ROC ROOT GRAPH
 enum EnumROCStyle {
     StyleROC = 0,
-    StyleFAMP
+    StyleFaMaN = 1,
+    StyleFaMa = 2
 };
 
 class ROCGraph : public IBROC {
     typedef IBROC BaseClass;
 public:
 
-    ROCGraph(EnumROCStyle style = StyleFAMP) :
+    ROCGraph(EnumROCStyle style = StyleFaMa) :
         m_style(style)
     {
         m_awo.SetLineWidth(2);
@@ -66,7 +67,15 @@ protected:
                 m_owa.SetPoint(i,100 - this->at(i).Owa(),this->at(i).Awo());
             }
             break;
-        case ROCPlot::StyleFAMP:
+        case ROCPlot::StyleFaMa:
+            m_awo.SetLineColor(kRed);
+            m_owa.SetLineColor(kBlue);
+            for(int i=0; i<this->size(); i++) {
+                m_awo.SetPoint(i,this->at(i).X()*0.04,this->at(i).Awo());
+                m_owa.SetPoint(i,this->at(i).X()*0.04,this->at(i).Owa());
+            }
+            break;
+        case ROCPlot::StyleFaMaN:
             m_awo.SetLineColor(kRed);
             m_owa.SetLineColor(kBlue);
             for(int i=0; i<this->size(); i++) {
@@ -96,7 +105,7 @@ class ROCMultiGraph : public TMultiGraph {
 
     typedef TMultiGraph BaseClass;
 public:
-    ROCMultiGraph(EnumROCStyle style = StyleFAMP) :
+    ROCMultiGraph(EnumROCStyle style = StyleFaMa) :
         m_min(0), m_max(100), m_style(style)
     {
         m_legend=new TLegend(0.685,0.12,0.88,0.22);
@@ -136,11 +145,13 @@ public:
 
     void Draw()  {
         m_legend->Clear();
-        if(m_rocs.size() == 1 && m_style == StyleFAMP)
+        if(m_rocs.size() == 1 && (m_style == StyleFaMaN || m_style == StyleFaMa) )
         {
             ROCGraph & roc = m_rocs.at(0);
-            m_legend->AddEntry(&roc.awo(),roc.m_labels[1].c_str(),"l");
-            m_legend->AddEntry(&roc.owa(),roc.m_labels[2].c_str(),"l");
+            //            m_legend->AddEntry(&roc.awo(),roc.m_labels[1].c_str(),"l");
+            //            m_legend->AddEntry(&roc.owa(),roc.m_labels[2].c_str(),"l");
+            m_legend->AddEntry(&roc.awo(),"Fa","l");
+            m_legend->AddEntry(&roc.owa(),"Ma","l");
         }
         else
         {
@@ -149,10 +160,31 @@ public:
             }
         }
 
+        m_legend->SetTextSize(0.04);
+
         // add graphs //
         this->Clear();
 
-        if(m_style == StyleFAMP) {
+        if(m_style == StyleFaMa) {
+            for(int i=0; i< m_rocs.size(); ++i)
+            {
+                m_rocs.at(i).SetStyle(m_style);
+                this->Add(&m_rocs.at(i).awo());
+                this->Add(&m_rocs.at(i).owa());
+            }
+            BaseClass::Draw("apl");
+            //            this->GetXaxis()->SetLimits(m_min,m_max);
+            //            this->SetMinimum(0);
+            //            this->SetMaximum(4);
+
+            //            this->GetXaxis()->SetNdivisions(10);
+            //            this->GetYaxis()->SetNdivisions(5);
+            this->GetXaxis()->SetTitle("Scattering density threshold");
+            this->GetYaxis()->SetTitle("Rate (%)");
+            BaseClass::Draw("apl");
+            m_legend->Draw();
+        }
+        else if(m_style == StyleFaMaN) {
             for(int i=0; i< m_rocs.size(); ++i)
             {
                 m_rocs.at(i).SetStyle(m_style);
@@ -161,9 +193,14 @@ public:
             }
             BaseClass::Draw("apl");
             this->GetXaxis()->SetLimits(m_min,m_max);
-            //            this->GetYaxis()->SetRangeUser(0.,100.);
-            this->GetXaxis()->SetTitle("Normalized density");
+            this->SetMinimum(0);
+            this->SetMaximum(100);
+
+            this->GetXaxis()->SetNdivisions(10);
+            this->GetYaxis()->SetNdivisions(5);
+            this->GetXaxis()->SetTitle("Normalized density threshold");
             this->GetYaxis()->SetTitle("Rate (%)");
+            BaseClass::Draw("apl");
             m_legend->Draw();
         }
         else {
@@ -173,23 +210,27 @@ public:
                 this->Add(&m_rocs.at(i).awo());
             }
             BaseClass::Draw("apl");
-            this->GetXaxis()->SetRangeUser(0,100);
-            this->GetYaxis()->SetRangeUser(0,100);
+            this->GetXaxis()->SetLimits(0.,100.);
+            this->SetMinimum(0);
+            this->SetMaximum(100);
+            this->GetXaxis()->SetNdivisions(5);
+            this->GetYaxis()->SetNdivisions(5);
             this->GetXaxis()->SetTitle("False alarms (%)");
             this->GetYaxis()->SetTitle("Detection efficiency (%)");
+            BaseClass::Draw("apl");
             if(m_rocs.size() > 1)
                 m_legend->Draw();
         }
         this->GetXaxis()->SetTitleOffset(1.3);
-        this->GetYaxis()->SetTitleOffset(1.6);
+        this->GetYaxis()->SetTitleOffset(1.3);
         this->GetXaxis()->SetTitleFont(42);
         this->GetYaxis()->SetTitleFont(42);
-        this->GetXaxis()->SetTitleSize(0.03);
-        this->GetYaxis()->SetTitleSize(0.03);
+        this->GetXaxis()->SetTitleSize(0.04);
+        this->GetYaxis()->SetTitleSize(0.04);
         this->GetXaxis()->SetLabelFont(42);
         this->GetYaxis()->SetLabelFont(42);
-        this->GetXaxis()->SetLabelSize(0.03);
-        this->GetYaxis()->SetLabelSize(0.03);
+        this->GetXaxis()->SetLabelSize(0.04);
+        this->GetYaxis()->SetLabelSize(0.04);
 
     }
 
@@ -255,14 +296,15 @@ main(int argc, char * argv[]){
     if(argc>=5) {
         p.type = atoi(argv[4]);
     }
-    if(argc>=7) {
+    if(argc>=6) {
         p.file0_caption = argv[5];
         p.file1_caption = argv[6];
     }
-    if(argc>=9){
+    if(argc>=8){
         p.x_min = atof(argv[7]);
         p.x_max = atof(argv[8]);
     }
+
     // .................................................................... //
 
     gStyle->SetPaperSize(30,30);  //default
@@ -314,6 +356,7 @@ main(int argc, char * argv[]){
 
     mg.SetRange(p.x_min,p.x_max);
     mg.Draw();
+//    c0->Modified();
 
     c0->Print(p.file_out);
 }

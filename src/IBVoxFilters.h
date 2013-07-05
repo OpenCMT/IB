@@ -14,7 +14,7 @@
 
 class IBFilterGaussShape : public uLib::Interface::VoxImageFilterShape {
 public:
-    IBFilterGaussShape(float sigma) : m_sigma2(sigma) {}
+    IBFilterGaussShape(float sigma) : m_sigma2(sigma*sigma) {}
 
     float operator()(float d) {
         return exp( -d/m_sigma2);

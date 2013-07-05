@@ -49,7 +49,7 @@ struct Gauss3 {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Linear trim(Vector3i(3,3,3));
-        IBFilterGaussShape shape(0.5);
+        IBFilterGaussShape shape(0.7);
         trim.SetKernelWeightFunction(shape);
         trim.SetImage(image);
         trim.Run();
@@ -63,7 +63,7 @@ struct Gauss5 {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Linear trim(Vector3i(5,5,5));
-        IBFilterGaussShape shape(0.5);
+        IBFilterGaussShape shape(0.7);
         trim.SetKernelWeightFunction(shape);
         trim.SetImage(image);
         trim.Run();
@@ -107,27 +107,13 @@ struct Median {
     }
 };
 
-struct Trim3s2 {
-    static const char *name() { return "Trim3s2"; }
-    static bool Run(IBVoxCollection *image) {
-        // RECIPE // -------------------------------------------------------- //
-        IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-        IBFilterGaussShape shape(0.2);
-        trim.SetKernelWeightFunction(shape);
-        trim.SetABTrim(0,1);
-        trim.SetImage(image);
-        trim.Run();
-        // ------------------------------------------------------------------ //
-        return true;
-    }
-};
 
 struct Trim3 {
     static const char *name() { return "Trim3"; }
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-        IBFilterGaussShape shape(0.5);
+        IBFilterGaussShape shape(0.7);
         trim.SetKernelWeightFunction(shape);
         trim.SetABTrim(0,1);
         trim.SetImage(image);
@@ -160,7 +146,7 @@ struct Trim5 {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Abtrim trim(Vector3i(5,5,5));
-        IBFilterGaussShape shape(0.5);
+        IBFilterGaussShape shape(0.7);
         trim.SetKernelWeightFunction(shape);
         trim.SetABTrim(0,2);
         trim.SetImage(image);
