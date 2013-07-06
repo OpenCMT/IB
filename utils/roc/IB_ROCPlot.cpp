@@ -173,12 +173,12 @@ public:
                 this->Add(&m_rocs.at(i).owa());
             }
             BaseClass::Draw("apl");
-            //            this->GetXaxis()->SetLimits(m_min,m_max);
-            //            this->SetMinimum(0);
-            //            this->SetMaximum(4);
+            this->GetXaxis()->SetLimits(m_min,m_max);
+            this->SetMinimum(0);
+            this->SetMaximum(100);
 
-            //            this->GetXaxis()->SetNdivisions(10);
-            //            this->GetYaxis()->SetNdivisions(5);
+            this->GetXaxis()->SetNdivisions(10);
+            this->GetYaxis()->SetNdivisions(5);
             this->GetXaxis()->SetTitle("Scattering density threshold");
             this->GetYaxis()->SetTitle("Rate (%)");
             BaseClass::Draw("apl");
