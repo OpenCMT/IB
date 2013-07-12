@@ -3,8 +3,11 @@
 #include <TCanvas.h>
 #include <TFile.h>
 #include <TAxis.h>
+#include <TBox.h>
+#include <TGraphAsymmErrors.h>
 #include <TLegend.h>
 #include <TStyle.h>
+#include <TSystem.h>
 
 #include "IBROC.h"
 
@@ -50,6 +53,7 @@ public:
     uLibRefMacro(awo,TGraph)
     uLibRefMacro(owa,TGraph)
 
+
 protected:
     int Draw() {
         m_awo.Set(this->size());
@@ -63,24 +67,24 @@ protected:
             m_awo.SetLineColor(kRed);
             m_owa.SetLineColor(kRed);
             for(int i=0; i<this->size(); i++) {
-                m_awo.SetPoint(i,this->at(i).Awo(),100 - this->at(i).Owa());
-                m_owa.SetPoint(i,100 - this->at(i).Owa(),this->at(i).Awo());
+                m_awo.SetPoint(i,this->at(i).Awo()/100 ,1 - this->at(i).Owa()/100);
+                m_owa.SetPoint(i,1 - this->at(i).Owa()/100,this->at(i).Awo()/100); // not used
             }
             break;
         case ROCPlot::StyleFaMa:
             m_awo.SetLineColor(kRed);
             m_owa.SetLineColor(kBlue);
             for(int i=0; i<this->size(); i++) {
-                m_awo.SetPoint(i,this->at(i).X()*0.04,this->at(i).Awo());
-                m_owa.SetPoint(i,this->at(i).X()*0.04,this->at(i).Owa());
+                m_awo.SetPoint(i,this->at(i).X()*0.04,this->at(i).Awo()/100);
+                m_owa.SetPoint(i,this->at(i).X()*0.04,this->at(i).Owa()/100);
             }
             break;
         case ROCPlot::StyleFaMaN:
             m_awo.SetLineColor(kRed);
             m_owa.SetLineColor(kBlue);
             for(int i=0; i<this->size(); i++) {
-                m_awo.SetPoint(i,this->at(i).X(),this->at(i).Awo());
-                m_owa.SetPoint(i,this->at(i).X(),this->at(i).Owa());
+                m_awo.SetPoint(i,this->at(i).X(),this->at(i).Awo()/100);
+                m_owa.SetPoint(i,this->at(i).X(),this->at(i).Owa()/100);
             }
             break;
         }
@@ -115,6 +119,8 @@ public:
         m_legend->SetCornerRadius(2);
         m_legend->SetMargin(0.3);
         m_legend->SetBorderSize(0);
+
+        //m_ErrorBands << 1.5,4;
     }
 
     ~ROCMultiGraph() {
@@ -150,8 +156,8 @@ public:
             ROCGraph & roc = m_rocs.at(0);
             //            m_legend->AddEntry(&roc.awo(),roc.m_labels[1].c_str(),"l");
             //            m_legend->AddEntry(&roc.owa(),roc.m_labels[2].c_str(),"l");
-            m_legend->AddEntry(&roc.awo(),"Fa","l");
-            m_legend->AddEntry(&roc.owa(),"Ma","l");
+            m_legend->AddEntry(&roc.awo(),"FPF","l");
+            m_legend->AddEntry(&roc.owa(),"FNF","l");
         }
         else
         {
@@ -175,32 +181,50 @@ public:
             BaseClass::Draw("apl");
             this->GetXaxis()->SetLimits(m_min,m_max);
             this->SetMinimum(0);
-            this->SetMaximum(100);
+            this->SetMaximum(1);
 
             this->GetXaxis()->SetNdivisions(10);
             this->GetYaxis()->SetNdivisions(5);
-            this->GetXaxis()->SetTitle("Scattering density threshold");
-            this->GetYaxis()->SetTitle("Rate (%)");
+            this->GetXaxis()->SetTitle("Scattering density threshold [cm^{-1}]");
+            this->GetYaxis()->SetTitle("FPF, FNF");
             BaseClass::Draw("apl");
             m_legend->Draw();
         }
         else if(m_style == StyleFaMaN) {
             for(int i=0; i< m_rocs.size(); ++i)
             {
+                static const int colors[3] = {kGreen+2,kOrange,kRed};
+                static const int styles[3] = {3005,3005,3005};
+
+                // ERROR BAND //
+                for(int j=m_ErrorBands.size(); j-->0 && i==m_rocs.size()-1;){
+                    Vector2f band = m_rocs.at(i).GetRange(m_ErrorBands.at(j));
+                    std::cout << "band for " << m_ErrorBands.at(j) << " = " << band.transpose() << "\n";
+                    if(band(1)>band(0)) {
+                        TGraphAsymmErrors* gae = new TGraphAsymmErrors();
+                        gae->SetPoint(0,band(0),0);
+                        gae->SetPointError(0,0,band(1)-band(0),0,100);
+                        gae->SetFillColor(colors[j]);
+                        gae->SetFillStyle(styles[j]);
+                        this->Add(gae);
+                    }
+                }
+
+
+                // GRAPHS //
                 m_rocs.at(i).SetStyle(m_style);
                 this->Add(&m_rocs.at(i).awo());
                 this->Add(&m_rocs.at(i).owa());
             }
-            BaseClass::Draw("apl");
+            BaseClass::Draw("a2pl");
             this->GetXaxis()->SetLimits(m_min,m_max);
             this->SetMinimum(0);
-            this->SetMaximum(100);
-
+            this->SetMaximum(1);
             this->GetXaxis()->SetNdivisions(10);
             this->GetYaxis()->SetNdivisions(5);
             this->GetXaxis()->SetTitle("Normalized density threshold");
-            this->GetYaxis()->SetTitle("Rate (%)");
-            BaseClass::Draw("apl");
+            this->GetYaxis()->SetTitle("FPF, FNF");
+            BaseClass::Draw("a2pl");
             m_legend->Draw();
         }
         else {
@@ -210,19 +234,19 @@ public:
                 this->Add(&m_rocs.at(i).awo());
             }
             BaseClass::Draw("apl");
-            this->GetXaxis()->SetLimits(0.,100.);
+            this->GetXaxis()->SetLimits(0.,1.);
             this->SetMinimum(0);
-            this->SetMaximum(100);
+            this->SetMaximum(1);
             this->GetXaxis()->SetNdivisions(5);
             this->GetYaxis()->SetNdivisions(5);
-            this->GetXaxis()->SetTitle("False alarms (%)");
-            this->GetYaxis()->SetTitle("Detection efficiency (%)");
+            this->GetXaxis()->SetTitle("FPF");
+            this->GetYaxis()->SetTitle("TPF");
             BaseClass::Draw("apl");
             if(m_rocs.size() > 1)
                 m_legend->Draw();
         }
-        this->GetXaxis()->SetTitleOffset(1.3);
-        this->GetYaxis()->SetTitleOffset(1.3);
+        this->GetXaxis()->SetTitleOffset(1);
+        this->GetYaxis()->SetTitleOffset(1);
         this->GetXaxis()->SetTitleFont(42);
         this->GetYaxis()->SetTitleFont(42);
         this->GetXaxis()->SetTitleSize(0.04);
@@ -234,9 +258,12 @@ public:
 
     }
 
+    uLibRefMacro (ErrorBands,Vector<float>)
+
 private:
     TLegend * m_legend;
     Vector<ROCGraph> m_rocs;
+    Vector<float> m_ErrorBands; // error band in yband percent //
     float m_min,m_max;
     EnumROCStyle m_style;
 };
@@ -249,7 +276,16 @@ private:
 
 
 
-
+void print_canvas(TCanvas* c, const char* filename)
+{
+  TString tmpname(Form("/tmp/psfrag_tmp_%d.eps", gSystem->GetPid()));
+  c->Print(tmpname);
+  gSystem->Exec(Form("make_psfrags.pl -d -s 1.5 -f %d %s %s",
+                     gStyle->GetTitleFont(),
+             tmpname.Data(),
+             filename));
+  //gSystem->Unlink(tmpname);
+}
 
 
 
@@ -271,6 +307,7 @@ main(int argc, char * argv[]){
         char * file1_caption;
         float x_min;
         float x_max;
+        int error_bands;
     } p ={
         NULL,
         NULL,
@@ -279,7 +316,8 @@ main(int argc, char * argv[]){
         NULL,
         NULL,
         NAN,
-        NAN
+        NAN,
+        0
     };
 
     if(argc>=2) {
@@ -304,10 +342,15 @@ main(int argc, char * argv[]){
         p.x_min = atof(argv[7]);
         p.x_max = atof(argv[8]);
     }
+    if(argc>=10){
+        p.error_bands = atoi(argv[9]);
+    }
+
 
     // .................................................................... //
 
-    gStyle->SetPaperSize(30,30);  //default
+    //    gStyle->SetPaperSize(30,30);     // default
+    gStyle->SetTitleFont(60, "XY"); // don't ask psfrag trick
 
     ROCPlot::ROCMultiGraph mg;
     mg.SetStyle( (ROCPlot::EnumROCStyle)p.type  );
@@ -355,8 +398,10 @@ main(int argc, char * argv[]){
     c0->SetBorderMode(0);
 
     mg.SetRange(p.x_min,p.x_max);
+    if(p.error_bands)
+        mg.ErrorBands() << 6./4 + 1./100 , 17./4 + 1./100;
     mg.Draw();
-//    c0->Modified();
 
     c0->Print(p.file_out);
+//    print_canvas(c0, p.file_out);
 }

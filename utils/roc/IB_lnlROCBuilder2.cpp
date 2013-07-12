@@ -109,11 +109,13 @@ struct Trim3u {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-        Vector <float> values;
-        for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
-            values.push_back(1.);
-        }
-        trim.SetKernelNumericXZY(values);
+        //        Vector <float> values;
+        //        for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
+        //            values.push_back(1.);
+        //        }
+        //        trim.SetKernelNumericXZY(values);
+        IBFilterGaussShape shape(1);
+        trim.SetKernelWeightFunction(shape);
         trim.SetABTrim(0,1);
         trim.SetImage(image);
         trim.Run();
