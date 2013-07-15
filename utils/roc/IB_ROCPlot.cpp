@@ -110,7 +110,7 @@ class ROCMultiGraph : public TMultiGraph {
     typedef TMultiGraph BaseClass;
 public:
     ROCMultiGraph(EnumROCStyle style = StyleFaMa) :
-        m_min(0), m_max(100), m_style(style)
+        m_min(0), m_max(100), m_style(style), m_DisplayBands(0)
     {
         m_legend=new TLegend(0.685,0.12,0.88,0.22);
         m_legend->SetTextFont(72);
@@ -194,10 +194,10 @@ public:
             for(int i=0; i< m_rocs.size(); ++i)
             {
                 static const int colors[3] = {kGreen+2,kOrange,kRed};
-                static const int styles[3] = {3005,3005,3005};
+                static const int styles[3] = {3002,3002,3005};
 
                 // ERROR BAND //
-                for(int j=m_ErrorBands.size(); j-->0 && i==m_rocs.size()-1;){
+                for(int j=m_ErrorBands.size(); j-->0 && i==m_DisplayBands-1;){
                     Vector2f band = m_rocs.at(i).GetRange(m_ErrorBands.at(j));
                     std::cout << "band for " << m_ErrorBands.at(j) << " = " << band.transpose() << "\n";
                     if(band(1)>band(0)) {
@@ -260,9 +260,12 @@ public:
 
     uLibRefMacro (ErrorBands,Vector<float>)
 
+    void SetDisplayBands(int b) { this->m_DisplayBands = b; }
+
 private:
     TLegend * m_legend;
     Vector<ROCGraph> m_rocs;
+    int m_DisplayBands;
     Vector<float> m_ErrorBands; // error band in yband percent //
     float m_min,m_max;
     EnumROCStyle m_style;
@@ -398,8 +401,10 @@ main(int argc, char * argv[]){
     c0->SetBorderMode(0);
 
     mg.SetRange(p.x_min,p.x_max);
-    if(p.error_bands)
+    if(p.error_bands) {
         mg.ErrorBands() << 6./4 + 1./100 , 17./4 + 1./100;
+        mg.SetDisplayBands(p.error_bands);
+    }
     mg.Draw();
 
     c0->Print(p.file_out);
