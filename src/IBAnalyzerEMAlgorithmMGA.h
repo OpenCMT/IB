@@ -138,7 +138,7 @@ void IBAnalyzerEMAlgorithmMGA_PXTZ<size>::evaluate(Matrix4f &Sigma, Event *evc)
 
         float Sij = Ki * (Bn * Dn).trace() - Bn.trace();
         evc->elements[j].Sij =  Sij * evc->elements[j].lambda *
-                evc->elements[j].lambda * evc->elements[j].pw / 2;
+                evc->elements[j].lambda * evc->elements[j].pw;
     }
 }
 
@@ -174,7 +174,7 @@ void IBAnalyzerEMAlgorithmMGA_PX<size>::evaluate(Matrix4f &Sigma, Event *evc) {
         Matrix2f Bn = iS * evc->elements[j].Wij;
         float Sij = Ki * (Bn * Dn).trace() - Bn.trace();
         evc->elements[j].Sij =  Sij * evc->elements[j].lambda *
-                evc->elements[j].lambda * evc->elements[j].pw / 2;
+                evc->elements[j].lambda * evc->elements[j].pw;
     }
 }
 
@@ -209,7 +209,7 @@ void IBAnalyzerEMAlgorithmMGA_TZ<size>::evaluate(Matrix4f &Sigma, Event *evc) {
         Matrix2f Bn = iS * evc->elements[j].Wij;
         float Sij = Ki * (Bn * Dn).trace() - Bn.trace();
         evc->elements[j].Sij =  Sij * evc->elements[j].lambda *
-                evc->elements[j].lambda * evc->elements[j].pw / 2;
+                evc->elements[j].lambda * evc->elements[j].pw;
     }
 }
 
@@ -248,7 +248,7 @@ void IBAnalyzerEMAlgorithmMGA_PT<size>::evaluate(Matrix4f &Sigma, Event *evc) {
         float Sij = Ki * (Bn * Dn).trace() - Bn.trace();
         evc->elements[j].Sij =  Sij *
                 evc->elements[j].lambda * evc->elements[j].lambda *
-                evc->elements[j].pw / 2;
+                evc->elements[j].pw;
     }
 }
 

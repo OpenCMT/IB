@@ -67,13 +67,26 @@ class IBROC : public Vector<ROCElement>{
         this->Update();
     }
 
-    Vector2f GetRange(float y = 100 ) {
-        IBROC::Iterator itr = this->begin();
-        while (itr != this->end() && itr->Awo() >= y ) itr++;
-        float begin = itr->X();
-        itr = this->end()-1;
-        while (itr != this->begin() && itr->Owa() >= y ) itr--;
-        float end = itr->X();
+    Vector2f GetRange(float y = 90 ) {
+        IBROC::Iterator itr1,itr2;
+        itr1 = this->begin();
+        while (itr1 != this->end() && itr1->Awo() > y ) { itr1++; }
+        //        itr2 = itr1-1;
+        //        while(itr2->Awo() == (itr2-1)->Awo()) itr2--;
+        //        Vector3f diff = static_cast<Vector3f>(*itr1 - *itr2);
+        //        float m = diff(1)/diff(0);
+        //        float begin = itr1->X() + (y-itr1->Awo())/m;
+        float begin = itr1->X();
+
+        itr1 = this->end()-1;
+        while (itr1 != this->begin() && itr1->Owa() > y ) { itr1--; }
+        //        itr2 = itr1+1;
+        //        while(itr2->Owa() == (itr2+1)->Owa()) itr2++;
+        //        diff = static_cast<Vector3f>(*itr1 - *itr2);
+        //        m = diff(2)/diff(0);
+        //        float end = itr1->X() + (y - itr1->Owa())/m;
+        float end = itr1->X();
+
         return Vector2f(begin,end);
     }
 

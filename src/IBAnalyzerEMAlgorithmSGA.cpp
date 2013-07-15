@@ -26,7 +26,7 @@ void IBAnalyzerEMAlgorithmSGA_PXTZ::evaluate(Matrix4f &Sigma,
         Matrix4f Bn = iS * Wij;
         evc->elements[j].Sij =  ((Bn * Dn).trace() - Bn.trace()) *
                 evc->elements[j].lambda * evc->elements[j].lambda *
-                evc->elements[j].pw / 2;
+                evc->elements[j].pw;
     }
 
 }
@@ -46,7 +46,7 @@ void IBAnalyzerEMAlgorithmSGA_PXTZ2::evaluate(Matrix4f &Sigma,
 
         float DISWISD        = evc->header.Di.transpose() * iSWij * iS * evc->header.Di;
         evc->elements[j].Sij = (DISWISD - iSWij.trace()) * evc->elements[j].lambda *
-                evc->elements[j].lambda * evc->elements[j].pw / 2;
+                evc->elements[j].lambda * evc->elements[j].pw;
 
     }
 }
@@ -95,7 +95,7 @@ void IBAnalyzerEMAlgorithmSGA_PXTZ4::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgor
         Matrix4f Bn = iS * Wij;
         float Sij = ((Bn * Dn).trace() - Bn.trace()) *
                 evc->elements[j].lambda * evc->elements[j].lambda *
-                evc->elements[j].pw / 2;
+                evc->elements[j].pw;
         evc->elements[j].Sij =  Sij;
     }
 
@@ -140,7 +140,7 @@ void IBAnalyzerEMAlgorithmSGA_PX::evaluate(Matrix4f &Sigma,
         Matrix2f iSWij = iS * evc->elements[j].Wij;
         float DISWISD  = Di.transpose() * iSWij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2.;
+                evc->elements[j].lambda * evc->elements[j].lambda;
     }
 }
 
@@ -159,7 +159,7 @@ void IBAnalyzerEMAlgorithmSGA_TZ::evaluate(Matrix4f &Sigma,
         Matrix2f iSWij = iS * evc->elements[j].Wij;
         float DISWISD  = Di.transpose() * iSWij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2.;
+                evc->elements[j].lambda * evc->elements[j].lambda;
     }
 }
 
@@ -191,7 +191,7 @@ void IBAnalyzerEMAlgorithmSGA_PXT::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorit
         Matrix4f Bn = iS * Wij;
         evc->elements[j].Sij =  ((Bn * Dn).trace() - Bn.trace()) *
                 evc->elements[j].lambda * evc->elements[j].lambda *
-                evc->elements[j].pw / 2;
+                evc->elements[j].pw;
     }
 
 }
@@ -220,7 +220,7 @@ void IBAnalyzerEMAlgorithmSGA_PT::evaluate(Matrix4f &Sigma,
         Matrix2f iSWij = iS * Wij;
         float DISWISD  = Di.transpose() * iSWij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2.;
+                evc->elements[j].lambda * evc->elements[j].lambda;
     }
 }
 
@@ -247,7 +247,7 @@ void IBAnalyzerEMAlgorithmSGA_XZ::evaluate(Matrix4f &Sigma,
         Matrix2f iSWij = iS * Wij;
         float DISWISD  = Di.transpose() * iSWij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2.;
+                evc->elements[j].lambda * evc->elements[j].lambda;
     }
 }
 
@@ -265,7 +265,7 @@ void IBAnalyzerEMAlgorithmSGA_P::evaluate(Matrix4f &Sigma,
         float Wij = evc->elements[j].Wij(0,0);
         float DISWISD = Di * iS * Wij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iS * Wij) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2.;
+                evc->elements[j].lambda * evc->elements[j].lambda;
     }
 }
 
@@ -278,7 +278,7 @@ void IBAnalyzerEMAlgorithmSGA_T::evaluate(Matrix4f &Sigma,
         float Wij = evc->elements[j].Wij(0,0);
         float DISWISD = Di * iS * Wij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iS * Wij) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2.;
+                evc->elements[j].lambda * evc->elements[j].lambda;
     }
 }
 
@@ -299,7 +299,7 @@ void IBAnalyzerEMAlgorithmSGA_X::evaluate(Matrix4f &Sigma,
         float Wij = evc->elements[j].Wij(1,1);
         float DISWISD = Di * iS * Wij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iS * Wij) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2.;
+                evc->elements[j].lambda * evc->elements[j].lambda;
     }
 }
 
@@ -312,7 +312,7 @@ void IBAnalyzerEMAlgorithmSGA_Z::evaluate(Matrix4f &Sigma,
         float Wij = evc->elements[j].Wij(1,1);
         float DISWISD = Di * iS * Wij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iS * Wij) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2.;
+                evc->elements[j].lambda * evc->elements[j].lambda;
     }
 }
 
@@ -339,7 +339,7 @@ void IBAnalyzerEMAlgorithmSGA_M::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm
 
         Matrix4f Bn = iS * Wij;
         p += ((Bn * Dn).trace() - Bn.trace()) * evc->elements[j].lambda *
-                pow(evc->elements[j].pw,4) / 2;
+                pow(evc->elements[j].pw,4);
     }
     p /= evc->elements.size();
 
