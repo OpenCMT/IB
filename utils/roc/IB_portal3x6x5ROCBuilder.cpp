@@ -109,13 +109,11 @@ struct Trim3u {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-        //        Vector <float> values;
-        //        for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
-        //            values.push_back(1.);
-        //        }
-        //        trim.SetKernelNumericXZY(values);
-        IBFilterGaussShape shape(1);
-        trim.SetKernelWeightFunction(shape);
+        Vector <float> values;
+        for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
+            values.push_back(1.);
+        }
+        trim.SetKernelNumericXZY(values);
         trim.SetABTrim(0,1);
         trim.SetImage(image);
         trim.Run();
@@ -245,18 +243,30 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
     ////////////////////////////////////
     int fbulk = 0;
     sprintf(fname, p.file_inTp, fbulk, p.iteration);
+    int y=0;
     while (image.ImportFromVtk(fname)) {
         sprintf(fname, p.file_inTp, fbulk++, p.iteration);
 
         // FILTER RECIPE //
         RecipeT::Run(&image);
+        IBVoxCollection img;
 
-        // SCAN THRESHOLD //
-        for(uLib::IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++)
-            itr->Owa() += (image.CountLambdaOverThreshold(itr->X(),
-                                                         img_center,
-                                                         img_hsize)) > 0 ? 1 : 0;
+        IBSubImageGrabber<IBVoxCollection> grabber(image);
 
+        for (int x=0; x<6; ++x) {
+            for (int z=0; z<3; ++z) {
+                fbulk++;
+                img = grabber.GrabRegion<IBVoxCollection>(HPoint3f(-250+x*100,
+                                                                     -100+y*50,
+                                                                     -100+z*100),
+                                                            HVector3f(40,40,40));
+                for(uLib::IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++)
+                    itr->Owa() += (img.CountLambdaOverThreshold(itr->X(),
+                                                                  img_center,
+                                                                  img_hsize)) > 0 ? 1 : 0;
+            }
+        }
+        y++;
         std::cout << "\rProcessing image: " << fbulk << std::flush;
     }
 
