@@ -191,12 +191,12 @@ public:
             m_legend->Draw();
         }
         else if(m_style == StyleFaMaN) {
+
+            // ERROR BAND //
             for(int i=0; i< m_rocs.size(); ++i)
             {
                 static const int colors[3] = {kGreen+2,kOrange,kRed};
                 static const int styles[3] = {3002,3002,3005};
-
-                // ERROR BAND //
                 for(int j=m_ErrorBands.size(); j-->0 && i==m_DisplayBands-1;){
                     Vector2f band = m_rocs.at(i).GetRange(m_ErrorBands.at(j));
                     std::cout << "band for " << m_ErrorBands.at(j) << " = " << band.transpose() << "\n";
@@ -209,13 +209,16 @@ public:
                         this->Add(gae);
                     }
                 }
+            }
 
-
-                // GRAPHS //
+            // GRAPHS //
+            for(int i=0; i< m_rocs.size(); ++i)
+            {
                 m_rocs.at(i).SetStyle(m_style);
                 this->Add(&m_rocs.at(i).awo());
                 this->Add(&m_rocs.at(i).owa());
             }
+
             BaseClass::Draw("a2pl");
             this->GetXaxis()->SetLimits(m_min,m_max);
             this->SetMinimum(0);

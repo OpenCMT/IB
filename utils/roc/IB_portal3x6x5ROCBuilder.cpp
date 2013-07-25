@@ -208,7 +208,6 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
     std::cout << "Initializing containers..." << std::flush;
     char fname[200];
 
-
     IBVoxCollection image(Vector3i::Zero());
 
     ////////////////////////////////////
@@ -217,13 +216,14 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
     float max = 0;
     {
         int index = 0;
-        sprintf(fname, p.file_inTp, index++, p.iteration);
+        sprintf(fname, p.file_inTp, index, p.iteration);
+        std::cout << "starting autorange with file: " << fname << "\n";
         while (image.ImportFromVtk(fname)) {
-            sprintf(fname, p.file_inTp, index++, p.iteration);
-            IBSubImageGrabber<IBVoxCollection> grabber(image);
-            IBVoxCollection img = grabber.GrabRegion<IBVoxCollection>(img_center,img_hsize);
-            RecipeT::Run(&img);
-            float imgmax = max_of_image(img);
+            sprintf(fname, p.file_inTp, ++index, p.iteration);
+            //IBSubImageGrabber<IBVoxCollection> grabber(image);
+            //IBVoxCollection img = grabber.GrabRegion<IBVoxCollection>(img_center,img_hsize);
+            RecipeT::Run(&image);
+            float imgmax = max_of_image(image);
             if (imgmax > max) max = imgmax;
         }
     }
@@ -242,11 +242,10 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
     //   L E A D     D A T A S E T    //
     ////////////////////////////////////
     int fbulk = 0;
-    sprintf(fname, p.file_inTp, fbulk, p.iteration);
     int y=0;
+    sprintf(fname, p.file_inTp, y, p.iteration);
+    std::cout << "starting Lead dataset with file: " << fname << "\n";
     while (image.ImportFromVtk(fname)) {
-        sprintf(fname, p.file_inTp, fbulk++, p.iteration);
-
         // FILTER RECIPE //
         RecipeT::Run(&image);
         IBVoxCollection img;
@@ -259,16 +258,15 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
                 img = grabber.GrabRegion<IBVoxCollection>(HPoint3f(-250+x*100,
                                                                      -100+y*50,
                                                                      -100+z*100),
-                                                            HVector3f(40,40,40));
+                                                            HVector3f(30,25,30));
                 for(uLib::IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++)
-                    itr->Owa() += (img.CountLambdaOverThreshold(itr->X(),
-                                                                  img_center,
-                                                                  img_hsize)) > 0 ? 1 : 0;
+                    itr->Owa() += img.CountLambdaOverThreshold(itr->X()) > 0 ? 1 : 0;
             }
         }
-        y++;
-        std::cout << "\rProcessing image: " << fbulk << std::flush;
+        sprintf(fname, p.file_inTp, ++y, p.iteration);
+        std::cout << "\rProcessing LEAD: " << y << std::flush;
     }
+    std::cout << std::endl;
 
     ////////////////////////////////////
     //   E M P T Y    D A T A S E T   //
@@ -276,19 +274,18 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
 
     int fBulk = 0;
     sprintf(fname, p.file_inFp, fBulk, p.iteration);
+    std::cout << "starting Scraps dataset with file: " << fname << "\n";
     while ( image.ImportFromVtk(fname) ){
-        sprintf(fname, p.file_inFp, fBulk++, p.iteration);
+        sprintf(fname, p.file_inFp, ++fBulk, p.iteration);
 
         // FILTER RECIPE //
         RecipeT::Run(&image);
 
         // SCAN THRESHOLD //
         for(uLib::IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++)
-            itr->Awo() += (image.CountLambdaOverThreshold(itr->X(),
-                                                          img_center,
-                                                          img_hsize) > 0) ? 1 : 0;
+            itr->Awo() += (image.CountLambdaOverThreshold(itr->X()) > 0) ? 1 : 0;
 
-        std::cout << "\rProcessing image: " << fBulk << std::flush;
+        std::cout << "\rProcessing SCRAP: " << fBulk << std::flush;
     }
 
 
@@ -342,10 +339,10 @@ int main(int argc, char **argv)
 
     // used
     process_ROC<Recipes::NoFilter>(argc,argv);
-    process_ROC<Recipes::Avg>(argc,argv);
-    process_ROC<Recipes::Trim3u>(argc,argv);
-    process_ROC<Recipes::Trim3>(argc,argv);
-    process_ROC<Recipes::BilateralTrim>(argc,argv);
+    //    process_ROC<Recipes::Avg>(argc,argv);
+    //    process_ROC<Recipes::Trim3u>(argc,argv);
+    // process_ROC<Recipes::Trim3>(argc,argv);
+    //    process_ROC<Recipes::BilateralTrim>(argc,argv);
 
     // not used
     //    process_ROC<Recipes::Gauss3>(argc,argv);

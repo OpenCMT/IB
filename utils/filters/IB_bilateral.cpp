@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     if(argc == 1)
     {
         std::cerr << "No input filename given ..\n" <<
-                     "use: abtrim filename.vtk voxel_size a_trim b_trim scale\n";
+                     "use: abtrim filename.vtk voxel_size s_sigma i_sigma a_trim b_trim scale\n";
         exit(1);
     }
 
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         int size;
         float ssigma;
         float isigma;
-        float a,b;
+        int a,b;
         Scalarf scale;
     } parameters = {
         argv[1],
@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
         parameters.size = atoi(argv[2]);
         parameters.ssigma = atof(argv[3]);
         parameters.isigma = atof(argv[4]);
-        parameters.a      = atof(argv[5]);
-        parameters.a      = atof(argv[6]);
+        parameters.a      = atoi(argv[5]);
+        parameters.b      = atoi(argv[6]);
         parameters.scale  = atof(argv[7]);
     }
 
@@ -99,6 +99,7 @@ int main(int argc, char *argv[])
     IBFilterGaussShape shape(parameters.ssigma);
     filter.SetKernelWeightFunction(shape);
     filter.SetIntensitySigma(parameters.isigma);
+    filter.SetABTrim(parameters.a, parameters.b);
     filter.SetImage(&image);
     filter.Run();
 
