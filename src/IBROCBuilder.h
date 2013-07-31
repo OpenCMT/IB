@@ -53,10 +53,10 @@ public:
 
 
 inline void ROCBuilder::init_parameters() {
-    Parameters &p = this->parameters();
-    p.start = 0;
-    p.stop  = 100;
-    p.samples  = 1000;
+    ULIB_PARAMETERS_INIT
+    $.start = 0;
+    $.stop  = 100;
+    $.samples  = 1000;
 }
 
 #endif // IBROCBUILDER_H

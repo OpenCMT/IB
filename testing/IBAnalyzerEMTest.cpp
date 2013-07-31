@@ -81,16 +81,14 @@ int do_iterations(const char *file_in,
     reader->readPguess(true);
     reader->selectionCode(IBMuonEventTTreeR3DmcReader::All);
     
-    std::cout << "It Works!\n";
-    exit(0);
-    
+
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     // voxels //
     IBVoxel air = {0.1E-6,0,0};
-    IBVoxCollection voxels(Vector3i(140,72,60));
-    voxels.SetSpacing (Vector3f(5,5,5));
+    IBVoxCollection voxels(Vector3i(70,36,30));
+    voxels.SetSpacing (Vector3f(10,10,10));
     voxels.SetPosition(Vector3f(-350,-180,-150));
     voxels.InitLambda(air);
     
@@ -98,7 +96,7 @@ int do_iterations(const char *file_in,
     //    IBMAPPriorTotalWeigth weight_MAP(0.19, 300E-6 * 300E-6);
     //    voxels.SetMAPAlgorithm(&weight_MAP);
     
-    
+
     
     
     ////////////////////////////////////////////////////////////////////////////
@@ -120,10 +118,10 @@ int do_iterations(const char *file_in,
     minimizator->setRaytracer(tracer);
     
     // ML Algorithm //
-    IBAnalyzerEMAlgorithmSGA *ml_algorithm = new IBAnalyzerEMAlgorithmSGA_PXTZ;
+    IBAnalyzerEMAlgorithmSGA *ml_algorithm = new IBAnalyzerEMAlgorithmSGA_PXT;
     
     // analyzer //
-    IBAnalyzerEM3p* aem = new IBAnalyzerEM3p(voxels);
+    IBAnalyzerEM* aem = new IBAnalyzerEM(voxels);
     aem->SetMLAlgorithm(ml_algorithm);
     aem->SetPocaAlgorithm(processor);
     aem->SetRayAlgorithm(tracer);
@@ -201,7 +199,7 @@ int do_iterations(const char *file_in,
 
     char file[100];
 
-    std::cout << "SGA PXTZ 3+ ------------------------ \n";
+    std::cout << "SGA PXT pguess ------------------------ \n";
     for (int i=1; i<=it; ++i) {
         aem->Run(drop,1);
         trim.Run();
@@ -237,10 +235,9 @@ int main(int argc, char **argv) {
         float minutes;
         float start_min;
     } parameters = {
-        "/var/local/data/root/muSteel_PDfit_20130220_1_v15.root", // blocchi 2l
-        //"/var/local/data/root/ROC_sets/20130214_v15/muSteel_PDfit_20130214_0_v15.root",
-        "2lpg_notrim_3p_PXTZ",
-        5,
+        "/var/local/data/root/muSteel_PDfit_20130220_1_v15.root",
+        "2lpg_notrim_PXT",
+        0.2,
         0
     };
     

@@ -230,7 +230,6 @@ public:
 
 
 IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels) :
-    d(new IBAnalyzerEMPimpl(&parameters())),
     m_PocaAlgorithm(NULL),
     m_VarAlgorithm(NULL),
     m_RayAlgorithm(NULL),
@@ -238,6 +237,7 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels) :
 {
     BaseClass::SetVoxCollection(&voxels);
     init_parameters();
+    d = new IBAnalyzerEMPimpl(&parameters());
 }
 
 IBAnalyzerEM::~IBAnalyzerEM()

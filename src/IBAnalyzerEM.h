@@ -85,9 +85,9 @@ private:
 
 
 inline void IBAnalyzerEM::init_parameters() {
-    Parameters &p = this->parameters();
-    p.nominal_momentum = 3;
-    p.SijCutEM         = 0.0;
+    ULIB_PARAMETERS_INIT
+    p().nominal_momentum = 3;
+    p().SijCutEM         = 0.0;
 }
 
 
