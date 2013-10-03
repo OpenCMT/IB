@@ -170,11 +170,11 @@ struct Parameters {
     int  samples;
     int iteration;
 } p = {
-    "/var/local/data/vtk/ROC/ROC_LNL_1388/Source_12l/vtk_R7_10cm/min_0.5/image_%i_%i.vtk",
-    "/var/local/data/vtk/ROC/ROC_LNL_1388/NOSource/vtk_R7_10cm/min_0.5/image_%i_%i.vtk",
-    "ROC_r1388_%s_v10_t0.5.csv",
-    1000,
-    300
+    "/var/local/data/pubs/IEEE_P/src/m20130220/vtk_R7_5cm/min_1.5/image_%i_tr_%i.vtk",
+    "/var/local/data/pubs/IEEE_P/src/m20130214/vtk_R7_5cm/min_1.5/image_%i_tr_%i.vtk",
+    "test_ROC.csv",
+    500,
+    120
 };
 
 
@@ -325,7 +325,10 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
 int main(int argc, char **argv)
 {
 
-    if(argc == 6) {
+    if(argc == 1) {
+        std::cout << "working in test mode with default values \n";
+    }
+    else if(argc == 6) {
         p.file_inTp  = argv[1];
         p.file_inFp  = argv[2];
         p.file_out   = argv[3];
@@ -352,3 +355,4 @@ int main(int argc, char **argv)
     //    process_ROC<Recipes::Trim5>(argc,argv);
     return 0;
 }
+

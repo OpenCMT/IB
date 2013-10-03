@@ -115,8 +115,8 @@ public:
     std::string m_labels[3];
 };
 
-inline std::fstream&
-operator<< (std::fstream& stream, IBROC &roc) {
+inline std::ofstream&
+operator << (std::ofstream& stream, IBROC &roc) {
     stream << "X" << CSV_SEPARATOR << "Awo" << CSV_SEPARATOR << "Owa\n";
     for (IBROC::Iterator itr = roc.begin(); itr < roc.end(); itr++)
         stream << itr->X() << CSV_SEPARATOR
@@ -125,15 +125,18 @@ operator<< (std::fstream& stream, IBROC &roc) {
     return stream;
 }
 
-//inline std::ostream&
-//operator<< (std::ostream& stream, IBROC &roc) {
-//    stream << "X" << CSV_SEPARATOR << "Awo" << CSV_SEPARATOR << "Owa\n";
-//    for (IBROC::Iterator itr = roc.begin(); itr < roc.end(); itr++)
-//        stream << itr->X() << CSV_SEPARATOR
-//               << itr->Awo() << CSV_SEPARATOR
-//               << itr->Owa() << "\n";
-//    return stream;
-//}
+inline std::ostream&
+operator<< (std::ostream& stream, IBROC &roc) {
+    stream << "X" << CSV_SEPARATOR << "Awo" << CSV_SEPARATOR << "Owa\n";
+    for (IBROC::Iterator itr = roc.begin(); itr < roc.end(); itr++)
+        stream << itr->X() << CSV_SEPARATOR
+               << itr->Awo() << CSV_SEPARATOR
+               << itr->Owa() << "\n";
+    return stream;
+}
+
+
+
 
 
 } // uLib
