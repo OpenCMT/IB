@@ -173,9 +173,7 @@ struct Trim5 {
 // CLASS
 
 ROCBuilder::ROCBuilder()
-{
-    this->init_parameters();
-}
+{}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -226,10 +224,10 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> 
     }
     max += max/2;
 
-    IBROC roc(parameters().samples);
-    for(int i=0; i < parameters().samples; ++i )
+    IBROC roc($$.samples);
+    for(int i=0; i < $$.samples; ++i )
     {
-        roc[i].X() = max/parameters().samples * i;
+        roc[i].X() = max/$$.samples * i;
         roc[i].Awo() = 0;
         roc[i].Owa() = 0;
     }
@@ -323,6 +321,23 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa,
     }
 
     return ret;
+}
+
+
+
+float ROCBuilder::Ratio(IBROC roc, float y)
+{
+    // first point y [%] Owa
+    IBROC::Iterator itr = roc.begin();
+    while (itr != roc.end() && itr->Awo() > y ) itr++;
+    float begin = itr->X();
+
+    // second point y [%] Awo
+    itr = roc.end()-1;
+    while (itr != roc.begin() && itr->Owa() > y ) itr--;
+    float end = itr->X();
+
+    return end / begin;
 }
 
 

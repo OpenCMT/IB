@@ -12,7 +12,7 @@ using namespace uLib;
 
 
 class IBAnalyzerWTrackLengths : public IBAnalyzer {
-
+    uLibTypeMacro(IBAnalyzerWTrackLengths,IBAnalyzer)
 public:
     IBAnalyzerWTrackLengths();
     ~IBAnalyzerWTrackLengths();
@@ -21,11 +21,13 @@ public:
 
     void Run(unsigned int iterations = 1, float muons_ratio = 1);
 
-    void SetRaytracer(IBVoxRaytracer *raytracer);
+    void SetRayAlgorithm(IBVoxRaytracer *raytracer);
 
     void SetPocaAlgorithm(IBPocaEvaluator *evaluator);
 
-    void SetVaraiblesAlgorithm(IBMinimizationVariablesEvaluator *algorithm);
+    void SetVarAlgorithm(IBMinimizationVariablesEvaluator *algorithm);
+
+    void SetPocaProximity(float sigma = 0); // TODO: //
 
 private:
     class IBAnalyzerWTrackLengthsPimpl *d;

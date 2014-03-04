@@ -32,28 +32,33 @@ class IBROC : public Vector<ROCElement>{
     typedef Vector<ROCElement> BaseClass;
   public:
 
-    IBROC() : BaseClass() {}
-    IBROC(unsigned int i) :  BaseClass(i) {}
+    IBROC() : BaseClass() , m_Samples(0,0)  {}
+    IBROC(unsigned int i) :  BaseClass(i) , m_Samples(0,0) {}
 
     virtual void Update() {}
 
-    virtual void read_roc_with_header(const char *file_name) {
+    virtual void read_csv(const char *file_name) {
         std::ifstream file;
         file.open(file_name);
-        this->read_roc_with_header(file);
+        this->read_csv(file);
+        file.close();
     }
 
-    virtual void read_roc_with_header(std::ifstream &file) {
+    virtual void read_csv(std::ifstream &file) {
         std::string line;
         std::string col;
 
+        this->clear(); // clear current data! //
         std::getline(file, line);
         std::istringstream csvStream(line);
 
         // header
         int j=0;
-        while( j<3 && std::getline(csvStream, col, CSV_SEPARATOR ) )
+        while( j<3 && std::getline(csvStream, col, CSV_SEPARATOR ) ) // labels
             m_labels[j++] = col;
+        j=0;
+        while( j<2 && std::getline(csvStream, col, CSV_SEPARATOR ) ) // #Samples
+            m_Samples[j++] = atof(col.c_str());
 
         while ( std::getline(file, line) ) {
             std::istringstream csvStream(line);
@@ -65,6 +70,26 @@ class IBROC : public Vector<ROCElement>{
         }
 
         this->Update();
+    }
+
+    virtual void write_csv(const char *file_name) {
+        std::ofstream file;
+        file.open(file_name);
+        this->write_csv(file);
+        file.close();
+    }
+
+    virtual void write_csv (std::ofstream &stream) {
+        // header
+        stream << "X" << CSV_SEPARATOR << "Awo" << CSV_SEPARATOR << "Owa"
+               << CSV_SEPARATOR << Samples()(0)
+               << CSV_SEPARATOR << Samples()(1)
+               << "\n";
+        // items
+        for (IBROC::Iterator itr = this->begin(); itr < this->end(); itr++)
+            stream << itr->X() << CSV_SEPARATOR
+                   << itr->Awo() << CSV_SEPARATOR
+                   << itr->Owa() << "\n";
     }
 
     Vector2f GetRange(float y = 90 ) {
@@ -111,30 +136,20 @@ class IBROC : public Vector<ROCElement>{
         return scale_factor;
     }
 
+    uLibRefMacro(Samples,Vector2i)
+
 public:
     std::string m_labels[3];
+    Vector2i    m_Samples; // FPF and FNF trials size //
 };
+
+
 
 inline std::ofstream&
 operator << (std::ofstream& stream, IBROC &roc) {
-    stream << "X" << CSV_SEPARATOR << "Awo" << CSV_SEPARATOR << "Owa\n";
-    for (IBROC::Iterator itr = roc.begin(); itr < roc.end(); itr++)
-        stream << itr->X() << CSV_SEPARATOR
-               << itr->Awo() << CSV_SEPARATOR
-               << itr->Owa() << "\n";
+    roc.write_csv(stream);
     return stream;
 }
-
-inline std::ostream&
-operator<< (std::ostream& stream, IBROC &roc) {
-    stream << "X" << CSV_SEPARATOR << "Awo" << CSV_SEPARATOR << "Owa\n";
-    for (IBROC::Iterator itr = roc.begin(); itr < roc.end(); itr++)
-        stream << itr->X() << CSV_SEPARATOR
-               << itr->Awo() << CSV_SEPARATOR
-               << itr->Owa() << "\n";
-    return stream;
-}
-
 
 
 

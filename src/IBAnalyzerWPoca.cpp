@@ -21,8 +21,6 @@ public:
 #ifndef NDEBUG
         m_out   = new TFile("dump_poca_weighting.root", "RECREATE");
         m_tree = new TTree("w", "weighting");
-        m_tree->Branch("w_x", &t_w_1,      "w_x");
-        m_tree->Branch("w_z", &t_w_2,      "w_z");
         m_tree->Branch("w",   &tmp.weight, "w");
 #endif
     }
@@ -30,23 +28,26 @@ public:
     bool CollectMuon(const MuonScatterData &muon)
     {
         assert(m_PocaAlgorithm);
-        assert(m_Minimizator);
-        if (m_PocaAlgorithm->evaluate(muon) && m_Minimizator->evaluate(muon)) {
+        if (m_PocaAlgorithm->evaluate(muon)) {
             tmp.poca   = m_PocaAlgorithm->getPoca();
-            t_w_1 = tan((m_Minimizator->getDataVector(0)));
-            t_w_2 = tan((m_Minimizator->getDataVector(2)));
-            t_w_1 *= t_w_1;
-            t_w_2 *= t_w_2;
-//            t_w_1 = (t_w_1>0.5) ? 0.5 : t_w_1; // <<< HARDCODED!!
-//            t_w_2 = (t_w_2>0.5) ? 0.5 : t_w_2; // Think about delta angle!
-
-            tmp.weight = 1E-6*(sqrt(t_w_1 + t_w_2));
-
+            if(m_Minimizator && m_Minimizator->evaluate(muon)) {
+                Scalarf t_w_1 = pow(tan((m_Minimizator->getDataVector(0))), 2);
+                Scalarf t_w_2 = pow(tan((m_Minimizator->getDataVector(2))), 2);
+                tmp.weight = (t_w_1 + t_w_2) * pow(muon.GetMomentum(),2) * 1.5E-6;
+            }
+            else {
+                Vector3f in, out;
+                in  = muon.LineIn().direction.head(3);
+                out = muon.LineOut().direction.head(3);
+                float a = in.transpose() * out;
+                a = fabs( acos(a / (in.norm() * out.norm())) );
+                if(uLib::isFinite(a)) tmp.weight = pow(a * muon.GetMomentum(),2) * 1.5E-6;
+                else tmp.weight = 0;
+            }
             m_Data.push_back(tmp);
-
-#ifndef NDEBUG
+#           ifndef NDEBUG
             m_tree->Fill();
-#endif
+#           endif
             return true;
         }
         return false;
@@ -55,8 +56,11 @@ public:
     void SetVoxels(IBVoxCollection *voxels) {
         for (int i=0; i<m_Data.size(); ++i) {
             Vector3i id = voxels->Find(m_Data[i].poca);
-            if (voxels->IsInsideGrid(id))
-                voxels->operator [](id).Value += m_Data[i].weight;
+            if (voxels->IsInsideGrid(id)) {
+                IBVoxel &vox = voxels->operator [](id);
+                vox.Value += m_Data[i].weight;
+                vox.Count++;
+            }
         }
     }
 
@@ -104,7 +108,7 @@ void IBAnalyzerWPoca::SetPocaAlgorithm(IBPocaEvaluator *poca)
     d->m_PocaAlgorithm = poca;
 }
 
-void IBAnalyzerWPoca::SetVariablesAlgorithm(IBMinimizationVariablesEvaluator *evaluator)
+void IBAnalyzerWPoca::SetVarAlgorithm(IBMinimizationVariablesEvaluator *evaluator)
 {
     d->m_Minimizator = evaluator;
 }

@@ -58,7 +58,7 @@ int main(int argv, char** argc) {
     vtkVoxRaytracerRepresentation v_tracer(tracer);
     vtkVoxRaytracerRepresentation v_traceR(traceR);
 
-    v_viewer.AddAbstractProp(v_voxels);
+    v_viewer.AddPuppet(v_voxels);
 
     if(reader->getNumberOfEvents() >= 100)
         for (int i=atoi(argc[1]); i<1000; i++) {
@@ -95,14 +95,14 @@ int main(int argv, char** argc) {
             v_traceR.SetVoxelsColor(Vector4f(0.5,0,0,0.25));
             v_tracer.SetRayColor(Vector4f(0,1,0,1));
             v_traceR.SetRayColor(Vector4f(1,0,0,1));
-            v_viewer.AddAbstractProp(v_tracer);
-            v_viewer.AddAbstractProp(v_traceR);
+            v_viewer.AddPuppet(v_tracer);
+            v_viewer.AddPuppet(v_traceR);
             //v_viewer.AddAbstractProp(v_event);
 
             v_viewer.Start();
             //v_viewer.RemoveAbstractProp(v_event);
-            v_viewer.RemoveAbstractProp(v_tracer);
-            v_viewer.RemoveAbstractProp(v_traceR);
+            v_viewer.RemovePuppet(v_tracer);
+            v_viewer.RemovePuppet(v_traceR);
 
         }
     }

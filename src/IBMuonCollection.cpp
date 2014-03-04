@@ -1,4 +1,7 @@
 
+#include "root/TFile.h"
+#include "root/TTree.h"
+
 #include <math.h>
 #include <Math/Utils.h>
 
@@ -30,7 +33,7 @@ class IBMuonCollectionPimpl {
         Vector3f in = mu.LineIn().direction.head(3);
         Vector3f out = mu.LineOut().direction.head(3);
         float a = in.transpose() * out;
-        a = fabs( M_PI_2 - asin(a / (in.norm() * out.norm())) );
+        a = fabs( acos(a / (in.norm() * out.norm())) );
         if(uLib::isFinite(a)) return a;
         else return 0;
     }
@@ -144,4 +147,31 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
         o << " Muons passed: " << this->size() << "\n";
 }
 
+void IBMuonCollection::DumpP(const char *filename)
+{
+    static int counter = 0;
+    static TFile *file = new TFile(filename,"RECREATE");
+
+    if(filename) {
+        char name[100];
+        sprintf(name,"p_%i",counter++);
+        gDirectory->cd(file->GetPath());
+        TTree *tree = new TTree(name,name);
+        float p = 0;
+        tree->Branch("p",&p,"float");
+        for(int i=0; i < this->size(); ++i )
+        {
+            p = this->At(i).GetMomentum();
+            tree->Fill();
+        }
+        tree->Write();
+        delete tree;
+    }
+    else {
+        file->Write();
+        file->Close();
+        delete file;
+    }
+        return;
+}
 

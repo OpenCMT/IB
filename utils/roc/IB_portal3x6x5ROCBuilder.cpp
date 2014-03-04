@@ -261,6 +261,9 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
                                                             HVector3f(30,25,30));
                 for(uLib::IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++)
                     itr->Owa() += img.CountLambdaOverThreshold(itr->X()) > 0 ? 1 : 0;
+                //#               pragma omp parallel for
+//                for(uint i=0; i < roc.size(); ++i)
+//                    roc[i].Owa() += img.CountLambdaOverThreshold(roc[i].X()) > 0 ? 1 : 0;
             }
         }
         sprintf(fname, p.file_inTp, ++y, p.iteration);
@@ -284,6 +287,9 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
         // SCAN THRESHOLD //
         for(uLib::IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++)
             itr->Awo() += (image.CountLambdaOverThreshold(itr->X()) > 0) ? 1 : 0;
+        //#       pragma omp parallel for
+        //        for(uint i=0; i < roc.size(); ++i)
+        //            roc[i].Owa() += image.CountLambdaOverThreshold(roc[i].X()) > 0 ? 1 : 0;
 
         std::cout << "\rProcessing SCRAP: " << fBulk << std::flush;
     }
@@ -341,11 +347,11 @@ int main(int argc, char **argv)
     }
 
     // used
-    process_ROC<Recipes::NoFilter>(argc,argv);
-    //    process_ROC<Recipes::Avg>(argc,argv);
-    //    process_ROC<Recipes::Trim3u>(argc,argv);
-    // process_ROC<Recipes::Trim3>(argc,argv);
-    //    process_ROC<Recipes::BilateralTrim>(argc,argv);
+//    process_ROC<Recipes::NoFilter>(argc,argv);
+//    process_ROC<Recipes::Avg>(argc,argv);
+    process_ROC<Recipes::Trim3u>(argc,argv);
+//    process_ROC<Recipes::Trim3>(argc,argv);
+    process_ROC<Recipes::BilateralTrim>(argc,argv);
 
     // not used
     //    process_ROC<Recipes::Gauss3>(argc,argv);

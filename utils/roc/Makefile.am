@@ -1,7 +1,7 @@
 
 include $(top_srcdir)/Common.am
 
-LDADD = $(top_srcdir)/libmutomIB-0.3.5.la
+LDADD = $(top_srcdir)/libmutomIB-0.3.5.la -lboost_program_options
 
 bin_PROGRAMS = 	IB_lnlROCBuilder \
                 IB_lnlROCBuilder2 \

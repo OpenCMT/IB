@@ -103,7 +103,7 @@ void IBAnalyzerTrackLengths::Run(unsigned int iterations, float muons_ratio)
         d->Project(&d->m_Events[i]);
 }
 
-void IBAnalyzerTrackLengths::SetRaytracer(IBVoxRaytracer *raytracer)
+void IBAnalyzerTrackLengths::SetRayAlgorithm(IBVoxRaytracer *raytracer)
 {
     d->m_RayAlgorithm = raytracer;
 }

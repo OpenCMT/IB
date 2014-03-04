@@ -13,6 +13,40 @@
 
 #define CSV_SEPARATOR ';'
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// GLOBAL PARAMETERS
+
+
+struct Parameters {
+    char *file_inTp;
+    char *file_inFp;
+    char *file_out;
+    int  samples;
+    int iteration;
+    std::string algs;
+} p = {
+    "/var/local/data/vtk/ROC/ROC_LNL_1388/Source_12l/vtk_R7_10cm/min_0.5/image_%i_%i.vtk",
+    "/var/local/data/vtk/ROC/ROC_LNL_1388/NOSource/vtk_R7_10cm/min_0.5/image_%i_%i.vtk",
+    "ROC_r1388_%s_v10_t0.5.csv",
+    1000,
+    300,
+    "NoFilter"
+};
+
+
+
+HPoint3f  img_center(-5,-95,-5);
+HVector3f img_hsize(55,70,50);
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// RECIPES //
+
+
 
 namespace Recipes {
 
@@ -159,31 +193,6 @@ struct BilateralTrim {
 
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// GLOBAL PARAMETERS
-
-
-struct Parameters {
-    char *file_inTp;
-    char *file_inFp;
-    char *file_out;
-    int  samples;
-    int iteration;
-} p = {
-    "/var/local/data/vtk/ROC/ROC_LNL_1388/Source_12l/vtk_R7_10cm/min_0.5/image_%i_%i.vtk",
-    "/var/local/data/vtk/ROC/ROC_LNL_1388/NOSource/vtk_R7_10cm/min_0.5/image_%i_%i.vtk",
-    "ROC_r1388_%s_v10_t0.5.csv",
-    1000,
-    300
-};
-
-
-
-HPoint3f  img_center(-5,-95,-5);
-HVector3f img_hsize(55,70,50);
-
 
 
 
@@ -286,7 +295,9 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
         itr->X()   *= 1E6;
         itr->Awo() *= 100./fBulk;
         itr->Owa()  = 100 * (1 - itr->Owa()/fbulk);
-    }
+    }    
+
+    roc.Samples() << fBulk , fbulk;
 
     // FILE SAVE ------------------------------------------------------------ //
     std::cout << "Finalizing Data and Saving..." << std::flush;
@@ -314,21 +325,41 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
 ////////////////////////////////////////////////////////////////////////////////
 // MAIN
 
+#include "boost/tokenizer.hpp"
+
+#include "Core/Options.h"
+
 
 int main(int argc, char **argv)
 {
 
-    if(argc == 6) {
+
+
+    Options opt("usage: sourcefile_%i_%i, nosourcefile_%i_%i, fileoutname  ( %i_%i is: imagesample_iteration )");
+    opt.add_options()
+            ("help", "get this help and exit")
+            ("samples", &p.samples, "samples to quantize ROC threshold")
+            ("iteration", &p.iteration, "iteration to run")
+            ("algs",&p.algs, "Algorithms to use");
+
+    opt.parse_command_line(argc,argv);
+
+    boost::tokenizer<> tok(p.algs);
+    for(boost::tokenizer<>::iterator beg = tok.begin(); beg!=tok.end(); ++beg){
+        std::cout << *beg << "\n";
+    }
+
+    if(argc >= 4) {
         p.file_inTp  = argv[1];
         p.file_inFp  = argv[2];
         p.file_out   = argv[3];
-        p.samples    = atof(argv[4]);
-        p.iteration  = atof(argv[5]);
     }
     else {
-        std::cout << "invalid command. please use this args: sourcefile_%i_%i, nosourcefile_%i_%i, fileoutname, nsamples, iteration\n";
+        std::cerr << "error parsing command line: use --help \n";
         exit(1);
     }
+
+    exit(0);
 
     // used
     process_ROC<Recipes::NoFilter>(argc,argv);

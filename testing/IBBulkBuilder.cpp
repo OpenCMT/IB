@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     // poca analyzer //
     IBAnalyzerWPoca* ap = new IBAnalyzerWPoca();
     ap->SetPocaAlgorithm(processor);
-    ap->SetVariablesAlgorithm(minimizator);
+    ap->SetVarAlgorithm(minimizator);
     ap->SetVoxCollection(&voxels);
 
 

@@ -18,38 +18,55 @@ public:
             Matrix4f Wij;
             IBVoxel *voxel;
         };
+        HPoint3f PoCa;
         Vector4f Variables;
+        Scalarf  Length;
+        Scalarf  Momentum;
         Vector<Element> elements;
     };
 
-    IBAnalyzerWTrackLengthsPimpl() :
+    IBAnalyzerWTrackLengthsPimpl(IBAnalyzerWTrackLengths *parent) :
         m_RayAlgorithm(NULL),
         m_PocaAlgorithm(NULL),
-        m_VarAlgorithm(NULL)
+        m_VarAlgorithm(NULL),
+        m_poca_proximity_rms(0)
     {}
 
     void Project(Event *evc) {
         IBVoxel *vox;
         for (unsigned int j = 0; j < evc->elements.size(); ++j) {
             vox = evc->elements[j].voxel;
-            vox->Value += ( pow(fabs(evc->Variables(0)),2) + pow(fabs(evc->Variables(2)),2)  ) *
-                    evc->elements[j].Wij(0,0);
-            vox->Count++;
+            float a;
+            if(m_VarAlgorithm)
+                a = ( pow(fabs(evc->Variables(0)),2) + pow(fabs(evc->Variables(2)),2)  ) *
+                        evc->elements[j].Wij(0,0) * pow(evc->Momentum,2) * 1.5E-6 / evc->Length;
+            else
+                a = evc->Variables(0) * pow(evc->Momentum,2) * 1.5E-6 * evc->elements[j].Wij(0,0) / evc->Length;
+            // FINIRE //
+            //  if(m_poca_proximity_rms > 0) {
+            //    float d = 1/sqrt(2*M_PI)/fabs(m_poca_proximity_rms) ;// ...
+            //  }
+            if(a<1E-6) {
+                vox->Value += a;
+                vox->Count++;
+            }
         }
     }
 
     // members //
+    IBAnalyzerWTrackLengths *p;
     Vector<Event> m_Events;
     VoxRaytracer *m_RayAlgorithm;
     IBPocaEvaluator *m_PocaAlgorithm;
     IBMinimizationVariablesEvaluator *m_VarAlgorithm;
+    Scalarf m_poca_proximity_rms;
 };
 
 
 
 
 IBAnalyzerWTrackLengths::IBAnalyzerWTrackLengths() :
-    d(new IBAnalyzerWTrackLengthsPimpl)
+    d(new IBAnalyzerWTrackLengthsPimpl(this))
 {}
 
 IBAnalyzerWTrackLengths::~IBAnalyzerWTrackLengths()
@@ -59,17 +76,28 @@ IBAnalyzerWTrackLengths::~IBAnalyzerWTrackLengths()
 
 bool IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
 {
-    if(!d->m_RayAlgorithm || !d->m_PocaAlgorithm || !d->m_VarAlgorithm) {
+    if(!d->m_RayAlgorithm || !d->m_PocaAlgorithm /*|| !d->m_VarAlgorithm*/) {
         std::cerr << "not all parameters setted\n";
         return false;
     }
+
     IBAnalyzerWTrackLengthsPimpl::Event evc;
 
-    // VARIABLES //
-    if(likely(d->m_VarAlgorithm->evaluate(muon))) {
+    evc.Momentum = muon.GetMomentum();
+
+    // VARIABLES //    
+    if(likely(d->m_VarAlgorithm && d->m_VarAlgorithm->evaluate(muon))) {
         evc.Variables = d->m_VarAlgorithm->getDataVector();
     }
-    else return false;
+    else {
+        Vector3f in, out;
+        in  = muon.LineIn().direction.head(3);
+        out = muon.LineOut().direction.head(3);
+        float a = in.transpose() * out;
+        a = acos(a / (in.norm() * out.norm()) );
+        if(uLib::isFinite(a)) evc.Variables(0) = pow(a,2);
+        else evc.Variables(0) = 0;
+    }
 
     // RAY //
     IBVoxRaytracer::RayData ray;
@@ -93,6 +121,7 @@ bool IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
     // LENGTHS //
     IBAnalyzerWTrackLengthsPimpl::Event::Element elc;
     Scalarf T = ray.TotalLength();
+    evc.Length = T;
     for(int i=0; i<ray.Data().size(); ++i)
     {
         const IBVoxRaytracer::RayData::Element *el = &ray.Data().at(i);
@@ -119,7 +148,7 @@ void IBAnalyzerWTrackLengths::Run(unsigned int iterations, float muons_ratio)
         d->Project(&d->m_Events[i]);
 }
 
-void IBAnalyzerWTrackLengths::SetRaytracer(IBVoxRaytracer *raytracer)
+void IBAnalyzerWTrackLengths::SetRayAlgorithm(IBVoxRaytracer *raytracer)
 {
     d->m_RayAlgorithm = raytracer;
 }
@@ -129,7 +158,13 @@ void IBAnalyzerWTrackLengths::SetPocaAlgorithm(IBPocaEvaluator *evaluator)
     d->m_PocaAlgorithm = evaluator;
 }
 
-void IBAnalyzerWTrackLengths::SetVaraiblesAlgorithm(IBMinimizationVariablesEvaluator *algorithm)
+void IBAnalyzerWTrackLengths::SetVarAlgorithm(IBMinimizationVariablesEvaluator *algorithm)
 {
     d->m_VarAlgorithm = algorithm;
+}
+
+void IBAnalyzerWTrackLengths::SetPocaProximity(float sigma)
+{
+    // FINIRE //
+    //    d->m_poca_proximity_rms = p;
 }

@@ -35,7 +35,7 @@ bool IBAnalyzerEM3p::AddMuon(const MuonScatterData &muon)
     if(unlikely(!GetRayAlgorithm() || !GetVarAlgorithm())) return false;
     Event evc;
 
-    evc.header.InitialSqrP = parameters().nominal_momentum/muon.GetMomentum();
+    evc.header.InitialSqrP = $$.nominal_momentum/muon.GetMomentum();
     evc.header.InitialSqrP *= evc.header.InitialSqrP;
 
     if(likely(GetVarAlgorithm()->evaluate(muon))) {

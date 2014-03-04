@@ -15,9 +15,9 @@ using namespace uLib;
 
 class ROCBuilder : public Object
 {
-    typedef Object BaseClass;
+    uLibTypeMacro(ROCBuilder,Object)
 public:
-    ULIB_OBJECT_PARAMETERS(BaseClass)
+    properties()
     {
         float start; // actually not used
         float stop;  // actually not used
@@ -38,12 +38,12 @@ public:
         Trim5
     };
 
-
-
     template < class RecipeT >
     IBROC BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> Awo);
 
     IBROC BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> Awo, ROCRecipeEnum recipe = NoFilter);
+
+    float Ratio(IBROC roc, float y);
 
     float FSI(IBROC roc, float y);
 
@@ -52,11 +52,11 @@ public:
 };
 
 
-inline void ROCBuilder::init_parameters() {
-    ULIB_PARAMETERS_INIT
-    $.start = 0;
-    $.stop  = 100;
-    $.samples  = 1000;
+inline void ROCBuilder::init_properties() {
+    $_init()
+    $$.start = 0;
+    $$.stop  = 100;
+    $$.samples  = 1000;
 }
 
 #endif // IBROCBUILDER_H

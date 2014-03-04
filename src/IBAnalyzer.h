@@ -7,10 +7,10 @@
 #include <Detectors/MuonError.h>
 
 #include "IBMuonCollection.h"
-#include "IBExperiment.h"
 
 using namespace uLib;
 
+class IBExperiment;
 class IBAnalyzerPoca;
 class IBAnalyzerWPoca;
 class IBAnalyzerEM;
@@ -22,6 +22,7 @@ class IBVoxCollection;
 
 
 class IBAnalyzer : public Object {
+    uLibTypeMacro(IBAnalyzer,Object)
 
 public:
 

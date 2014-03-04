@@ -2,7 +2,6 @@
 #define IBVOXIMAGEFILTERPLASMON_HPP
 
 #include "TFile.h"
-#include "TH2F.h"
 #include "Math/VoxImageFilter.h"
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -257,7 +257,7 @@ int do_iterations(const char *file_in,
     IBAnalyzerWPoca ap;
     ap.SetPocaAlgorithm(processor);
     ap.SetVoxCollection(&voxels);
-    ap.SetVariablesAlgorithm(minimizator);
+    ap.SetVarAlgorithm(minimizator);
 
     std::cout << "reading mu from file: ";
     for (int i=0; i<ev; i++) {

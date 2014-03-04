@@ -12,8 +12,9 @@ using namespace uLib;
 class IBNormalPlaneMinimizationVariablesEvaluator;
 class IBSimpleTwoViewsMinimizationVariablesEvaluator;
 
-class IBMinimizationVariablesEvaluator
+class IBMinimizationVariablesEvaluator : public Object
 {
+    uLibTypeMacro(IBMinimizationVariablesEvaluator,Object)
 public:
     enum IBMinVarEvaluatorAlgorithm {
         NormalPlane,

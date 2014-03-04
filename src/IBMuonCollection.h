@@ -40,6 +40,7 @@ public:
 
     void PrintSelf(std::ostream &o);
 
+    void DumpP(const char *filename);
 
 private:
     class IBMuonCollectionPimpl *d;

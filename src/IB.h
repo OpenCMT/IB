@@ -10,8 +10,8 @@
 
 #include <Core/Macros.h>
 #include <Core/Object.h>
+#include <Detectors/MuonScatter.h>
 
-using namespace uLib;
 
 namespace IB {
 
@@ -22,8 +22,24 @@ public:
     static const char *Release;
 
     static void PrintSelf(std::ostream &o);
-
 };
+
+
+//class TestObject : public Object {
+//    uLibTypeMacro(TestObject,Object)
+//public:
+//    properties() {
+//        int a;
+//        int b;
+//    };
+
+//};
+
+//inline void TestObject::init_properties() {
+//    $_init();
+//    $$.a = 123;
+//    $$.b = 5552368;
+//}
 
 
 }

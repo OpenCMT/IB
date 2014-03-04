@@ -60,7 +60,9 @@ bool IBAnalyzerTrackCount::AddMuon(const MuonScatterData &muon)
 
     IBVoxRaytracer::RayData ray;
     { // Get RayTrace RayData //
-        HPoint3f entry_pt,poca,exit_pt;
+        HPoint3f entry_pt,
+                poca,
+                exit_pt;
         if( !d->m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
                 !d->m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
             return false;
@@ -88,13 +90,26 @@ bool IBAnalyzerTrackCount::AddMuon(const MuonScatterData &muon)
     return true;
 }
 
+void IBAnalyzerTrackCount::SetMuonCollection(IBMuonCollection *muons)
+{
+    uLibAssert(muons);
+    d->m_Events.clear();
+    for(int i=0; i<muons->size(); ++i)
+    {
+        this->AddMuon(muons->At(i));
+    }
+    BaseClass::SetMuonCollection(muons);
+}
+
+
+
 void IBAnalyzerTrackCount::Run(unsigned int iterations, float muons_ratio)
 {
     for(int i=0; i<d->m_Events.size(); ++i)
         d->Project(&d->m_Events[i]);
 }
 
-void IBAnalyzerTrackCount::SetRaytracer(IBVoxRaytracer *raytracer)
+void IBAnalyzerTrackCount::SetRayAlgorithm(IBVoxRaytracer *raytracer)
 {
     d->m_RayAlgorithm = raytracer;
 }
@@ -102,6 +117,16 @@ void IBAnalyzerTrackCount::SetRaytracer(IBVoxRaytracer *raytracer)
 void IBAnalyzerTrackCount::SetPocaAlgorithm(IBPocaEvaluator *evaluator)
 {
     d->m_PocaAlgorithm = evaluator;
+}
+
+void IBAnalyzerTrackCount::Clear()
+{
+    d->m_Events.clear();
+}
+
+unsigned int IBAnalyzerTrackCount::Size() const
+{
+    return d->m_Events.size();
 }
 
 

@@ -16,7 +16,9 @@ class IBNormalPlaneMinimizationVariablesEvaluatorPimpl {
 
 public:
 
-    IBNormalPlaneMinimizationVariablesEvaluatorPimpl() {
+    IBNormalPlaneMinimizationVariablesEvaluatorPimpl(IBNormalPlaneMinimizationVariablesEvaluator *parent) : m_parent(parent)
+
+    {
         m_tracer    = NULL;
 
 #ifndef NDEBUG
@@ -86,6 +88,7 @@ public:
         if (unlikely((m_ErrorMatrix(0,0)>0.03 || m_ErrorMatrix(1,1)>1500 ||
                       m_ErrorMatrix(2,2)>0.03 || m_ErrorMatrix(2,2)>1500 ))) // << HARDCODED
             m_integrity = false;
+
 
 #ifndef NDEBUG
         if (m_integrity) {
@@ -322,14 +325,23 @@ public:
         //        return out;
 
 
-        // YZY rotations without angles (only for AlphaX)
+        // YZY rotations without angles
         Vector2f dc02 = Vector2f(dc(0),dc(2));       // phi
         Vector2f dc1  = Vector2f(dc(1),dc02.norm()); // theta
         Vector2f alphaX(dc(0),-dc(2)*dc(1));         // alphaX
+        Vector2f alphaZ(dc(0)*dc(1),-dc(2));
+        if(m_parent->$$.use_free_rotation == false) {
+            m_alpha = (  (1-m_parent->$$.alphaXZ) * atan2(alphaX(1),alphaX(0)) +
+                         (m_parent->$$.alphaXZ)*atan2(alphaZ(1),alphaZ(0)) );
+        }
+        else {
+            m_alpha = m_parent->$$.alphaXZ;
+        }
 
         Matrix4f first_y_rotation = compileYRotation(dc02);
         Matrix4f first_z_rotation = compileZRotation(dc1);
-        Matrix4f secnd_y_rotation = compileYRotation(alphaX);
+        //        Matrix4f secnd_y_rotation = compileYRotation(alphaX);
+        Matrix4f secnd_y_rotation = compileYRotation(m_alpha);
         Matrix4f out = secnd_y_rotation * first_z_rotation * first_y_rotation;
         return out;
 
@@ -418,7 +430,7 @@ public:
     }
 
 public:
-
+    IBNormalPlaneMinimizationVariablesEvaluator *m_parent;
     Scalarf         m_alpha;
     Scalarf         t_phi,
                     t_theta;
@@ -462,7 +474,9 @@ public:
 
 
 IBNormalPlaneMinimizationVariablesEvaluator::IBNormalPlaneMinimizationVariablesEvaluator() :
-    d(new IBNormalPlaneMinimizationVariablesEvaluatorPimpl) {}
+    d(new IBNormalPlaneMinimizationVariablesEvaluatorPimpl(this)) {
+    this->init_properties();
+}
 
 IBNormalPlaneMinimizationVariablesEvaluator::~IBNormalPlaneMinimizationVariablesEvaluator()
 {

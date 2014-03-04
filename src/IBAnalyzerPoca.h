@@ -8,7 +8,7 @@ using namespace uLib;
 class IBPocaEvaluator;
 
 class IBAnalyzerPoca : public IBAnalyzer {
-
+    uLibTypeMacro(IBAnalyzerPoca,IBAnalyzer)
 public:
     IBAnalyzerPoca();
     ~IBAnalyzerPoca();

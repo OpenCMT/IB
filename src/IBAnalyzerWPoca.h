@@ -10,6 +10,7 @@ class IBMinimizationVariablesEvaluator;
 
 class IBAnalyzerWPoca : public IBAnalyzer
 {
+    uLibTypeMacro(IBAnalyzerWPoca,IBAnalyzer)
 public:
     IBAnalyzerWPoca();
     ~IBAnalyzerWPoca();
@@ -20,7 +21,7 @@ public:
 
     void SetPocaAlgorithm(IBPocaEvaluator *poca);
 
-    void SetVariablesAlgorithm(IBMinimizationVariablesEvaluator *evaluator);
+    void SetVarAlgorithm(IBMinimizationVariablesEvaluator *evaluator);
 
 private:
     friend class IBAnalyzerWPocaPimpl;

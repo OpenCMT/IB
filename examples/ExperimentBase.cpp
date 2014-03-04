@@ -1,32 +1,37 @@
+
 #include <iostream>
 #include <fstream>
 
 #include <TFile.h>
 #include <TTree.h>
 
-
-#include "IBPocaEvaluator.h"
-#include "IBAnalyzerEM.h"
-#include "IBAnalyzerEMAlgorithm.h"
-#include "IBVoxRaytracer.h"
-#include "IBMinimizationVariablesEvaluator.h"
-#include "IBVoxCollection.h"
-#include "IBMuonError.h"
+#include "Core/Options.h"
 #include "Detectors/MuonScatter.h"
+
+#include "IB.h"
+
+#include "IBMuonError.h"
+#include "IBVoxCollection.h"
+#include "IBMuonCollection.h"
+
+#include "IBVoxRaytracer.h"
+#include "IBPocaEvaluator.h"
+#include "IBMinimizationVariablesEvaluator.h"
+#include "IBVoxFilters.h"
+
 #include "IBMuonEventTTreeReader.h"
 #include "IBMuonEventTTreeLNLdataReader.h"
 #include "IBMuonEventTTreeLNLmcReader.h"
-#include "IBVoxFilters.h"
-#include "IBAnalyzerWPoca.h"
-#include "IBMAPUpdateDensityAlgorithms.h"
+#include "IBMuonEventTTreeR3DmcReader.h"
 
-#include "IBSubImageGrabber.h"
-
+#include "IBAnalyzerEM.h"
+#include "IBAnalyzerEMAlgorithm.h"
 #include "IBAnalyzerEMAlgorithmSGA.h"
 #include "IBAnalyzerEMAlgorithmMGA.h"
-
-#include "IBMuonCollection.h"
-#include "IB.h"
+#include "IBMAPUpdateDensityAlgorithms.h"
+#include "IBAnalyzerPoca.h"
+#include "IBAnalyzerWPoca.h"
+#include "IBAnalyzerTrackCount.h"
 
 
 
@@ -35,15 +40,29 @@ using namespace uLib;
 ////////////////////////////////////////////////////////////////////////////////
 // EXPERIMENT PARAMETERS //
 
-Vector<Vector2f> g_Sij_guess_tp_pairs;
+namespace {
+static struct Experiment {
+    Experiment() :
+        m_reader(NULL),
+        ev_poca(NULL),
+        ev_tracer(NULL),
+        ev_analyzer(NULL)
+    {}
 
 
+
+    // members //
+    IBMuonEventTTreeReader *m_reader;
+    IBPocaEvaluator        *ev_poca;
+    IBVoxRaytracer         *ev_tracer;
+    IBAnalyzer             *ev_analyzer;
+    IBMuonCollection       muons;
+    IBVoxCollection        voxels;
+
+} p;
+} // local namespace
 
 ////////////////////////////////////////////////////////////////////////////////
-
-
-
-
 
 
 
@@ -177,7 +196,7 @@ Vector2f do_iterations(const char *file_in,
     for (int i=1; i<=it; ++i) {
         aem->Run(drop,1);
         //trim.Run();
-	if(it%5 == 0) 
+    if(it%5 == 0)
         sprintf(file, "%s_%i.vtk",file_out, i*drop);
         voxels.ExportToVtk(file,0);
         //sprintf(file, "%s_%i.vti",file_out, i*drop);
@@ -200,12 +219,6 @@ Vector2f do_iterations(const char *file_in,
 ////////////////////////////////////////////////////////////////////////////
 // MAIN //
 
-//RUN 20130530
-// FIX ALPHA PT
-//PT: RESULTS LATEST AND GREATEST muon momentum for N1*<Sij> < Sij < N2*<Sij>:
-//N1=0, N2=3:    <1/p2>=1.33619, <p>=0.8651
-//N1=3, N2=30:   <1/p2>=4.44864, <p>=0.474118
-//N1=30, N2=100: <1/p2>=15.5233, <p>=0.25381
 
 int main(int argc, char **argv) {
     struct {

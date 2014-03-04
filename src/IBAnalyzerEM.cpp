@@ -32,8 +32,8 @@ class IBAnalyzerEMPimpl {
     typedef IBAnalyzerEM::Event Event;
 
 public:
-    IBAnalyzerEMPimpl(IBAnalyzerEM::Parameters *parameters) :
-        m_parameters(parameters),
+    IBAnalyzerEMPimpl(IBAnalyzerEM *parent) :
+        m_parent(parent),
         m_SijAlgorithm(NULL)
     {}
 
@@ -42,12 +42,7 @@ public:
 
     void BackProject(Event *evc);
 
-    void BackProjectCut(Event *evc);
-
     void Evaluate(float muons_ratio);
-
-//    template < AlgorithmT >
-//    void Evaluate(float muons_ratio);
 
     void SijCut(float threshold);
 
@@ -56,7 +51,7 @@ public:
     void Chi2Cut(float threshold);
 
     // members //
-    IBAnalyzerEM::Parameters     *m_parameters;
+    IBAnalyzerEM                 *m_parent;
     IBAnalyzerEMAlgorithm        *m_SijAlgorithm;
     Vector<Event> m_Events;
 
@@ -78,21 +73,8 @@ void IBAnalyzerEMPimpl::BackProject(Event *evc)
     // sommatoria della formula 38 //
     for (unsigned int j = 0; j < evc->elements.size(); ++j) {
         vox = evc->elements[j].voxel;
-        vox->SijCap += evc->elements[j].Sij;        
-        vox->Count++;        
-    }
-}
-
-void IBAnalyzerEMPimpl::BackProjectCut(Event *evc)
-{
-    IBVoxel *vox;
-    // sommatoria della formula 38 //
-    for (unsigned int j = 0; j < evc->elements.size(); ++j) {
-        if(likely(evc->elements[j].Sij < m_parameters->SijCutEM)) {
-            vox = evc->elements[j].voxel;
-            vox->SijCap += evc->elements[j].Sij;
-            vox->Count++;
-        }
+        vox->SijCap += evc->elements[j].Sij;
+        vox->Count++;
     }
 }
 
@@ -109,20 +91,11 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
             this->Project(&m_Events[i]);
 #       pragma omp barrier
 
-        // Backprojection
-        if(likely(m_parameters->SijCutEM > 0.))
-        {
-#           pragma omp parallel for
-            for (unsigned int i = start; i < end; ++i)
-                this->BackProjectCut(&m_Events[i]);
-#           pragma omp barrier
-        }
-        else {
+//        // Backprojection
 #           pragma omp parallel for
             for (unsigned int i = start; i < end; ++i)
                 this->BackProject(&m_Events[i]);
 #           pragma omp barrier
-        }
     }
     else {
         std::cerr << "Error: Lamda ML Algorithm not setted\n";
@@ -166,7 +139,7 @@ void IBAnalyzerEMPimpl::SijGuess(float threshold, float p)
     do {
         if(em_test_SijCut(itr.base(), threshold))
         {
-            itr->header.InitialSqrP = m_parameters->nominal_momentum / p;
+            itr->header.InitialSqrP = m_parent->$$.nominal_momentum / p;
             itr->header.InitialSqrP *= itr->header.InitialSqrP;
         }
         itr++;    // guess solution
@@ -207,14 +180,15 @@ public:
         for(unsigned int i=0; i< voxels->Data().size(); ++i) {
             IBVoxel& voxel = voxels->Data()[i];
             unsigned int tcount = voxel.Count;
-            if (tcount > 0 && (threshold == 0 || tcount >= threshold)) {
+            if ( voxel.Value > 0 && tcount > 0 && (threshold == 0 || tcount >= threshold) ) {
                 voxel.Value += voxel.SijCap / static_cast<float>(tcount);
                 if(unlikely(!isFinite(voxel.Value) || voxel.Value > 100.E-6)) {  // HARDCODED!!!
                     voxel.Value = 100.E-6;
-                } else if (unlikely(voxel.Value < 0.)) voxel.Value = 0.1E-6;
+                }
+                // else if (unlikely(voxel.Value < 0.)) voxel.Value = 0.1E-6;
             }
-            else
-                voxel.Value = 0;
+            // else
+            // voxel.Value = 0;
             voxel.SijCap = 0;
         }
     }
@@ -228,7 +202,6 @@ public:
 // IB ANALYZER EM  /////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-
 IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels) :
     m_PocaAlgorithm(NULL),
     m_VarAlgorithm(NULL),
@@ -236,8 +209,8 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels) :
     m_UpdateAlgorithm(NULL)
 {
     BaseClass::SetVoxCollection(&voxels);
-    init_parameters();
-    d = new IBAnalyzerEMPimpl(&parameters());
+    init_properties(); // < DANGER !!! should be moved away !!
+    d = new IBAnalyzerEMPimpl(this);
 }
 
 IBAnalyzerEM::~IBAnalyzerEM()
@@ -256,7 +229,7 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
     if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)) return false;
     Event evc;
 
-    evc.header.InitialSqrP = parameters().nominal_momentum/muon.GetMomentum();
+    evc.header.InitialSqrP = $$.nominal_momentum/muon.GetMomentum();
 //    evc.header.InitialSqrP = parameters().nominal_momentum/0.7;
     evc.header.InitialSqrP *= evc.header.InitialSqrP;
 
@@ -281,8 +254,10 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
         // HARDCODED ... LESS ERROR ! //
         //evc.header.E /= 2;
 
+        //        std::cout
+        //                << " evc.header.Di " << evc.header.Di.transpose() << "\n"
+        //                << " evc.header.E " << evc.header.E << "\n";
     }
-    else return false;
 
     IBVoxRaytracer::RayData ray;
     { // Get RayTrace RayData //
@@ -295,6 +270,13 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
         if(m_PocaAlgorithm) {
             use_poca = m_PocaAlgorithm->evaluate(muon);
             poca = m_PocaAlgorithm->getPoca();
+
+            Vector3f in, out;
+            in  = muon.LineIn().direction.head(3);
+            out = muon.LineOut().direction.head(3);
+            float poca_angle = in.transpose() * out;
+            poca_angle = acos( - poca_angle / (in.norm() * out.norm()) );
+            use_poca &= ( fabs(poca_angle) > M_PI_2 );
         }
         if(use_poca && this->GetVoxCollection()->IsInsideBounds(poca)) {
             poca = m_PocaAlgorithm->getPoca();
@@ -399,7 +381,7 @@ void IBAnalyzerEM::SetVoxCollection(IBVoxCollection *voxels)
                      "*** without a defined muon collection ... ***\n";
 }
 
-void IBAnalyzerEM::AddVoxcollectionShift(Vector3f shift)
+void IBAnalyzerEM::SetVoxcollectionShift(Vector3f shift)
 {
   if(this->GetMuonCollection()) {
     IBVoxCollection *voxels = this->GetVoxCollection();
@@ -430,7 +412,7 @@ void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
         sprintf(name,"p_%i",counter++);
         gDirectory->cd(file->GetPath());
         TH1F *h = new TH1F(name,"1/p^2 distribution [1/GeV^2]",1000,x0,x1);
-        float p0 = parameters().nominal_momentum * parameters().nominal_momentum;
+        float p0 = $$.nominal_momentum * $$.nominal_momentum;
         for(Id_t i=0; i<d->m_Events.size(); ++i)
             h->Fill(d->m_Events[i].header.InitialSqrP / p0 );
         h->Write();

@@ -12,7 +12,7 @@ class IBAnalyzerEMAlgorithm;
 
 
 class IBAnalyzerEM : public IBAnalyzer {
-    typedef IBAnalyzer BaseClass;
+    uLibTypeMacro(IBAnalyzerEM,IBAnalyzer)
 
 public:
     struct Event {
@@ -35,7 +35,7 @@ public:
     };
 
 
-    ULIB_OBJECT_PARAMETERS(BaseClass)
+    properties()
     {
         Scalarf nominal_momentum;        
         Scalarf SijCutEM;
@@ -68,7 +68,7 @@ public:
 
     void SetVoxCollection(IBVoxCollection *voxels);
 
-    void AddVoxcollectionShift(Vector3f shift);
+    void SetVoxcollectionShift(Vector3f shift);
 
     void DumpP(const char *filename, float x0 = 0, float x1 = 10);
 
@@ -83,11 +83,10 @@ private:
     class IBAnalyzerEMPimpl *d;
 };
 
-
-inline void IBAnalyzerEM::init_parameters() {
-    ULIB_PARAMETERS_INIT
-    p().nominal_momentum = 3;
-    p().SijCutEM         = 0.0;
+inline void IBAnalyzerEM::init_properties() {
+    $_init();
+    $$.nominal_momentum = 3;
+    //    $$.SijCutEM         = 0.0; // non lo uso piu'
 }
 
 

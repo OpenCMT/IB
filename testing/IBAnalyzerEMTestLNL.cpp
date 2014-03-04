@@ -161,7 +161,7 @@ int do_iterations(const char *file_in,
     IBAnalyzerWPoca ap;
     ap.SetPocaAlgorithm(processor);
     ap.SetVoxCollection(&voxels);
-    ap.SetVariablesAlgorithm(minimizator);
+    ap.SetVarAlgorithm(minimizator);
 
     for (int i=0; i<ev; i++) {
         MuonScatter mu;
