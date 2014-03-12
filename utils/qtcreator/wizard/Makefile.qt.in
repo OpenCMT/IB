@@ -1,6 +1,6 @@
 
 CC=g++
-PKG=`pkg-config --cflags --libs libmutomIB-0.3.5`
+PKG=`pkg-config --cflags --libs libmutomIB-0.1`
 
 
 all:

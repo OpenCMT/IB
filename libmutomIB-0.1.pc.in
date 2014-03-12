@@ -10,5 +10,5 @@ Name: Mutom Library - Image Builder (INFN)
 Description: Library for Muon Tomography experiments.
 Requires: eigen3 libmutom-0.1
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -lmutom-0.1 -lmutomIB-0.3.5 -L${root_libdir} ${root_libs}
-Cflags: -I${includedir}/libmutom-0.1 -I${includedir}/libmutom-0.1/include -I${includedir}/libmutomIB-0.3.5 -I${includedir}/libmutomIB-0.3.5/include ${root_cflags}
+Libs: -L${libdir} -lmutom-0.1 -lmutomIB-@PACKAGE_VERSION@ -L${root_libdir} ${root_libs}
+Cflags: -I${includedir}/libmutom-0.1 -I${includedir}/libmutom-0.1/include -I${includedir}/libmutomIB-@PACKAGE_VERSION@ -I${includedir}/libmutomIB-@PACKAGE_VERSION@/include ${root_cflags}

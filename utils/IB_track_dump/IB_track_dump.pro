@@ -4,7 +4,7 @@ CONFIG -= qt
 
 unix {
     CONFIG += link_pkgconfig
-    PKGCONFIG += libmutomIB-0.3.5
+    PKGCONFIG += libmutomIB-0.1
     QMAKE_CXXFLAGS += -fopenmp
     LIBS += -fopenmp
 }
