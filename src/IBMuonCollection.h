@@ -40,7 +40,7 @@ public:
 
     void PrintSelf(std::ostream &o);
 
-    void DumpP(const char *filename);
+    void DumpTTree(const char *filename);
 
 private:
     class IBMuonCollectionPimpl *d;

@@ -191,11 +191,16 @@ int do_iterations(const char *file_in,
     ////////////////////////////////////////////////////////////////////////////
     // ITERATIONS //
     
-    int it   = 100;
-    int drop = 5;
-    
-    aem->SijCut(60);
-    voxels.InitLambda(air);
+    int it   = 10;
+    int drop = 1;
+
+    {
+        int count = aem->Size();
+        aem->SijCut(60);
+        voxels.InitLambda(air);
+        count -= aem->Size();
+        std::cout << "SijCut cutted size = " << count << "\n";
+    }
 
     char file[100];
 
@@ -236,8 +241,8 @@ int main(int argc, char **argv) {
         float start_min;
     } parameters = {
         "/var/local/data/root/muSteel_PDfit_20130220_1_v15.root",
-        "2lpg_notrim_PXT",
-        0.2,
+        "test",
+        10,
         0
     };
     

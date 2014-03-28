@@ -37,7 +37,7 @@ public:
 
     properties()
     {
-        Scalarf nominal_momentum;        
+        Scalarf nominal_momentum;
         Scalarf SijCutEM;
     };
 

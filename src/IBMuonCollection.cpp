@@ -29,7 +29,7 @@ class IBMuonCollectionPimpl {
         }
     };
 
-    static float MuonScatterAngle(MuonScatter &mu) {
+    static float MuonScatterAngle(const MuonScatter &mu) {
         Vector3f in = mu.LineIn().direction.head(3);
         Vector3f out = mu.LineOut().direction.head(3);
         float a = in.transpose() * out;
@@ -147,7 +147,7 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
         o << " Muons passed: " << this->size() << "\n";
 }
 
-void IBMuonCollection::DumpP(const char *filename)
+void IBMuonCollection::DumpTTree(const char *filename)
 {
     static int counter = 0;
     static TFile *file = new TFile(filename,"RECREATE");
@@ -158,10 +158,16 @@ void IBMuonCollection::DumpP(const char *filename)
         gDirectory->cd(file->GetPath());
         TTree *tree = new TTree(name,name);
         float p = 0;
+        float angle = 0;
+
         tree->Branch("p",&p,"float");
+        tree->Branch("angle",&angle,"float");
+
         for(int i=0; i < this->size(); ++i )
         {
-            p = this->At(i).GetMomentum();
+            const MuonScatter &mu = this->At(i);
+            p = mu.GetMomentum();
+            angle = d->MuonScatterAngle(mu);
             tree->Fill();
         }
         tree->Write();

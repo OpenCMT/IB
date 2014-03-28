@@ -103,7 +103,6 @@ int main(int argv, char** argc) {
             //v_viewer.RemoveAbstractProp(v_event);
             v_viewer.RemovePuppet(v_tracer);
             v_viewer.RemovePuppet(v_traceR);
-
         }
     }
 

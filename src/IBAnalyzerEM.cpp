@@ -73,7 +73,9 @@ void IBAnalyzerEMPimpl::BackProject(Event *evc)
     // sommatoria della formula 38 //
     for (unsigned int j = 0; j < evc->elements.size(); ++j) {
         vox = evc->elements[j].voxel;
+#       pragma omp atomic
         vox->SijCap += evc->elements[j].Sij;
+#       pragma omp atomic
         vox->Count++;
     }
 }
@@ -91,11 +93,11 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
             this->Project(&m_Events[i]);
 #       pragma omp barrier
 
-//        // Backprojection
-#           pragma omp parallel for
-            for (unsigned int i = start; i < end; ++i)
-                this->BackProject(&m_Events[i]);
-#           pragma omp barrier
+        // Backprojection
+#       pragma omp parallel for
+        for (unsigned int i = start; i < end; ++i)
+            this->BackProject(&m_Events[i]);
+#       pragma omp barrier
     }
     else {
         std::cerr << "Error: Lamda ML Algorithm not setted\n";
@@ -109,6 +111,7 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
 ////////////////////////////////////////////////////////////////////////////////
 
 // SijCut RECIPE1:  (true if Sij cut proposed) //
+
 static int em_test_SijCut(Event *evc, float cut_level)
 {
     int n_cuts = 0;
@@ -123,14 +126,20 @@ static int em_test_SijCut(Event *evc, float cut_level)
 void IBAnalyzerEMPimpl::SijCut(float threshold)
 {
     Vector< Event >::iterator itr = this->m_Events.begin();
-    do {
-        if(em_test_SijCut(itr.base(), threshold))
+    while (itr != this->m_Events.end()) {
+        ////////////////////////////////////////////////////////////////////////
+        int n_cuts = 0;
+        for (unsigned int i = 0; i < itr->elements.size(); i++)
+            if (fabs( (itr->elements[i].Sij * itr->elements[i].voxel->Count -
+                       itr->elements[i].voxel->SijCap) /
+                      itr->elements[i].voxel->SijCap ) > threshold) n_cuts++;
+        if (n_cuts > (itr->elements.size()/3) )/////////////////////////////////
+//        if(em_test_SijCut(itr.base(), threshold))
         {
             this->m_Events.remove_element(*itr);
         }
         else ++itr; // remove solution
-
-    } while (itr != this->m_Events.end());
+    }
 }
 
 void IBAnalyzerEMPimpl::SijGuess(float threshold, float p)
@@ -185,10 +194,10 @@ public:
                 if(unlikely(!isFinite(voxel.Value) || voxel.Value > 100.E-6)) {  // HARDCODED!!!
                     voxel.Value = 100.E-6;
                 }
-                // else if (unlikely(voxel.Value < 0.)) voxel.Value = 0.1E-6;
+                //                 else if (unlikely(voxel.Value < 0.)) voxel.Value = 0.1E-6;
             }
             // else
-            // voxel.Value = 0;
+            //             voxel.Value = 0;
             voxel.SijCap = 0;
         }
     }
@@ -267,16 +276,15 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
             return false;
 
         bool use_poca = false;
-        if(m_PocaAlgorithm) {
+        if(m_PocaAlgorithm) { //TODO:  move this to poca algorithm
             use_poca = m_PocaAlgorithm->evaluate(muon);
             poca = m_PocaAlgorithm->getPoca();
 
-            Vector3f in, out;
-            in  = muon.LineIn().direction.head(3);
-            out = muon.LineOut().direction.head(3);
-            float poca_angle = in.transpose() * out;
-            poca_angle = acos( - poca_angle / (in.norm() * out.norm()) );
-            use_poca &= ( fabs(poca_angle) > M_PI_2 );
+            HVector3f in, out;
+            in  = poca - muon.LineIn().origin;
+            out = muon.LineOut().origin - poca;
+            float poca_prj = in.transpose() * out;
+            use_poca &= ( poca_prj > 0 );
         }
         if(use_poca && this->GetVoxCollection()->IsInsideBounds(poca)) {
             poca = m_PocaAlgorithm->getPoca();
