@@ -46,6 +46,10 @@ include(uLibMacros)
 include(uLibDebugMacro)
 include(uLibTargetMacros)
 
+## CONFIG ------------------------------------------------------------------- ##
+
+include(uLibConfigHeader)
+
 
 ## GLOBALS ------------------------------------------------------------------ ##
 
@@ -53,10 +57,13 @@ include(uLibCommon)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ") ## Add flags here ##
 
 
-
 ## FIND PACKAGES ------------------------------------------------------------ ##
 
 include(uLibFindDependencies)
+
+
+
+
 
 ## CONFIG FIND PACKAGE
 set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/lib/cmake")
@@ -77,9 +84,6 @@ if(ULIB_CONFIG)
  include_directories(${ULIB_INCLUDE_DIRS})
 endif()
 
-## CONFIG ------------------------------------------------------------------- ##
-
-include(uLibConfigHeader)
 
 
 ## ADD LIBRARIES SUBDIRECTORIES --------------------------------------------- ##
