@@ -16,7 +16,6 @@ void IBAnalyzerEMAlgorithmSGA_PXTZ::evaluate(Matrix4f &Sigma,
     Matrix4f iS;
     iS = Sigma.inverse();
     Matrix4f Wij = Matrix4f::Zero();
-
     Matrix4f Dn = iS * (evc->header.Di * evc->header.Di.transpose());
 
     for (unsigned int j = 0; j < evc->elements.size(); ++j) {
@@ -205,9 +204,9 @@ void IBAnalyzerEMAlgorithmSGA_PXT::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorit
 void IBAnalyzerEMAlgorithmSGA_PT::evaluate(Matrix4f &Sigma,
                                               IBAnalyzerEMAlgorithm::Event *evc)
 {
+    Matrix2f S;
     Matrix2f iS;
     {
-        Matrix2f S;
         S << Sigma(0,0), Sigma(0,2), Sigma(2,0), Sigma(2,2);
         iS = S.inverse();
     }
@@ -218,9 +217,23 @@ void IBAnalyzerEMAlgorithmSGA_PT::evaluate(Matrix4f &Sigma,
         Wij << evc->elements[j].Wij(0,0),0,
                0,evc->elements[j].Wij(0,0);
         Matrix2f iSWij = iS * Wij;
+        float lambda = evc->elements[j].lambda;
         float DISWISD  = Di.transpose() * iSWij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
                 evc->elements[j].lambda * evc->elements[j].lambda / 2 / $$.inertia;
+        //        if(isnan(evc->elements[j].Sij)) {
+        //            std::cout << "\n\n -------------------------- \n"
+        //                      << "Di: " << Di.transpose() << "\n"
+        //                      << "\nlambda: " << lambda
+        //                      << "\nWij: \n" << Wij
+        //                      << "\nSigma:\n" << S
+        //                      << "\nE:\n" << evc->header.E
+        //                      << "\nISigma: \n" << iS
+        //                      << "\npw:" << evc->elements[j].pw
+        //                      << "\ninertia:" << $$.inertia
+        //                      << "\nlambda dopo: " << evc->elements[j].lambda
+        //                      << "\n" << std::flush;
+        //        }
     }
 }
 

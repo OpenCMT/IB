@@ -5,6 +5,7 @@
 #include <TH1F.h>
 
 #include <Core/Vector.h>
+#include <Core/Debug.h>
 
 #include "IBPocaEvaluator.h"
 #include "IBMinimizationVariablesEvaluator.h"
@@ -17,9 +18,11 @@
 #include "IBAnalyzerEMAlgorithmSGA.h"
 
 class IBAnalyzerEMPimpl;
+
+namespace {
 typedef IBAnalyzerEM::Event Event;
-
-
+//static DebugTTree trd(__FILE__);
+} // namespace
 
 
 
@@ -75,14 +78,23 @@ void IBAnalyzerEMPimpl::BackProject(Event *evc)
         vox = evc->elements[j].voxel;
 #       pragma omp atomic
         vox->SijCap += evc->elements[j].Sij;
+//        {
+//            //            IBVoxel *v0 = &(*m_parent->GetVoxCollection()->Data().begin());
+//            //            int id = (vox-v0)/sizeof(IBVoxel);
+//            if( isnan(evc->elements[j].Sij) ) {
+//                std::cout << "nan Sij in vox:" << vox << " mu:" << evc << "\n" << std::flush;
+//            }
+//            if( isnan(vox->SijCap) ) {
+//                std::cout << "nan SijCap in vox:" << vox << " mu:" << evc << "\n" << std::flush;
+//            }
+//        }
 #       pragma omp atomic
         vox->Count++;
     }
 }
 
 void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
-{
-    // TODO: Move to iterators !!! //
+{    
     unsigned int start = 0;
     unsigned int end = (unsigned int) (m_Events.size() * muons_ratio);
 
@@ -111,15 +123,15 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
 ////////////////////////////////////////////////////////////////////////////////
 
 // SijCut RECIPE1:  (true if Sij cut proposed) //
-
-static int em_test_SijCut(Event *evc, float cut_level)
+static bool em_test_SijCut(const Event &evc, float cut_level)
 {
     int n_cuts = 0;
-    for (unsigned int i = 0; i < evc->elements.size(); i++)
-        if (fabs( (evc->elements[i].Sij * evc->elements[i].voxel->Count -
-                   evc->elements[i].voxel->SijCap) /
-                  evc->elements[i].voxel->SijCap ) > cut_level) n_cuts++;
-    if (n_cuts > (int)(evc->elements.size()/3) ) return true;
+    for (unsigned int i = 0; i < evc.elements.size(); i++) {
+        const Event::Element &el = evc.elements[i];
+        if (fabs( (el.Sij * el.voxel->Count - el.voxel->SijCap)
+                  / el.voxel->SijCap ) > cut_level) n_cuts++;
+    }
+    if (n_cuts > (int)(evc.elements.size()/3) ) return true;
     else return false;
 }
 
@@ -127,18 +139,11 @@ void IBAnalyzerEMPimpl::SijCut(float threshold)
 {
     Vector< Event >::iterator itr = this->m_Events.begin();
     while (itr != this->m_Events.end()) {
-        ////////////////////////////////////////////////////////////////////////
-        int n_cuts = 0;
-        for (unsigned int i = 0; i < itr->elements.size(); i++)
-            if (fabs( (itr->elements[i].Sij * itr->elements[i].voxel->Count -
-                       itr->elements[i].voxel->SijCap) /
-                      itr->elements[i].voxel->SijCap ) > threshold) n_cuts++;
-        if (n_cuts > (itr->elements.size()/3) )/////////////////////////////////
-//        if(em_test_SijCut(itr.base(), threshold))
+        if(em_test_SijCut(*itr, threshold))
         {
             this->m_Events.remove_element(*itr);
         }
-        else ++itr; // remove solution
+        else ++itr;
     }
 }
 
@@ -146,12 +151,12 @@ void IBAnalyzerEMPimpl::SijGuess(float threshold, float p)
 {
     Vector< Event >::iterator itr = this->m_Events.begin();
     do {
-        if(em_test_SijCut(itr.base(), threshold))
+        if(em_test_SijCut(*itr, threshold))
         {
             itr->header.InitialSqrP = m_parent->$$.nominal_momentum / p;
             itr->header.InitialSqrP *= itr->header.InitialSqrP;
         }
-        itr++;    // guess solution
+        itr++;
     } while (itr != this->m_Events.end());
 }
 
@@ -207,6 +212,15 @@ public:
 
 
 
+
+
+
+
+
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // IB ANALYZER EM  /////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -238,12 +252,9 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
     if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)) return false;
     Event evc;
 
-    evc.header.InitialSqrP = $$.nominal_momentum/muon.GetMomentum();
-//    evc.header.InitialSqrP = parameters().nominal_momentum/0.7;
-    evc.header.InitialSqrP *= evc.header.InitialSqrP;
-
-
-
+    evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
+    if(isnan(evc.header.InitialSqrP)) std::cout << "sono in AddMuon: nominalp:" << $$.nominal_momentum << " muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::flush;
+//    DBG(trd,evc.header.InitialSqrP,"invP2/F");
     if(likely(m_VarAlgorithm->evaluate(muon))) {
         evc.header.Di = m_VarAlgorithm->getDataVector();
         evc.header.E  = m_VarAlgorithm->getCovarianceMatrix();
@@ -261,12 +272,13 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
         // .................................................. //
 
         // HARDCODED ... LESS ERROR ! //
+        //evc.header.E = Matrix4f::Zero();
         //evc.header.E /= 2;
-
         //        std::cout
         //                << " evc.header.Di " << evc.header.Di.transpose() << "\n"
         //                << " evc.header.E " << evc.header.E << "\n";
     }
+    else return false;
 
     IBVoxRaytracer::RayData ray;
     { // Get RayTrace RayData //
@@ -279,11 +291,13 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
         if(m_PocaAlgorithm) { //TODO:  move this to poca algorithm
             use_poca = m_PocaAlgorithm->evaluate(muon);
             poca = m_PocaAlgorithm->getPoca();
+//            DBG(trd,poca,"x/F:y/F:z/F:h/F");
 
             HVector3f in, out;
             in  = poca - muon.LineIn().origin;
             out = muon.LineOut().origin - poca;
             float poca_prj = in.transpose() * out;
+//            DBG(trd,poca_prj);
             use_poca &= ( poca_prj > 0 );
         }
         if(use_poca && this->GetVoxCollection()->IsInsideBounds(poca)) {
@@ -302,19 +316,19 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
     for(int i=0; i<ray.Data().size(); ++i)
     {
         // voxel //
-        const IBVoxRaytracer::RayData::Element *el = &ray.Data().at(i);
-        elc.voxel = &this->GetVoxCollection()->operator [](el->vox_id);
+        const IBVoxRaytracer::RayData::Element &el = ray.Data().at(i);
+        elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);
         // Wij   //
-        Scalarf L = el->L;  T -= L;
+        Scalarf L = el.L;  T = fabs(T-L);
         elc.Wij << L ,          L*L/2 + L*T,
                    L*L/2 + L*T, L*L*L/3 + L*L*T + L*T*T;
         // pw    //
         elc.pw = evc.header.InitialSqrP;
-
-        evc.elements.push_back(elc);        
+        evc.elements.push_back(elc);
     }
-//#   pragma omp critical
+
     d->m_Events.push_back(evc);
+//    trd.Fill();
     return true;
 }
 

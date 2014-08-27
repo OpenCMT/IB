@@ -16,6 +16,7 @@ bool IBAnalyzerEMAlgorithm::ComputeSigma(Matrix4f &Sigma,
         _Sigma += evc->elements[j].Wij * evc->elements[j].lambda;
     }
 
+//    if(isnan(evc->header.InitialSqrP)) std::cout << "sto calcolando Sigma e ho trovato 1/p2 a nan \n" << std::flush;
     _Sigma *= evc->header.InitialSqrP;
 
     Sigma.block<2,2>(0,0) = _Sigma;

@@ -1,0 +1,86 @@
+set(HEADERS
+                          IB.h
+                          IBAbstractReader.h
+                          IBAnalyzer.h
+                          IBAnalyzerEM.h
+                          IBAnalyzerEM3p.h
+                          IBAnalyzerEMTrim.h
+                          IBAnalyzerEMAlgorithm.h
+                          IBAnalyzerEMAlgorithmMGA.h
+                          IBAnalyzerEMAlgorithmSGA.h
+                          IBAnalyzerPoca.h
+                          IBAnalyzerTrackCount.h
+                          IBAnalyzerTrackLengths.h
+                          IBAnalyzerWPoca.h
+                          IBAnalyzerWTrackLengths.h
+                          IBExperiment.h
+                          IBLineDistancePocaEvaluator.h
+                          IBMAPUpdateDensityAlgorithms.h
+                          IBMinimizationVariablesEvaluator.h
+                          IBMuonCollection.h
+                          IBMuonError.h
+                          IBMuonEventTTreeLNLdataReader.h
+                          IBMuonEventTTreeLNLmcReader.h
+                          IBMuonEventTTreeR2DmcReader.h
+                          IBMuonEventTTreeR3DmcReader.h
+                          IBMuonEventTTreeReader.h
+                          IBNormalPlaneMinimizationVariablesEvaluator.h
+                          IBSimpleTwoViewsMinimizationVariablesEvaluator.h
+                          IBPWeightAlgorithms.h
+                          IBPocaEvaluator.h
+                          IBSubImageGrabber.h
+                          IBTiltedAxisPocaEvaluator.h
+                          IBVoxCollection.h
+                          IBVoxCollectionCap.h
+                          IBVoxFilters.h
+                          IBVoxImageScanner.h
+                          IBVoxRaytracer.h
+                          IBVoxel.h
+                          IBVoxImageFilterPlasmon.hpp
+                          IBVoxImageFilterGradient.hpp
+                          IBROC.h
+                          IBROCBuilder.h
+)
+
+SET(SOURCES
+                IB.cpp
+                IBMinimizationVariablesEvaluator.cpp
+                IBNormalPlaneMinimizationVariablesEvaluator.cpp
+                IBSimpleTwoViewsMinimizationVariablesEvaluator.cpp
+                IBAnalyzer.cpp
+                IBPocaEvaluator.cpp
+                IBTiltedAxisPocaEvaluator.cpp
+                IBLineDistancePocaEvaluator.cpp
+                IBAnalyzerPoca.cpp
+                IBAnalyzerEM.cpp
+                IBAnalyzerEM3p.cpp
+                IBAnalyzerEMTrim.cpp
+                IBMuonEventTTreeReader.cpp
+                IBMuonEventTTreeR3DmcReader.cpp
+                IBMuonEventTTreeR2DmcReader.cpp
+                IBMuonEventTTreeLNLmcReader.cpp
+                IBMuonEventTTreeLNLdataReader.cpp
+                IBAnalyzerWPoca.cpp
+                IBVoxCollection.cpp
+                IBVoxFilters.cpp
+                IBAnalyzerEMAlgorithm.cpp
+                IBAnalyzerEMAlgorithmSGA.cpp
+                IBAnalyzerEMAlgorithmMGA.cpp
+                IBAnalyzerTrackCount.cpp
+                IBAnalyzerTrackLengths.cpp
+                IBAnalyzerWTrackLengths.cpp
+                IBMuonCollection.cpp
+                IBMuonError.cpp
+                IBROCBuilder.cpp
+)
+
+
+
+set(LIBRARIES
+       ${PACKAGE_LIBPREFIX}Core
+       ${PACKAGE_LIBPREFIX}Math
+       ${PACKAGE_LIBPREFIX}Detectors
+)
+
+uLib_add_shared_library(IB)
+#add_subdirectory(testing)
