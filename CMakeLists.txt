@@ -92,6 +92,13 @@ include_directories(${SRC_DIR})
 add_subdirectory(${SRC_DIR})
 
 
+add_subdirectory(${PROJECT_SOURCE_DIR}/utils/filters)
+add_subdirectory(${PROJECT_SOURCE_DIR}/utils/roc)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/examples EXCLUDE_FROM_ALL)
+
+
+
 ## INSTALLS AND EXPORTS ----------------------------------------------------- ##
 
 export(PACKAGE IB)
