@@ -79,11 +79,19 @@ public:
         m_hitZ         = 4;
         m_momentum     = 0.f;
         m_integrity    = true;
+        m_align = Matrix4f::Identity();
+
+//        m_align <<
+//                1,            0, -0.000164017,    -0.954234,
+//                0,            1,            0,     -182.941,
+//                0.000164017,  0,            1,    -0.309603,
+//                0,            0,            0,            1;
+
 #ifndef NDEBUG
         m_out = new TFile("evDistro.root","RECREATE");
         //m_out = out;
         m_dumpster = new TTree("ev","ev");
-        //m_dumpster = dumpster;
+        //m_dumpster = dumpster;        
 
         m_dumpster->Branch("x_up", &m_xu, "xu");
         m_dumpster->Branch("z_up", &m_zu, "zu");
@@ -139,7 +147,7 @@ public:
         return;
     }
 
-    void GetMuonEvent(MuonScatter * muon_event)
+    void GetMuonScatter(MuonScatter * muon_event)
     {
         if(unlikely(!m_integrity)) return;
         float *track_ptr;
@@ -189,11 +197,30 @@ public:
         muon_event->LineIn().origin     <<  m_track.phi_up.position,            0,       m_track.theta_up.position,           1;  // HARDCODED
         muon_event->LineIn().direction  << -m_track.phi_up.slope,              -1,       -m_track.theta_up.slope,              0;
 
-        //        muon_event->LineOut().origin    <<  m_track.phi_down.position - 1.004, -183.43,  m_track.theta_down.position - 0.112, 1; // PRETERREMOTO
-        //        muon_event->LineOut().direction << -m_track.phi_down.slope - 0.0004,   -1,       -m_track.theta_down.slope - 0.0027,   0;
+//        muon_event->LineOut().origin    <<  m_track.phi_down.position, -183.43,  m_track.theta_down.position, 1; // NO SHIFT
+//        muon_event->LineOut().direction << -m_track.phi_down.slope,   -1,       -m_track.theta_down.slope,   0;
 
-        muon_event->LineOut().origin    <<  m_track.phi_down.position + 0.046, -183.43,  m_track.theta_down.position - 0.18, 1; // PSTTERREMOTO
-        muon_event->LineOut().direction << -m_track.phi_down.slope,   -1,       -m_track.theta_down.slope - 0.0061,   0;
+//        muon_event->LineOut().origin    <<  m_track.phi_down.position - 1.004, -183.43,  m_track.theta_down.position - 0.112, 1; // PRETERREMOTO
+//        muon_event->LineOut().direction << -m_track.phi_down.slope - 0.0004,   -1,       -m_track.theta_down.slope - 0.0027,   0;
+
+//        muon_event->LineOut().origin    <<  m_track.phi_down.position + 0.046, -183.43,  m_track.theta_down.position - 0.18, 1; // PSTTERREMOTO
+//        muon_event->LineOut().direction << -m_track.phi_down.slope,   -1,       -m_track.theta_down.slope - 0.0061,   0;
+
+//        muon_event->LineOut().origin    <<  m_track.phi_down.position  -0.95744, -183.43,  m_track.theta_down.position  -0.31360, 1; // FIX 2014
+//        muon_event->LineOut().direction << -m_track.phi_down.slope,   -1,       -m_track.theta_down.slope + 0.0029,   0;
+
+        muon_event->LineOut().origin    <<  m_track.phi_down.position, 0,  m_track.theta_down.position, 1; // AUTO
+        muon_event->LineOut().direction << -m_track.phi_down.slope,   -1, -m_track.theta_down.slope,    0;
+
+
+        { // ALIGNMENT //
+            const Eigen::Affine3f &tr = m_align;
+            muon_event->LineOut().origin = tr * muon_event->LineOut().origin;
+            muon_event->LineOut().direction = tr * muon_event->LineOut().direction;
+            muon_event->LineOut().direction /= fabs(muon_event->LineOut().direction(1)); // back to slopes //
+        }
+
+
 
         muon_event->SetMomentum(m_momentum);
 
@@ -228,6 +255,7 @@ public:
 #endif // NDEBUG
     }
 
+    static const float events_per_minute() { return 6.7E4; }
 
 public:
 #ifndef NDEBUG
@@ -248,7 +276,14 @@ public:
     unsigned long m_max_event;
     unsigned long m_pos;
 
+    Eigen::Affine3f   m_align;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
 
 IBMuonEventTTreeLNLdataReader::IBMuonEventTTreeLNLdataReader() :
     d(new IBMuonEventTTreeLNLdataReaderPimpl) {}
@@ -295,7 +330,7 @@ void IBMuonEventTTreeLNLdataReader::setError(IBMuonError &e)
 
 void IBMuonEventTTreeLNLdataReader::setAcquisitionTime(float min)
 {
-    d->m_total_events = min * 6.7E4;
+    d->m_total_events = min * d->events_per_minute();
     if(d->m_total_events+d->m_pos>d->m_max_event) {
         printf("Requested time interval rejected at acquisition time setting.\nAborting...\n");
         exit(0);
@@ -316,17 +351,92 @@ unsigned long IBMuonEventTTreeLNLdataReader::getCurrentPosition()
 bool IBMuonEventTTreeLNLdataReader::readNext(MuonScatter *event)
 {
     d->AcquireEvent();
-    d->GetMuonEvent(event);
+    d->GetMuonScatter(event);
     return d->m_integrity;
 }
 
 
 void IBMuonEventTTreeLNLdataReader::setStartTime(float min)
 {
-    d->m_pos = min * 6.7E4;
+    d->m_pos = (unsigned long)(min * d->events_per_minute());
     if (unlikely(d->m_total_events+d->m_pos>d->m_max_event)) {
         printf("Requested time interval rejected at start time setting\nAborting...\n");
         exit(0);
     }
     printf("Starting processing from %.2f minutes (event n. %i)\n", min, d->m_pos);
+}
+
+void IBMuonEventTTreeLNLdataReader::setAlignmentFromData(float min)
+{
+    Matrix4f M = Matrix4f::Zero();
+    Vector4f K = Vector4f::Zero();
+    Vector2f w(1,1);
+    MuonScatter mu;
+
+    unsigned long ev;
+    if(min == 0)
+        ev = d->m_max_event;
+    else {
+        ev = (unsigned long)(min * d->events_per_minute());
+    }
+
+    int tot=0;
+    std::cout << "Aligning Reader with data.. \n";
+    for( int i=0; i<80; ++i) std::cout << "-"; std::cout << "\r";
+    for (unsigned long i=0; i<ev; i++) {
+        d->m_integrity = true;
+        d->m_tree->GetEntry(i);
+        d->GetMuonScatter(&mu);
+
+        if(d->m_integrity) {
+            float &x1 = mu.LineIn().origin(0);
+            float &x2 = mu.LineOut().origin(0);
+            float &z1 = mu.LineIn().origin(2);
+            float &z2 = mu.LineOut().origin(2);
+            float &tphi1 = mu.LineIn().direction(0);
+            float &tphi2 = mu.LineOut().direction(0);
+            float &tthe1 = mu.LineIn().direction(2);
+            float &tthe2 = mu.LineOut().direction(2);
+
+            Matrix4f Mi;
+            Mi <<
+                  w(0) * tphi1*tphi1 + w(1) * tthe1*tthe1, w(1) * x2 * tthe1 - w(0) * z2 * tphi1, w(0) * tphi1, w(1) * tthe1,
+                  w(1) * x2 * tthe1 - w(0) * z2 * tphi1,   w(0) * z2 * z2 + w(1) * x2 *x2,        -w(0) * z2,   w(1) * x2,
+                  w(0) * tphi1,                            -w(0) * z2,                             w(0),         0,
+                  w(1) * tthe1,                             w(1) * x2,                               0 ,         w(1);
+
+            M += Mi * 2;
+
+            Vector4f Ki = Vector4f::Zero();
+            Ki <<
+                  w(0) * (x1 - x2) * tphi1 + w(1) * (z1 - z2) * tthe1,
+                  w(0) * (x2 - x1) * z2  + w(1) * (z1 - z2) * x2,
+                  w(0) * (x1 - x2),
+                  w(1) * (z1 - z2);
+            K += Ki * 2;
+
+            tot++;
+        }
+        if(tot++%(ev/80) == 0) std::cout << "o" << std::flush;
+    }
+    std::cout << "\n";
+    Vector4f X = M.inverse() * K;
+    std::cout << "ALIGNMENT FOUND [H, Phi, x0, z0]: " << X.transpose() << "\n";
+
+    { // APPLY TO PIMPL TRANSFORM //
+        Eigen::Affine3f &tr = d->m_align;
+        tr.rotate(Eigen::AngleAxisf(-X(1),Vector3f(0,1,0)));
+        tr.translation() += Vector3f(X(2),X(0)-tr.translation()(1),X(3));
+    }
+
+}
+
+void IBMuonEventTTreeLNLdataReader::setAlignment(Matrix4f align)
+{
+    d->m_align = align;
+}
+
+Matrix4f IBMuonEventTTreeLNLdataReader::getAlignment()
+{
+    return d->m_align.matrix();
 }

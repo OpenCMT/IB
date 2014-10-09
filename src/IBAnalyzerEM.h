@@ -95,7 +95,7 @@ public:
 
     void DumpP(const char *filename, float x0 = 0, float x1 = 10);
 
-    Vector<Event> &Events();
+    Vector<Event> & Events();
 
 private:    
     IBPocaEvaluator                            *m_PocaAlgorithm;
@@ -109,7 +109,6 @@ private:
 inline void IBAnalyzerEM::init_properties() {
     $_init();
     $$.nominal_momentum = 3;
-    //    $$.SijCutEM         = 0.0; // non lo uso piu'
 }
 
 

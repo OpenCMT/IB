@@ -40,7 +40,6 @@ class IBAnalyzerEM;
 
 class IBPocaEvaluator;
 class IBMinimizationVariablesEvaluator;
-
 class IBVoxCollection;
 
 
@@ -49,19 +48,16 @@ class IBAnalyzer : public Object {
 
 public:
 
-    uLibGetSetMacro(Experiment,IBExperiment *)
-
-    uLibGetSetMacro(VoxCollection,IBVoxCollection *)
-
-    uLibGetMacro(MuonCollection,IBMuonCollection *)
-
+    virtual uLibGetMacro(Experiment,IBExperiment *)
+    virtual uLibSetMacro(Experiment,IBExperiment *)
+    virtual uLibGetMacro(VoxCollection,IBVoxCollection *)
+    virtual uLibSetMacro(VoxCollection,IBVoxCollection *)
+    virtual uLibGetMacro(MuonCollection,IBMuonCollection *)
     virtual uLibSetMacro(MuonCollection,IBMuonCollection *)
 
     virtual bool AddMuon(const MuonScatterData &event) = 0;
-
-    virtual unsigned int Size() {}
-
     virtual void Run(unsigned int iterations, float muons_ratio) = 0;
+    virtual unsigned int Size() { return 0; }
 
 protected:
     IBAnalyzer() :

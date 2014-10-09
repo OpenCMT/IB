@@ -62,8 +62,9 @@ public:
 
 
     void PrintSelf(std::ostream &o);
-
     void DumpTTree(const char *filename);
+    std::pair<HVector3f, HVector3f> GetAlignment();
+    void SetAlignment(std::pair<HVector3f, HVector3f> align);
 
 private:
     class IBMuonCollectionPimpl *d;

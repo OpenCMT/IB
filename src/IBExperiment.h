@@ -46,18 +46,8 @@
 #include "IBVoxFilters.h"
 
 #include "IBMuonEventTTreeReader.h"
-//#include "IBMuonEventTTreeLNLdataReader.h"
-//#include "IBMuonEventTTreeLNLmcReader.h"
-//#include "IBMuonEventTTreeR3DmcReader.h"
 
 #include "IBAnalyzer.h"
-//#include "IBAnalyzerEMAlgorithm.h"
-//#include "IBAnalyzerEMAlgorithmSGA.h"
-//#include "IBAnalyzerEMAlgorithmMGA.h"
-//#include "IBMAPUpdateDensityAlgorithms.h"
-//#include "IBAnalyzerPoca.h"
-//#include "IBAnalyzerWPoca.h"
-//#include "IBAnalyzerTrackCount.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////

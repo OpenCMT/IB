@@ -26,6 +26,7 @@
 #include "root/TTree.h"
 
 #include <math.h>
+#include <Math/Dense.h>
 #include <Math/Utils.h>
 
 #include "IBMuonCollection.h"
@@ -201,6 +202,52 @@ void IBMuonCollection::DumpTTree(const char *filename)
         file->Close();
         delete file;
     }
-        return;
+    return;
+}
+
+/**
+ * @brief IBMuonCollection::GetAlignment
+ *  compute mean of rotation and shift of muon out relative to in
+ * @return Vector4f ( phi x theta z )
+ */
+std::pair<HVector3f,HVector3f> IBMuonCollection::GetAlignment()
+{
+    Vector3f direction(0,0,0);
+    Vector3f position(0,0,0);
+    for(int i=0; i<this->size(); ++i) {
+        const MuonScatter &mu = this->At(i);
+        Vector3f dir_in  = mu.LineIn().direction.head(3).normalized();
+        Vector3f dir_out = mu.LineOut().direction.head(3).normalized();
+        direction += dir_in.cross(dir_out);
+
+        float y = mu.LineOut().origin(1) - mu.LineIn().origin(1);
+        Vector3f shift = mu.LineOut().origin.head(3) - dir_in*(y/dir_in(1));
+        position += mu.LineIn().origin.head(3) - shift;
+    }
+    direction /= this->size();
+    position  /= this->size();
+    HVector3f  pos;
+    pos.head(3) = position;
+    HVector3f rot;
+    rot.head(3) = direction.normalized();
+    rot(3) = direction.norm();
+    std::cout << "Rotation : " << rot.transpose() << "\n";
+    std::cout << "Position : " << position.transpose() << "\n";
+
+    return std::pair<HVector3f,HVector3f>(pos,rot);
+}
+
+void IBMuonCollection::SetAlignment(std::pair<HVector3f,HVector3f> align)
+{
+    const HVector3f &pos = align.first;
+    const HVector3f &rot = align.second;
+
+    Eigen::Quaternion<float> q;
+    q = Eigen::AngleAxis<float>(-asin(rot(3)), rot.head(3));
+    for(int i=0; i<this->size(); ++i) {
+        MuonScatter &mu = this->operator [](i);
+        mu.LineOut().direction.head(3) = q * mu.LineIn().direction.head(3);
+        mu.LineOut().origin += pos;
+    }
 }
 

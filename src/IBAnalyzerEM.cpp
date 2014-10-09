@@ -300,6 +300,7 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
         //        std::cout
         //                << " evc.header.Di " << evc.header.Di.transpose() << "\n"
         //                << " evc.header.E " << evc.header.E << "\n";
+
     }
     else return false;
 

@@ -104,7 +104,6 @@ int main(int argc, char **argv) {
     mu.LineOut() = p.mu.out;
 
     VoxRaytracer tracer(voxels);
-    //    IBMinimizationVariablesEvaluator *eval = IBMinimizationVariablesEvaluator::New(IBMinimizationVariablesEvaluator::NormalPlane);
     IBNormalPlaneMinimizationVariablesEvaluator *eval = new IBNormalPlaneMinimizationVariablesEvaluator();
     eval->$$.use_free_rotation = p.eval.free;
     eval->$$.alphaXZ = p.eval.alpha;

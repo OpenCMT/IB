@@ -40,6 +40,11 @@ public:
     void setAcquisitionTime(float min);
     void setStartTime(float min);
 
+    void setAlignmentFromData(float min = 0.0);
+    void setAlignment(Matrix4f align);
+    Matrix4f getAlignment();
+
+
     unsigned long getNumberOfEvents();
     unsigned long getCurrentPosition();
 
