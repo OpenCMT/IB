@@ -66,6 +66,8 @@ public:
     std::pair<HVector3f, HVector3f> GetAlignment();
     void SetAlignment(std::pair<HVector3f, HVector3f> align);
 
+
+
 private:
     class IBMuonCollectionPimpl *d;
 

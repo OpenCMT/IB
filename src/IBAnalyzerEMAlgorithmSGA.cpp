@@ -362,7 +362,7 @@ void IBAnalyzerEMAlgorithmSGA_Z::evaluate(Matrix4f &Sigma,
 
 
 void IBAnalyzerEMAlgorithmSGA_M::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm::Event *evc)
-{
+{    
     Matrix4f iS = Sigma.inverse();
     Matrix4f Wij = Matrix4f::Zero();
 

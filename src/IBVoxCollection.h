@@ -74,6 +74,8 @@ public:
 
     IBVoxCollection(const IBVoxCollection &copy);
 
+    IBVoxCollection(const BaseClass &copy);
+
     // templated update for analyzer specific customizations //
     template < typename StaticUpdateAlgT >
     void UpdateDensity(unsigned int threshold);
@@ -92,7 +94,7 @@ public:
 
     int CountLambdaOverThreshold(float threshold,uLib::Vector3i boxp1, uLib::Vector3i boxp2);
 
-    int CountLambdaOverThreshold(float threshold,uLib::HPoint3f center, uLib::HVector3f size);
+    int CountLambdaOverThreshold(float threshold,uLib::HPoint3f center, uLib::HVector3f size);    
 
 private:
     IBAbstract::IBVoxCollectionMAPAlgorithm *m_MAPAlgorithm;
@@ -133,10 +135,6 @@ void IBVoxCollection::UpdateDensity(UpdateAlgT &algorithm,
 
 template < class StaticUpdateAlgT >
 void IBVoxCollection::UpdateDensity(unsigned int threshold) {
-
-    // check structural for UpdateAlgorithm //
-    // NOT WORKING !!!!!
-    // uLib::Interface::IsA<StaticUpdateAlgT, IBInterface::IBVoxCollectionStaticUpdateAlgorithm>();
 
     // Analyzer Update //
     StaticUpdateAlgT::UpdateDensity(this,threshold);

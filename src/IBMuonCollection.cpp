@@ -231,8 +231,9 @@ std::pair<HVector3f,HVector3f> IBMuonCollection::GetAlignment()
     HVector3f rot;
     rot.head(3) = direction.normalized();
     rot(3) = direction.norm();
+    std::cout << " ---- muons self adjust (use with care!) ----- \n";
     std::cout << "Rotation : " << rot.transpose() << "\n";
-    std::cout << "Position : " << position.transpose() << "\n";
+    std::cout << "Position : " << position.transpose() << "\n\n";
 
     return std::pair<HVector3f,HVector3f>(pos,rot);
 }
@@ -242,11 +243,20 @@ void IBMuonCollection::SetAlignment(std::pair<HVector3f,HVector3f> align)
     const HVector3f &pos = align.first;
     const HVector3f &rot = align.second;
 
-    Eigen::Quaternion<float> q;
-    q = Eigen::AngleAxis<float>(-asin(rot(3)), rot.head(3));
+    Eigen::Quaternion<float> q(Eigen::AngleAxis<float>(-asin(rot(3)), rot.head(3)));
+//    Eigen::Affine3f tr(Eigen::AngleAxis<float>(-rot(3), rot.head(3)));
+//    std::cout << "QUATERNION: \n" << q.matrix() << "\n\nROTATION: \n" << tr.matrix() << "\n\n";
+
     for(int i=0; i<this->size(); ++i) {
         MuonScatter &mu = this->operator [](i);
-        mu.LineOut().direction.head(3) = q * mu.LineIn().direction.head(3);
+//        if(i<10){
+//            Vector3f v1 = q * mu.LineOut().direction.head<3>();
+//            Vector4f v2 = tr * mu.LineOut().direction;
+//            std::cout << "dif: " << v1.transpose() << " vs " << v2.transpose() << "\n";
+//        }
+//        mu.LineOut().direction = tr * mu.LineOut().direction;
+        mu.LineOut().direction.head<3>() = q * mu.LineOut().direction.head<3>();
+        mu.LineOut().direction /= fabs(mu.LineOut().direction(1)); // back to slopes
         mu.LineOut().origin += pos;
     }
 }

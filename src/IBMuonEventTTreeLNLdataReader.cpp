@@ -80,13 +80,6 @@ public:
         m_momentum     = 0.f;
         m_integrity    = true;
         m_align = Matrix4f::Identity();
-
-//        m_align <<
-//                1,            0, -0.000164017,    -0.954234,
-//                0,            1,            0,     -182.941,
-//                0.000164017,  0,            1,    -0.309603,
-//                0,            0,            0,            1;
-
 #ifndef NDEBUG
         m_out = new TFile("evDistro.root","RECREATE");
         //m_out = out;
@@ -286,7 +279,9 @@ public:
 
 
 IBMuonEventTTreeLNLdataReader::IBMuonEventTTreeLNLdataReader() :
-    d(new IBMuonEventTTreeLNLdataReaderPimpl) {}
+    d(new IBMuonEventTTreeLNLdataReaderPimpl) {
+    d->m_align.translate(Vector3f(-0.96,-182.9,-0.3)); // DEFAULT RAW ALIGNMENT
+}
 
 IBMuonEventTTreeLNLdataReader::~IBMuonEventTTreeLNLdataReader()
 {

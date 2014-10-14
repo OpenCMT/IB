@@ -58,6 +58,11 @@ IBVoxCollection::IBVoxCollection(const IBVoxCollection &copy) :
     m_MAPAlgorithm(copy.m_MAPAlgorithm)
 {}
 
+IBVoxCollection::IBVoxCollection(const IBVoxCollection::BaseClass &copy) :
+    BaseClass(copy),
+    m_MAPAlgorithm(NULL)
+{}
+
 void IBVoxCollection::SetMAPAlgorithm(IBAbstract::IBVoxCollectionMAPAlgorithm *algorithm)
 {
     this->m_MAPAlgorithm = algorithm;

@@ -328,7 +328,7 @@ public:
 
     HVector3f getDirectorCosines(const HVector3f &track_direction)
     {
-        return track_direction / track_direction.head(3).norm();
+        return track_direction / track_direction.head<3>().norm();
     }
 
     Matrix4f getRotationMatrix(const HVector3f &track_direction)
@@ -354,12 +354,13 @@ public:
         Vector2f alphaX(dc(0),-dc(2)*dc(1));         // alphaX
         Vector2f alphaZ(dc(0)*dc(1),-dc(2));
         if(m_parent->$$.use_free_rotation == false) {
-            m_alpha = (  (1-m_parent->$$.alphaXZ) * atan2(alphaX(1),alphaX(0)) +
-                         (m_parent->$$.alphaXZ)*atan2(alphaZ(1),alphaZ(0)) );
+            m_alpha = -(  (1-m_parent->$$.alphaXZ) * atan2(alphaX(1),alphaX(0)) +
+                          (m_parent->$$.alphaXZ)*atan2(alphaZ(1),alphaZ(0)) );
         }
         else {
             m_alpha = m_parent->$$.alphaXZ;
         }
+
 
         Matrix4f first_y_rotation = compileYRotation(dc02);
         Matrix4f first_z_rotation = compileZRotation(dc1);
@@ -376,6 +377,10 @@ public:
         //                * Eigen::AngleAxisf(t_phi, Vector3f::UnitY());
         //        transform.rotate(mat);
         //        return transform.matrix();
+
+
+
+
     }
 
     Matrix4f compileYRotation(Scalarf angle)

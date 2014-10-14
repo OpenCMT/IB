@@ -454,15 +454,29 @@ void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
     }
 
     if(file) {
-        char name[100];
-        sprintf(name,"p_%i",counter++);
         gDirectory->cd(file->GetPath());
-        TH1F *h = new TH1F(name,"1/p^2 distribution [1/GeV^2]",1000,x0,x1);
-        float p0 = $$.nominal_momentum * $$.nominal_momentum;
-        for(Id_t i=0; i<d->m_Events.size(); ++i)
-            h->Fill(d->m_Events[i].header.InitialSqrP / p0 );
-        h->Write();
-        delete h;
+        {
+            char name[100];
+            sprintf(name,"inv_p_sq_%i",counter++);
+            TH1F *h = new TH1F(name,"1/p^2 distribution [1/GeV^2]",1000,x0,x1);
+            float p0sq = $$.nominal_momentum * $$.nominal_momentum;
+            for(Id_t i=0; i<d->m_Events.size(); ++i)
+                h->Fill(d->m_Events[i].header.InitialSqrP / p0sq );
+            h->Write();
+            delete h;
+        }
+
+        {
+            char name[100];
+            sprintf(name,"p_%i",counter++);
+            TH1F *h = new TH1F(name,"p distribution [GeV]",1000,x0,x1);
+            float p0sq = $$.nominal_momentum * $$.nominal_momentum;
+            for(Id_t i=0; i<d->m_Events.size(); ++i)
+                h->Fill( sqrt(p0sq / d->m_Events[i].header.InitialSqrP) );
+            h->Write();
+            delete h;
+        }
+
     }
 }
 
