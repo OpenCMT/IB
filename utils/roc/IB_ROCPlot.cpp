@@ -33,8 +33,8 @@
 #include <TBox.h>
 #include <TGraphAsymmErrors.h>
 #include <TGraphErrors.h>
-#include <root/Math/QuantFunc.h>
-#include <root/Math/QuantFuncMathCore.h>
+#include <Math/QuantFunc.h>
+#include <Math/QuantFuncMathCore.h>
 
 #include <TMath.h>
 #include <TLegend.h>
