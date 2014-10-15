@@ -28,11 +28,24 @@ set(PACKAGE_AUTHOR "Andrea Rigoni Garola <andrea.rigoni@pd.infn.it>")
 
 ## IMPORT MODULES ----------------------------------------------------------- ##
 
+## CONFIG FIND PACKAGE
+#set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/lib/cmake")
+
+## First of all find uLib package to get imported locations ##
+unset(ULIB_CONFIG)
+find_package(ULIB 0.2 CONFIG REQUIRED
+             NAMES uLib
+             PATH_SUFFIXES mutom-0.2
+)
+
+
 if(NOT DEFINED IB_CMAKE_DIR)
-execute_process(COMMAND uLib_config --cmake-modules
+get_target_property(ULIB_CONFIG_CMD uLib_config LOCATION)
+message("uLib_config executable: ${ULIB_CONFIG_CMD}")
+execute_process(COMMAND ${ULIB_CONFIG_CMD} --cmake-modules
                 OUTPUT_VARIABLE ULIB_CONFIG_COMMAND_OUTPUT)
 message(STATUS "Adding of CMake directory: ")
-message(STATUS "${ULIB_CONFIG_COMMAND_OUTPUT}")
+message(STATUS " ${ULIB_CONFIG_COMMAND_OUTPUT} ")
 set(IB_CMAKE_DIR "${PROJECT_BINARY_DIR}/CMake" CACHE PATH "CMake modules path")
 endif()
 
@@ -61,19 +74,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ") ## Add flags here ##
 
 include(uLibFindDependencies)
 
-
-
-
-
-## CONFIG FIND PACKAGE
-set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/lib/cmake")
-unset(ULIB_CONFIG)
-find_package(ULIB 0.2 CONFIG
-             NAMES uLib
-             PATH_SUFFIXES mutom-0.2
-)
-
 debug(ULIB_CONFIG)
+debug(ULIB_DIR)
 debug(ULIB_CONSIDERED_CONFIGS)
 debug(ULIB_CONSIDERED_VERSIONS)
 debug(ULIB_INCLUDE_DIRS)
