@@ -29,7 +29,7 @@ set(PACKAGE_AUTHOR "Andrea Rigoni Garola <andrea.rigoni@pd.infn.it>")
 ## IMPORT MODULES ----------------------------------------------------------- ##
 
 ## CONFIG FIND PACKAGE
-#set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/lib/cmake")
+#set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/lib/cmake") # enable this to search installed cmake dir by default
 
 ## First of all find uLib package to get imported locations ##
 unset(ULIB_CONFIG)

@@ -248,7 +248,9 @@ public:
 #endif // NDEBUG
     }
 
-    static const float events_per_minute() { return 6.7E4; }
+    // LNL Experiment seems to have 324Hz of DAQ based on run 2162 files //
+    // Old value was set to 6.7E4 (to remove apparatus inefficiencies?)  //
+    static const float events_per_minute() { return 242.3912; }
 
 public:
 #ifndef NDEBUG
