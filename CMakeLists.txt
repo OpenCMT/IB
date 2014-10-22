@@ -58,6 +58,8 @@ message(STATUS "Module path: ${CMAKE_MODULE_PATH}")
 include(uLibMacros)
 include(uLibDebugMacro)
 include(uLibTargetMacros)
+include(uLibGenerateRMake)
+
 
 ## CONFIG ------------------------------------------------------------------- ##
 
