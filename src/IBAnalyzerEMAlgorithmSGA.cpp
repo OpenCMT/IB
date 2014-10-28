@@ -24,7 +24,8 @@
 
 #include "IBAnalyzerEMAlgorithmSGA.h"
 
-
+#include <Eigen/Dense>
+#include <Eigen/LU>
 
 
 
@@ -155,6 +156,15 @@ void IBAnalyzerEMAlgorithmSGA_PX::evaluate(Matrix4f &Sigma,
         Matrix2f S;
         S << Sigma(0,0), Sigma(0,1), Sigma(1,0), Sigma(1,1);
         iS = S.inverse();
+//        bool invertible;
+//        S.computeInverseWithCheck(iS,invertible);
+//        Matrix2d iSd;
+//        S.cast<double>().computeInverseWithCheck(iSd,invertible);
+//        if(!invertible) {
+//            std::cerr << ".InvErr.";
+//        }
+//        iS = iSd.cast<float>();
+
     }
     Vector2f Di(evc->header.Di(0),evc->header.Di(1));
 
@@ -368,24 +378,50 @@ void IBAnalyzerEMAlgorithmSGA_M::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm
 
     Matrix4f Dn = iS * (evc->header.Di * evc->header.Di.transpose());
 
-    Scalarf p = 0;
+    Scalarf delta_p = 0;
     for (unsigned int j = 0; j < evc->elements.size(); ++j) {
         Wij.block<2,2>(0,0) = evc->elements[j].Wij;
         Wij.block<2,2>(2,2) = evc->elements[j].Wij;
 
         Matrix4f Bn = iS * Wij;
-        p += ((Bn * Dn).trace() - Bn.trace()) * evc->elements[j].lambda *
-                pow(evc->elements[j].pw,4) / 4;
+        delta_p += ((Bn * Dn).trace() - Bn.trace()) * evc->elements[j].lambda *
+                pow(evc->elements[j].pw,2) / 4 / $$.inertia;
     }
-    p /= evc->elements.size();
+    delta_p /= evc->elements.size();
 
     // BACK PROJECT //
     for (unsigned int j = 0; j < evc->elements.size(); ++j) {
-        evc->elements[j].pw += p;
+        evc->elements[j].pw += delta_p;
     }
-    evc->header.InitialSqrP += p;
+    evc->header.InitialSqrP += delta_p;
 
 }
 
+void IBAnalyzerEMAlgorithmSGA_M_PX::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm::Event *evc)
+{
+    Matrix2f iS;
+    {
+        Matrix2f S;
+        S << Sigma(0,0), Sigma(0,1), Sigma(1,0), Sigma(1,1);
+        iS = S.inverse();
+    }
+    Vector2f Di(evc->header.Di(0),evc->header.Di(1));
+    Scalarf delta_p = 0;
+
+    for (unsigned int j = 0; j < evc->elements.size(); ++j) {
+        Matrix2f iSWij = iS * evc->elements[j].Wij;
+        float DISWISD  = Di.transpose() * iSWij * iS * Di;
+        delta_p = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
+                evc->elements[j].pw * evc->elements[j].lambda / 2 /$$.inertia; // << reintroduced 2 factor !!
+    }
+    delta_p /= evc->elements.size();
+
+    // BACK PROJECT //
+    for (unsigned int j = 0; j < evc->elements.size(); ++j) {
+        evc->elements[j].pw += delta_p;
+    }
+    evc->header.InitialSqrP += delta_p;
+
+}
 
 

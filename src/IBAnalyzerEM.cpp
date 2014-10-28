@@ -161,26 +161,35 @@ static bool em_test_SijCut(const Event &evc, float cut_level)
 void IBAnalyzerEMPimpl::SijCut(float threshold)
 {
     Vector< Event >::iterator itr = this->m_Events.begin();
+    int count = 0;
     while (itr != this->m_Events.end()) {
         if(em_test_SijCut(*itr, threshold))
         {
             this->m_Events.remove_element(*itr);
+            count ++;
         }
         else ++itr;
     }
+    std::cout << "SijCut removed muons: " << count << "\n";
 }
 
 void IBAnalyzerEMPimpl::SijGuess(float threshold, float p)
 {
     Vector< Event >::iterator itr = this->m_Events.begin();
-    do {
+    int count = 0;
+    while (itr != this->m_Events.end()) {
         if(em_test_SijCut(*itr, threshold))
         {
             itr->header.InitialSqrP = m_parent->$$.nominal_momentum / p;
             itr->header.InitialSqrP *= itr->header.InitialSqrP;
+            for (unsigned int j = 0; j < itr->elements.size(); ++j) {
+                itr->elements[j].pw = itr->header.InitialSqrP;
+            }
+            count ++;
         }
         itr++;
-    } while (itr != this->m_Events.end());
+    }
+    std::cout << "Guess class " << threshold << ", p=" << p << "   counted muons: " << count << "\n";
 }
 
 

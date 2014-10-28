@@ -117,7 +117,11 @@ public:
 
 
 class IBAnalyzerEMAlgorithmSGA_M : public IBAnalyzerEMAlgorithmSGA {
-    typedef IBAnalyzerEMAlgorithmSGA BaseClass;
+public:
+    void evaluate(Matrix4f &Sigma, Event *evc);
+};
+
+class IBAnalyzerEMAlgorithmSGA_M_PX : public IBAnalyzerEMAlgorithmSGA {
 public:
     void evaluate(Matrix4f &Sigma, Event *evc);
 };
