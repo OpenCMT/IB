@@ -23,6 +23,7 @@ set(HEADERS
                           IBMuonEventTTreeLNLmcReader.h
                           IBMuonEventTTreeR2DmcReader.h
                           IBMuonEventTTreeR3DmcReader.h
+                          IBMuonEventTTreeMUBLASTmcReader.h
                           IBMuonEventTTreeReader.h
                           IBNormalPlaneMinimizationVariablesEvaluator.h
                           IBSimpleTwoViewsMinimizationVariablesEvaluator.h
@@ -60,6 +61,7 @@ SET(SOURCES
                 IBMuonEventTTreeR2DmcReader.cpp
                 IBMuonEventTTreeLNLmcReader.cpp
                 IBMuonEventTTreeLNLdataReader.cpp
+                IBMuonEventTTreeMUBLASTmcReader.cpp
                 IBAnalyzerWPoca.cpp
                 IBVoxCollection.cpp
                 IBVoxFilters.cpp
@@ -80,6 +82,7 @@ set(LIBRARIES
        ${PACKAGE_LIBPREFIX}Core
        ${PACKAGE_LIBPREFIX}Math
        ${PACKAGE_LIBPREFIX}Detectors
+       ${PACKAGE_LIBPREFIX}Root
 )
 
 uLib_add_shared_library(IB)

@@ -21,13 +21,13 @@
 
 
 
-
 #include <TFile.h>
 #include <TTree.h>
 
 #include <math.h>
 #include <Math/Dense.h>
 #include <Math/Utils.h>
+#include "Root/RootMuonScatter.h"
 
 #include "IBMuonCollection.h"
 
@@ -172,38 +172,36 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
 }
 
 void IBMuonCollection::DumpTTree(const char *filename)
-{
-    static int counter = 0;
+{ 
     static TFile *file = new TFile(filename,"RECREATE");
 
-    if(filename) {
-        char name[100];
-        sprintf(name,"p_%i",counter++);
-        gDirectory->cd(file->GetPath());
-        TTree *tree = new TTree(name,name);
-        float p = 0;
-        float angle = 0;
+    char name[100];
+    sprintf(name,"muons");
+    gDirectory->cd(file->GetPath());
+    TTree *tree = new TTree(name,name);
 
-        tree->Branch("p",&p,"float");
-        tree->Branch("angle",&angle,"float");
+    uLib::MuonScatter u_mu;
+    ROOT::Mutom::MuonScatter mu;
 
-        for(int i=0; i < this->size(); ++i )
-        {
-            const MuonScatter &mu = this->At(i);
-            p = mu.GetMomentum();
-            angle = d->MuonScatterAngle(mu);
-            tree->Fill();
-        }
-        tree->Write();
-        delete tree;
+    tree->Branch("mu",&mu);
+
+    for(int i=0; i < this->size(); ++i )
+    {
+        const MuonScatter &u_mu = this->At(i);
+        mu << u_mu;
+        tree->Fill();
     }
-    else {
-        file->Write();
-        file->Close();
-        delete file;
-    }
+
+    tree->Write();
+    delete tree;
+
+    file->Write();
+    file->Close();
+    delete file;
+
     return;
 }
+
 
 /**
  * @brief IBMuonCollection::GetAlignment

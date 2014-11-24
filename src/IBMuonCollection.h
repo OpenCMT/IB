@@ -29,8 +29,8 @@
 
 #include <Math/Dense.h>
 
-#include <Detectors/MuonScatter.h>
-
+#include "Root/RootMuonScatter.h"
+#include "Detectors/MuonScatter.h"
 
 using namespace uLib;
 

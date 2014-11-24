@@ -96,6 +96,11 @@ public:
 
     int CountLambdaOverThreshold(float threshold,uLib::HPoint3f center, uLib::HVector3f size);    
 
+    inline IBVoxCollection LambdaToInvLrad(float p0) { IBVoxCollection out = *this;
+                                                       out*=((p0/15)*(p0/15));
+                                                       return out;
+                                                     } //1/cm
+
 private:
     IBAbstract::IBVoxCollectionMAPAlgorithm *m_MAPAlgorithm;
 };
