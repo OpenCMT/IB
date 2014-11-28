@@ -143,32 +143,39 @@ private:
 
 }
 
-int main() {
+int main(int argc, char ** argv) {
     BEGIN_TESTING(IBMinVar);
-    Vector3f vox_bounding(300,161,240); // centered bounding size //
-    float vox_size = 10;
+    float vox_size = 2.5;
 
     // errors //
     IBMuonError sigma(6.07, 7.02); // parameters relative to scattering angles NOT measured angles!!
 
     // reader //
-    TFile* f = new TFile ("/var/local/data/root/run_1388/r1388_x.root");
+    TFile* f = new TFile (argv[1]);
     IBMuonEventTTreeReader* reader = IBMuonEventTTreeReader::New(f);
     reader->setError(sigma);
     reader->setMomentum(1);
 
     // voxels //
-    IBVoxel air = {0.1E-6,0,0};
+    Vector3f vox_bounding( 300, 63,  240   );
+    Vector3f vox_pos(     -150, -183,-120  );
+
+
     IBVoxCollection voxels(Vector3i(vox_bounding(0)/vox_size,
                                     vox_bounding(1)/vox_size,
                                     vox_bounding(2)/vox_size));
+
+    /// init density
+    IBVoxel zero = {0,0,0};
+    IBVoxel air = {0.1E-6,0,0};
+
+    voxels.InitLambda(air);
+
     voxels.SetSpacing (Vector3f(vox_size,
                                 vox_size,
                                 vox_size));
-    voxels.SetPosition(Vector3f( - 150,
-                                 - 172,
-                                 - 120 ));
-    voxels.InitLambda(air);
+    voxels.SetPosition(vox_pos);
+
 
     // tracer //
     IBVoxRaytracer* tracer = new IBVoxRaytracer(voxels);
@@ -176,7 +183,7 @@ int main() {
     int tot  = 0;
     int tot2 = 0;
 
-    reader->setAcquisitionTime(5);
+    reader->setAcquisitionTime(20);
 
     ThisTest::EventCollection events;
     events.SetTracer(tracer);
