@@ -111,13 +111,15 @@ int main(int argc, char ** argv) {
     std::cout << "Entries " << evnum << std::endl;
 
     //loop over the events
-    for (Int_t ientry=0 ; ientry < TMath::Min(100000,evnum); ientry ++)
+    for (Int_t ientry=0 ; ientry < TMath::Min(10000,evnum); ientry ++)
     {
+        int shift = 0;//12000000;
+
         if(floor(ientry/10000)*10000==ientry)
-        cout << "Event " << ientry << endl;
+        std::cout << "Event " << ientry << std::endl;
 
         //read tree
-        T->GetEntry(ientry);
+        T->GetEntry(ientry+shift);
 
         //occupancy of all hits
         for (int ih=0; ih<ihit; ih++){
