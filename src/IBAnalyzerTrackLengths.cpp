@@ -116,7 +116,9 @@ bool IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
 
         evc.elements.push_back(elc);
     }
-    d->m_Events.push_back(evc);
+    //    d->m_Events.push_back(evc);
+      d->Project(&evc);
+
     return true;
 }
 
