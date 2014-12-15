@@ -54,17 +54,22 @@ public:
         if (m_PocaAlgorithm->evaluate(muon)) {
             tmp.poca   = m_PocaAlgorithm->getPoca();
             if(m_Minimizator && m_Minimizator->evaluate(muon)) {
+                // weight with two views scattering angles
                 Scalarf t_w_1 = pow(tan((m_Minimizator->getDataVector(0))), 2);
                 Scalarf t_w_2 = pow(tan((m_Minimizator->getDataVector(2))), 2);
                 tmp.weight = (t_w_1 + t_w_2) * pow(muon.GetMomentum(),2) * 1.5E-6;
+                //tmp.weight = (t_w_1 + t_w_2);
             }
             else {
+                // weight with angle in 3D space
                 Vector3f in, out;
                 in  = muon.LineIn().direction.head(3);
                 out = muon.LineOut().direction.head(3);
                 float a = in.transpose() * out;
                 a = fabs( acos(a / (in.norm() * out.norm())) );
-                if(uLib::isFinite(a)) tmp.weight = pow(a * muon.GetMomentum(),2) * 1.5E-6;
+                if(uLib::isFinite(a))
+                    tmp.weight = pow(a * muon.GetMomentum(),2) * 1.5E-6;
+                    //tmp.weight = pow(a,2);
                 else tmp.weight = 0;
             }
             m_Data.push_back(tmp);
