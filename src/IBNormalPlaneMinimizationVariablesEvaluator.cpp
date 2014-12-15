@@ -326,86 +326,165 @@ public:
         return covariance;
     }
 
-    HVector3f getDirectorCosines(const HVector3f &track_direction)
+    static inline HVector3f getDirectorCosines(const HVector3f &track_direction)
     {
-        return track_direction / track_direction.head<3>().norm();
+        HVector3f v = track_direction;
+        v.head<3>().normalize();
+        return v;
     }
 
     Matrix4f getRotationMatrix(const HVector3f &track_direction)
     {
+
         // directors cosines
-        HVector3f dc = this->getDirectorCosines(track_direction);
-
-        // YZY rotations with angels
-        //        t_theta = acos(dc(1));
-        //        t_phi   = atan2(dc(2),dc(0));
-        //                this->evaluateAlpha(t_phi,t_theta);
-
-        //        Matrix4f first_y_rotation = compileYRotation(-t_phi);
-        //        Matrix4f first_z_rotation = compileZRotation(t_theta);
-        //        Matrix4f secnd_y_rotation = compileYRotation(-m_alpha);
-        //        Matrix4f out = secnd_y_rotation * first_z_rotation * first_y_rotation;
-        //        return out;
-
+        Vector4f dc = this->getDirectorCosines(track_direction);
 
         // YZY rotations without angles
-        Vector2f dc02 = Vector2f(dc(0),dc(2));       // phi
-        Vector2f dc1  = Vector2f(dc(1),dc02.norm()); // theta
-        Vector2f alphaX(dc(0),-dc(2)*dc(1));         // alphaX
-        Vector2f alphaZ(dc(0)*dc(1),-dc(2));
-        if(m_parent->$$.use_free_rotation == false) {
-            m_alpha = -(  (1-m_parent->$$.alphaXZ) * atan2(alphaX(1),alphaX(0)) +
-                          (m_parent->$$.alphaXZ)*atan2(alphaZ(1),alphaZ(0)) );
+        Vector2f phi = Vector2f(dc(0),dc(2));       // phi
+        Matrix4f first_y_rotation = compileYRotation(phi);
+
+        Vector2f the  = Vector2f(dc(1),phi.norm()); // theta
+        Matrix4f first_z_rotation = compileZRotation(the);
+
+        Matrix4f secnd_y_rotation;
+        if(!m_parent->$$.use_free_rotation) {
+            Vector2f alphaX(dc(0),-dc(2)*dc(1));
+            Vector2f alphaZ(dc(0)*dc(1),-dc(2));
+            float &weight = m_parent->$$.alphaXZ;
+            assert(weight >=0 && weight <= 1);
+            secnd_y_rotation = compileYRotation(  alphaX * (1-weight) + alphaZ * (weight) );
         }
         else {
             m_alpha = m_parent->$$.alphaXZ;
+            secnd_y_rotation = compileYRotation(m_alpha);
         }
 
-
-        Matrix4f first_y_rotation = compileYRotation(dc02);
-        Matrix4f first_z_rotation = compileZRotation(dc1);
-        //        Matrix4f secnd_y_rotation = compileYRotation(alphaX);
-        Matrix4f secnd_y_rotation = compileYRotation(m_alpha);
         Matrix4f out = secnd_y_rotation * first_z_rotation * first_y_rotation;
+        out /= out.determinant();
         return out;
 
-        // Eigen YZY
-        //        Eigen::Affine3f  transform(Matrix4f::Identity());
-        //        Matrix3f mat;
-        //        mat =     Eigen::AngleAxisf(m_alpha, Vector3f::UnitY())
-        //                * Eigen::AngleAxisf(t_theta, Vector3f::UnitZ())
-        //                * Eigen::AngleAxisf(t_phi, Vector3f::UnitY());
-        //        transform.rotate(mat);
-        //        return transform.matrix();
+
+
+
+//        // directors cosines
+//        HVector3f dc = this->getDirectorCosines(track_direction);
+
+//        // YZY rotations with angels
+//        //        t_theta = acos(dc(1));
+//        //        t_phi   = atan2(dc(2),dc(0));
+//        //                this->evaluateAlpha(t_phi,t_theta);
+
+//        //        Matrix4f first_y_rotation = compileYRotation(-t_phi);
+//        //        Matrix4f first_z_rotation = compileZRotation(t_theta);
+//        //        Matrix4f secnd_y_rotation = compileYRotation(-m_alpha);
+//        //        Matrix4f out = secnd_y_rotation * first_z_rotation * first_y_rotation;
+//        //        return out;
+
+
+//        // YZY rotations without angles
+//        Vector2f dc02 = Vector2f(dc(0),dc(2));       // phi
+//        Vector2f dc1  = Vector2f(dc(1),dc02.norm()); // theta
+//        Vector2f alphaX(dc(0),-dc(2)*dc(1));         // alphaX
+//        Vector2f alphaZ(dc(0)*dc(1),-dc(2));
+//        if(m_parent->$$.use_free_rotation == false) {
+//            m_alpha = -(  (1-m_parent->$$.alphaXZ) * atan2(alphaX(1),alphaX(0)) +
+//                          (m_parent->$$.alphaXZ)*atan2(alphaZ(1),alphaZ(0)) );
+//        }
+//        else {
+//            m_alpha = m_parent->$$.alphaXZ;
+//        }
+
+
+//        Matrix4f first_y_rotation = compileYRotation(dc02);
+//        Matrix4f first_z_rotation = compileZRotation(dc1);
+//        //        Matrix4f secnd_y_rotation = compileYRotation(alphaX);
+//        Matrix4f secnd_y_rotation = compileYRotation(m_alpha);
+//        Matrix4f out = secnd_y_rotation * first_z_rotation * first_y_rotation;
+//        return out;
+
+//        // Eigen YZY
+//        //        Eigen::Affine3f  transform(Matrix4f::Identity());
+//        //        Matrix3f mat;
+//        //        mat =     Eigen::AngleAxisf(m_alpha, Vector3f::UnitY())
+//        //                * Eigen::AngleAxisf(t_theta, Vector3f::UnitZ())
+//        //                * Eigen::AngleAxisf(t_phi, Vector3f::UnitY());
+//        //        transform.rotate(mat);
+//        //        return transform.matrix();
 
 
 
 
     }
 
-    Matrix4f compileYRotation(Scalarf angle)
+//    Matrix4f compileYRotation(Scalarf angle)
+//    {
+//        Matrix4f out;
+//        out << cos(angle), 0, -sin(angle), 0,
+//               0,          1,  0,          0,
+//               sin(angle), 0,  cos(angle), 0,
+//               0,          0,  0,          1;
+//        return out;
+//    }
+
+//    Matrix4f compileYRotation(Vector2f v)
+//    {
+//        float cos = v(0)/v.norm();
+//        float sin = v(1)/v.norm();
+//        Matrix4f out;
+//        out << cos, 0,  sin, 0,
+//               0,   1,  0,   0,
+//              -sin, 0,  cos, 0,
+//               0,   0,  0,   1;
+//        return out;
+//    }
+
+//    Matrix4f compileZRotation(Scalarf angle)
+//    {
+//        Matrix4f out;
+//        out <<  cos(angle), -sin(angle), 0, 0,
+//                sin(angle),  cos(angle), 0, 0,
+//                0,           0,          1, 0,
+//                0,           0,          0, 1;
+//        return out;
+//    }
+
+//    Matrix4f compileZRotation(Vector2f v)
+//    {
+//        float cos = v(0)/v.norm();
+//        float sin = v(1)/v.norm();
+//        Matrix4f out;
+//        out <<  cos, -sin, 0, 0,
+//                sin,  cos, 0, 0,
+//                0,    0,   1, 0,
+//                0,    0,   0, 1;
+//        return out;
+//    }
+
+    static Matrix4f compileYRotation(Scalarf angle)
     {
         Matrix4f out;
-        out << cos(angle), 0, -sin(angle), 0,
+        out << cos(angle), 0, sin(angle), 0,
                0,          1,  0,          0,
-               sin(angle), 0,  cos(angle), 0,
+               -sin(angle), 0,  cos(angle), 0,
                0,          0,  0,          1;
         return out;
     }
 
-    Matrix4f compileYRotation(Vector2f v)
+    static Matrix4f compileYRotation(Vector2f v)
     {
-        float cos = v(0)/v.norm();
-        float sin = v(1)/v.norm();
+        v.normalize();
+        const float &cos = v(0);
+        const float &sin = v(1);
         Matrix4f out;
-        out << cos, 0,  sin, 0,
-               0,   1,  0,   0,
-              -sin, 0,  cos, 0,
-               0,   0,  0,   1;
+        out <<
+               cos, 0,  sin, 0,
+                0,   1,  0,   0,
+                -sin,0,  cos, 0,
+                0,   0,  0,   1;
         return out;
     }
 
-    Matrix4f compileZRotation(Scalarf angle)
+    static Matrix4f compileZRotation(Scalarf angle)
     {
         Matrix4f out;
         out <<  cos(angle), -sin(angle), 0, 0,
@@ -415,12 +494,14 @@ public:
         return out;
     }
 
-    Matrix4f compileZRotation(Vector2f v)
+    static Matrix4f compileZRotation(Vector2f v)
     {
-        float cos = v(0)/v.norm();
-        float sin = v(1)/v.norm();
+        v.normalize();
+        const float &cos = v(0);
+        const float &sin = v(1);
         Matrix4f out;
-        out <<  cos, -sin, 0, 0,
+        out <<
+               cos, -sin, 0, 0,
                 sin,  cos, 0, 0,
                 0,    0,   1, 0,
                 0,    0,   0, 1;
