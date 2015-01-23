@@ -38,6 +38,7 @@ IBMuonError::IBMuonError(Scalarf xA, Scalarf zA, Scalarf ratio) :
     m_pratio = ratio;
     m_averPcorr = false;
     m_azimPcorr = false;
+    m_chamberErcorr = false;
 }
 
 IBMuonError::~IBMuonError()
@@ -63,6 +64,11 @@ bool IBMuonError::evaluate(MuonScatter &event, int i, int j)
 void IBMuonError::azimuthalMomentumCorrection(bool enable)
 {
     m_azimPcorr = enable;
+}
+
+void IBMuonError::crossChamberErrorCorrection(bool enable)
+{
+    m_chamberErcorr = enable;
 }
 
 void IBMuonError::averageMomentumCorrection(bool enable)
@@ -178,6 +184,10 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
 
 Scalarf IBMuonError::mpdEval(Scalarf a, Scalarf p, Scalarf d)
 {
-    return 1E-3 * (a/p) * (1+d*d);
+    float sigma = 1E-3 * (a/p);
+    /// SV 20141216 valid only for orizonthal or vertical chambers, not for furnace
+    if(m_chamberErcorr)
+            sigma *= (1+d*d);
+    return sigma;
 }
 
