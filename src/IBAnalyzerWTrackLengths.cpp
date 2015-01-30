@@ -168,8 +168,10 @@ bool IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
 
 void IBAnalyzerWTrackLengths::Run(unsigned int iterations, float muons_ratio)
 {
-//    for(int i=0; i<d->m_Events.size(); ++i)
-//        d->Project(&d->m_Events[i]);
+    std::cerr << "WARNING: Run function does nothing ... as the projection is "
+                 "made inside AddMuon funcion (without accounting events).";
+    //    for(int i=0; i<d->m_Events.size(); ++i)
+    //        d->Project(&d->m_Events[i]);
 }
 
 void IBAnalyzerWTrackLengths::SetRayAlgorithm(IBVoxRaytracer *raytracer)
