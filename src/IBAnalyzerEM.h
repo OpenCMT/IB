@@ -83,6 +83,10 @@ public:
     uLibGetSetMacro(RayAlgorithm,IBVoxRaytracer *)
     uLibGetSetMacro(UpdateAlgorithm,IBAbstract::IBVoxCollectionUpdateAlgorithm *)
 
+    void filterEvents();
+
+    void dumpEventsTTree(const char *filename);
+
     void SijCut(float threshold);
 
     void SijGuess(Vector<Vector2f> tpv);

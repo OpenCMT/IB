@@ -48,6 +48,7 @@ public:
     void azimuthalMomentumCorrection(bool enable=true);
     void crossChamberErrorCorrection(bool enable=true);
     void averageMomentumCorrection(bool enable=true);
+    void setOutMomentum(bool enable=true);
 
     void setScrapsImage(IBLightCollection &image);
 
@@ -81,6 +82,7 @@ private:
     Scalarf      m_pratio;
     bool         m_azimPcorr;
     bool         m_averPcorr;
+    bool         m_usePout;
     bool         m_chamberErcorr;
     IBMEShader * m_shader;
     IBMESimpler* m_simpler;

@@ -67,11 +67,12 @@ protected:
     {}
 
     virtual ~IBAnalyzer() {}
+public:
+    IBMuonCollection   *m_MuonCollection;
 
 private:    
     IBExperiment       *m_Experiment;
     IBVoxCollection    *m_VoxCollection;
-    IBMuonCollection   *m_MuonCollection;
 };
 
 

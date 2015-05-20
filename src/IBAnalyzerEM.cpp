@@ -70,6 +70,10 @@ public:
 
     void Evaluate(float muons_ratio);
 
+    void filterEvents();
+
+    void dumpEventsTTree(const char *filename);
+
     void SijCut(float threshold);
 
     void SijGuess(float threshold, float p);
@@ -145,6 +149,46 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
 ////// CUTS ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+// filter events after voxel mask has been applied
+void IBAnalyzerEMPimpl::filterEvents()
+{
+    std::cout << "\n*** Removing frozen voxels from " << this->m_Events.size() << " muon collection.";
+    Vector< Event >::iterator itr = this->m_Events.begin();
+    const Vector< Event >::iterator begin = this->m_Events.begin();
+
+    while (itr != this->m_Events.end()) {
+        Event & evc = *itr;
+        Vector< Event::Element >::iterator itre = evc.elements.begin();
+        // create new vector and fill it with positive voxels
+        Vector< Event::Element > newvelc;
+        while (itre != evc.elements.end()) {
+            Event::Element & elc = *itre;
+            if(elc.voxel->Value <= 0){
+                // add contribution to E matrix in both views
+                evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+                evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+            }
+            else
+                newvelc.push_back(elc);
+            ++itre;
+        }
+        evc.elements = newvelc;
+
+        /// erase event and muon with empty voxel collection
+        if(evc.elements.empty()){
+            unsigned int pos = itr - begin;
+            this->m_Events.remove_element(evc);
+            if(this->m_parent->m_MuonCollection)
+                this->m_parent->m_MuonCollection->Data().remove_element(pos);
+        }
+        else
+            ++itr;
+    }
+    std::cout << " " << this->m_Events.size() << " muons left!" << std::endl;
+
+    return;
+}
+
 // SijCut RECIPE1:  (true if Sij cut proposed) //
 static bool em_test_SijCut(const Event &evc, float cut_level)
 {
@@ -161,11 +205,16 @@ static bool em_test_SijCut(const Event &evc, float cut_level)
 void IBAnalyzerEMPimpl::SijCut(float threshold)
 {
     Vector< Event >::iterator itr = this->m_Events.begin();
+    const Vector< Event >::iterator begin = this->m_Events.begin();
+
     int count = 0;
     while (itr != this->m_Events.end()) {
         if(em_test_SijCut(*itr, threshold))
         {
+            unsigned int pos = itr - begin;
             this->m_Events.remove_element(*itr);
+            if(this->m_parent->m_MuonCollection)
+                this->m_parent->m_MuonCollection->Data().remove_element(pos);
             count ++;
         }
         else ++itr;
@@ -196,21 +245,80 @@ void IBAnalyzerEMPimpl::SijGuess(float threshold, float p)
 void IBAnalyzerEMPimpl::Chi2Cut(float threshold)
 {
     std::vector< Event >::iterator itr = this->m_Events.begin();
+    const Vector< Event >::iterator begin = this->m_Events.begin();
+
     do {
         Matrix4f Sigma = Matrix4f::Zero();
         Event &evc = *itr;
         this->m_SijAlgorithm->ComputeSigma(Sigma,&evc);
         Matrix4f iS = Sigma.inverse();
         Matrix4f Dn = iS * (evc.header.Di * evc.header.Di.transpose());
-        if ( Dn.trace() > threshold )
+        if ( Dn.trace() > threshold ){
+            unsigned int pos = itr - begin;
             this->m_Events.remove_element(*itr);
+            if(this->m_parent->m_MuonCollection)
+                this->m_parent->m_MuonCollection->Data().remove_element(pos);
+        }
         else ++itr;
     } while (itr != this->m_Events.end());
 }
 
+////////////////////////////////////////////////////////////////////////////////
+/////////////////// DUMP EVENTS ////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
+/// dump events on rootuple
+void IBAnalyzerEMPimpl::dumpEventsTTree(const char *filename)
+{
+    /// open file, tree
+    std::cout << "\n*** Dump event collection from IBAnalyzer on file " << filename << std::endl;
+    static TFile *file = new TFile(filename,"update");
+    gDirectory->cd(file->GetPath());
 
+    char name[100];
+    sprintf(name,"muons");
+    TTree *tree = (TTree*)file->Get("muons");
+    if(!tree)
+        tree = new TTree(name,name);
 
+    int ev = 0;
+    float p, sumLij;
+    TBranch *bev = tree->Branch("ev",&ev,"ev/I");
+    TBranch *bp = tree->Branch("p",&p,"p/F");
+    TBranch *bsumLij = tree->Branch("sumLij",&sumLij,"sumLij/F");
+
+    /// event loop
+    Vector< Event >::iterator itr = this->m_Events.begin();
+    while (itr != this->m_Events.end()) {
+
+        Event & evc = *itr;
+
+        /// crossed voxel loop
+        sumLij = 0;
+        Vector< Event::Element >::iterator itre = evc.elements.begin();
+        while (itre != evc.elements.end()) {
+            Event::Element & elc = *itre;
+            sumLij += elc.Wij(0,0);
+            ++itre;
+        }
+        p = m_parent->$$.nominal_momentum/sqrt(evc.header.InitialSqrP);
+
+        bev->Fill();
+        bp->Fill();
+        bsumLij->Fill();
+
+        ev++;
+        itr++;
+    }
+    tree->Write();
+    delete tree;
+
+    file->Write();
+    file->Close();
+    delete file;
+
+    return;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////// UPDATE DENSITY ALGORITHM ////////////////////////////////////////////////
@@ -350,28 +458,44 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
     {
         // voxel //
         const IBVoxRaytracer::RayData::Element &el = ray.Data().at(i);
-        elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);
+        elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);    
         // Wij   //
         Scalarf L = el.L;  T = fabs(T-L);
         elc.Wij << L ,          L*L/2 + L*T,
                    L*L/2 + L*T, L*L*L/3 + L*L*T + L*T*T;
         // pw    //
         elc.pw = evc.header.InitialSqrP;
-        evc.elements.push_back(elc);
-    }
 
+
+        if(elc.voxel->Value <= 0){
+            // add both views
+            evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+            evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+        }
+        else
+            evc.elements.push_back(elc);
+    }
     d->m_Events.push_back(evc);
+
 //    trd.Fill();
     return true;
 }
 
+///
+/// \note MuonCollection is syncronized with Event vector ONLY if SetMuonCollection is called
+/// if AddMuons is called by the analyzer it is not!
+/// \param muons
+///
 void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons)
 {
     uLibAssert(muons);
     d->m_Events.clear();
-    for(int i=0; i<muons->size(); ++i)
-    {
-        this->AddMuon(muons->At(i));
+    Vector<MuonScatterData>::iterator itr = muons->Data().begin();
+    while(itr != muons->Data().end()){
+        if(!this->AddMuon(*itr))
+            muons->Data().remove_element(*itr);
+        else
+            itr++;
     }
     BaseClass::SetMuonCollection(muons);
 }
@@ -400,6 +524,14 @@ void IBAnalyzerEM::Run(unsigned int iterations, float muons_ratio)
 void IBAnalyzerEM::SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm)
 {
     d->m_SijAlgorithm = MLAlgorithm;
+}
+
+void IBAnalyzerEM::filterEvents() {
+    d->filterEvents();
+}
+
+void IBAnalyzerEM::dumpEventsTTree(const char *filename) {
+    d->dumpEventsTTree(filename);
 }
 
 void IBAnalyzerEM::SijCut(float threshold) {

@@ -37,6 +37,7 @@ IBMuonError::IBMuonError(Scalarf xA, Scalarf zA, Scalarf ratio) :
     m_Az = zA;
     m_pratio = ratio;
     m_averPcorr = false;
+    m_usePout = false;
     m_azimPcorr = false;
     m_chamberErcorr = false;
 }
@@ -76,6 +77,11 @@ void IBMuonError::averageMomentumCorrection(bool enable)
     m_averPcorr = enable;
 }
 
+void IBMuonError::setOutMomentum(bool enable)
+{
+    m_usePout = enable;
+}
+
 void IBMuonError::setScrapsImage(IBLightCollection &image)
 {
     if(m_shader) {
@@ -98,7 +104,8 @@ void IBMuonError::setScrapsImage(IBLightCollection &image)
 bool IBMuonError::IBMESimpler::evaluate(MuonScatter &event, int i, int j)
 {
     if (unlikely(event.GetMomentum()!=0.f)) {
-        event.SetMomentumPrime(event.GetMomentum()/d->m_pratio);
+        if (event.GetMomentumPrime() == 0)
+            event.SetMomentumPrime(event.GetMomentum()/d->m_pratio);
     } else {
         if (d->m_azimPcorr) {
             float azAngl = atan(sqrt((event.LineIn().direction(0)*event.LineIn().direction(0)+
@@ -114,7 +121,12 @@ bool IBMuonError::IBMESimpler::evaluate(MuonScatter &event, int i, int j)
     event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Az, event.GetMomentum(), event.LineIn().direction(i));
     event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Ax, event.GetMomentumPrime(), event.LineOut().direction(0));
     event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Az, event.GetMomentumPrime(), event.LineOut().direction(j));
-    if (d->m_averPcorr) event.SetMomentum((event.GetMomentum()+event.GetMomentumPrime())/2.);
+
+    if (d->m_averPcorr)
+        event.SetMomentum((event.GetMomentum()+event.GetMomentumPrime())/2.);
+    if (d->m_usePout)
+        event.SetMomentum(event.GetMomentumPrime());
+
     return true;
 }
 
@@ -177,7 +189,10 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
     event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Az, event.GetMomentum(), event.LineIn().direction(i));
     event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Ax, event.GetMomentumPrime(), event.LineOut().direction(0));
     event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Az, event.GetMomentumPrime(), event.LineOut().direction(j));
-    if (d->m_averPcorr) event.SetMomentum((event.GetMomentum()+event.GetMomentumPrime())/2.);
+    if (d->m_averPcorr)
+        event.SetMomentum((event.GetMomentum()+event.GetMomentumPrime())/2.);
+    if (d->m_usePout)
+        event.SetMomentum(event.GetMomentumPrime());
     return true;
 
 }

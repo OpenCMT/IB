@@ -171,6 +171,7 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
         o << " Muons passed: " << this->size() << "\n";
 }
 
+
 void IBMuonCollection::DumpTTree(const char *filename)
 { 
     static TFile *file = new TFile(filename,"RECREATE");
