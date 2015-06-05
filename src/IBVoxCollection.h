@@ -20,7 +20,6 @@
 //////////////////////////////////////////////////////////////////////////////*/
 
 
-
 /* 
  * File:   IBVoxCollection.h
  * Author: andrea
@@ -102,6 +101,14 @@ public:
                                                        return out;
                                                      }
 
+    inline IBVoxCollection InvLradToLambda(float p0) { IBVoxCollection out = *this;
+                                                       out/=((p0/15)*(p0/15)); // 1/cm
+                                                       //out/=100.;              // if in 1/m
+                                                       return out;
+                                                     }
+    IBVoxCollection getMCImage(const char* file, int nsamples);
+    float getVoxelMCDensity(const char* file, uLib::HPoint3f c1, uLib::HPoint3f c2, int nrandom=1000);
+
 private:
     IBAbstract::IBVoxCollectionMAPAlgorithm *m_MAPAlgorithm;
 };
@@ -151,7 +158,6 @@ void IBVoxCollection::UpdateDensity(unsigned int threshold) {
     // Reinitialize voxels //
     this->InitCount(0);
 }
-
 
 
 #endif	/* IBVOXCOLLECTION_H */

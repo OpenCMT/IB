@@ -36,6 +36,9 @@ public:
     bool     evaluate(MuonScatterData muon);
     HPoint3f getPoca();
 
+    // dummy functions for the moment... to be implemented
+    inline Scalarf getDistance() {return 0;}
+
 private:
     friend class IBTiltedAxisPocaEvaluatorPimpl;
     class IBTiltedAxisPocaEvaluatorPimpl *d;

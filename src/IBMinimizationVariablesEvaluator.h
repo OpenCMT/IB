@@ -18,9 +18,6 @@
   permission of  Prof. Gianni Zumerle  < gianni.zumerle@pd.infn.it >
 
 //////////////////////////////////////////////////////////////////////////////*/
-
-
-
 #ifndef IBMINIMIZATIONVARIABLESEVALUATOR_H
 #define IBMINIMIZATIONVARIABLESEVALUATOR_H
 

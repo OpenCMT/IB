@@ -81,6 +81,8 @@ bool IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
     IBAnalyzerTrackLengthsPimpl::Event evc;
 
     IBVoxRaytracer::RayData ray;
+    // ENTRY and EXIT point present
+    if( !isnan(muon.LineOut().origin.prod()) )
     { // Get RayTrace RayData //
         HPoint3f entry_pt,poca,exit_pt;
         if( !d->m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
@@ -96,7 +98,8 @@ bool IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
         else {
             ray = d->m_RayAlgorithm->TraceBetweenPoints(entry_pt,exit_pt);
         }
-    }
+    } else // Get RayTrace Data for stopping muon //
+        ray = d->m_RayAlgorithm->TraceLine(muon.LineIn());
 
     IBAnalyzerTrackLengthsPimpl::Event::Element elc;
     Scalarf T = ray.TotalLength();
@@ -116,10 +119,22 @@ bool IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
 
         evc.elements.push_back(elc);
     }
-    //    d->m_Events.push_back(evc);
-      d->Project(&evc);
+    d->m_Events.push_back(evc);
+    //comment push_back and un-comment Project for not filling Events vector and have more space...
+    //d->Project(&evc);
 
     return true;
+}
+
+void IBAnalyzerTrackLengths::SetMuonCollection(IBMuonCollection *muons)
+{
+    uLibAssert(muons);
+    d->m_Events.clear();
+    for(int i=0; i<muons->size(); ++i)
+    {
+        this->AddMuon(muons->At(i));
+    }
+    BaseClass::SetMuonCollection(muons);
 }
 
 void IBAnalyzerTrackLengths::Run(unsigned int iterations, float muons_ratio)

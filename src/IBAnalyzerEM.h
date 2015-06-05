@@ -83,7 +83,9 @@ public:
     uLibGetSetMacro(RayAlgorithm,IBVoxRaytracer *)
     uLibGetSetMacro(UpdateAlgorithm,IBAbstract::IBVoxCollectionUpdateAlgorithm *)
 
-    void filterEvents();
+    void filterEventsVoxelMask();
+
+    void filterEventsLineDistance(float min, float max);
 
     void dumpEventsTTree(const char *filename);
 

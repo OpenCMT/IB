@@ -18,17 +18,12 @@
   permission of  Prof. Gianni Zumerle  < gianni.zumerle@pd.infn.it >
 
 //////////////////////////////////////////////////////////////////////////////*/
-
-
-
 #include <Core/Vector.h>
 #include "IBVoxCollectionCap.h"
 #include "IBAnalyzerTrackCount.h"
 #include "IBVoxRaytracer.h"
 
 using namespace uLib;
-
-
 
 ///// PIMPL ////////////////////////////////////////////////////////////////////
 
@@ -62,9 +57,6 @@ public:
 };
 
 
-
-
-
 IBAnalyzerTrackCount::IBAnalyzerTrackCount() :
     d(new IBAnalyzerTrackCountPimpl)
 {}
@@ -74,14 +66,14 @@ IBAnalyzerTrackCount::~IBAnalyzerTrackCount()
     delete d;
 }
 
-
-
 bool IBAnalyzerTrackCount::AddMuon(const MuonScatterData &muon)
 {
     if(!d->m_RayAlgorithm || !d->m_PocaAlgorithm) return false;
     IBAnalyzerTrackCountPimpl::Event evc;
 
     IBVoxRaytracer::RayData ray;
+    // ENTRY and EXIT point present
+    if( !isnan(muon.LineOut().origin.prod()) )
     { // Get RayTrace RayData //
         HPoint3f entry_pt,
                 poca,
@@ -89,6 +81,7 @@ bool IBAnalyzerTrackCount::AddMuon(const MuonScatterData &muon)
         if( !d->m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
                 !d->m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
             return false;
+
         bool test = d->m_PocaAlgorithm->evaluate(muon);
         poca = d->m_PocaAlgorithm->getPoca();
         if(test && this->GetVoxCollection()->IsInsideBounds(poca)) {
@@ -99,7 +92,8 @@ bool IBAnalyzerTrackCount::AddMuon(const MuonScatterData &muon)
         else {
             ray = d->m_RayAlgorithm->TraceBetweenPoints(entry_pt,exit_pt);
         }
-    }
+    } else // Get RayTrace Data for stopping muon //
+        ray = d->m_RayAlgorithm->TraceLine(muon.LineIn());
 
     IBAnalyzerTrackCountPimpl::Event::Element elc;
     Scalarf T = ray.TotalLength();

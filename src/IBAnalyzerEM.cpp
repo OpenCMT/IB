@@ -18,9 +18,6 @@
   permission of  Prof. Gianni Zumerle  < gianni.zumerle@pd.infn.it >
 
 //////////////////////////////////////////////////////////////////////////////*/
-
-
-
 #include <stdio.h>
 
 #include <TTree.h>
@@ -47,8 +44,6 @@ typedef IBAnalyzerEM::Event Event;
 //static DebugTTree trd(__FILE__);
 } // namespace
 
-
-
 ////////////////////////////////////////////////////////////////////////////////
 /////  PIMPL  //////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,9 +65,9 @@ public:
 
     void Evaluate(float muons_ratio);
 
-    void filterEvents();
+    void filterEventsVoxelMask();
 
-    void dumpEventsTTree(const char *filename);
+    void filterEventsLineDistance(float min, float max);
 
     void SijCut(float threshold);
 
@@ -149,8 +144,8 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
 ////// CUTS ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// filter events after voxel mask has been applied
-void IBAnalyzerEMPimpl::filterEvents()
+/// filter events after voxel mask has been applied
+void IBAnalyzerEMPimpl::filterEventsVoxelMask()
 {
     std::cout << "\n*** Removing frozen voxels from " << this->m_Events.size() << " muon collection.";
     Vector< Event >::iterator itr = this->m_Events.begin();
@@ -189,7 +184,39 @@ void IBAnalyzerEMPimpl::filterEvents()
     return;
 }
 
-// SijCut RECIPE1:  (true if Sij cut proposed) //
+////////////////////////////////////////////////////////////////////////////////
+/// filter events if in-out line distance out of range
+void IBAnalyzerEMPimpl::filterEventsLineDistance(float min, float max)
+{
+    std::cout << "\n*** Removing events with line distance out of range from " << this->m_Events.size() << " muon collection.";
+
+    Vector< Event >::iterator itr = this->m_Events.begin();
+    const Vector< Event >::iterator begin = this->m_Events.begin();
+
+    while (itr != this->m_Events.end()) {
+        Event & evc = *itr;
+        unsigned int pos = itr - begin;
+
+        MuonScatterData muon = this->m_parent->m_MuonCollection->At(pos);
+        bool use_poca = this->m_parent->m_PocaAlgorithm->evaluate(muon);
+        float dist = this->m_parent->m_PocaAlgorithm->getDistance();
+
+        /// erase event and muon with distance out of range
+        if(!isFinite(dist) || dist >= max || dist < min){
+            this->m_Events.remove_element(evc);
+            this->m_parent->m_MuonCollection->Data().remove_element(pos);
+        }
+        else
+            ++itr;
+    }
+
+    std::cout << " " << this->m_Events.size() << " muons left!" << std::endl;
+
+    return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// SijCut RECIPE1:  (true if Sij cut proposed) //
 static bool em_test_SijCut(const Event &evc, float cut_level)
 {
     int n_cuts = 0;
@@ -242,6 +269,7 @@ void IBAnalyzerEMPimpl::SijGuess(float threshold, float p)
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
 void IBAnalyzerEMPimpl::Chi2Cut(float threshold)
 {
     std::vector< Event >::iterator itr = this->m_Events.begin();
@@ -263,62 +291,7 @@ void IBAnalyzerEMPimpl::Chi2Cut(float threshold)
     } while (itr != this->m_Events.end());
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/////////////////// DUMP EVENTS ////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
-/// dump events on rootuple
-void IBAnalyzerEMPimpl::dumpEventsTTree(const char *filename)
-{
-    /// open file, tree
-    std::cout << "\n*** Dump event collection from IBAnalyzer on file " << filename << std::endl;
-    static TFile *file = new TFile(filename,"update");
-    gDirectory->cd(file->GetPath());
-
-    char name[100];
-    sprintf(name,"muons");
-    TTree *tree = (TTree*)file->Get("muons");
-    if(!tree)
-        tree = new TTree(name,name);
-
-    int ev = 0;
-    float p, sumLij;
-    TBranch *bev = tree->Branch("ev",&ev,"ev/I");
-    TBranch *bp = tree->Branch("p",&p,"p/F");
-    TBranch *bsumLij = tree->Branch("sumLij",&sumLij,"sumLij/F");
-
-    /// event loop
-    Vector< Event >::iterator itr = this->m_Events.begin();
-    while (itr != this->m_Events.end()) {
-
-        Event & evc = *itr;
-
-        /// crossed voxel loop
-        sumLij = 0;
-        Vector< Event::Element >::iterator itre = evc.elements.begin();
-        while (itre != evc.elements.end()) {
-            Event::Element & elc = *itre;
-            sumLij += elc.Wij(0,0);
-            ++itre;
-        }
-        p = m_parent->$$.nominal_momentum/sqrt(evc.header.InitialSqrP);
-
-        bev->Fill();
-        bp->Fill();
-        bsumLij->Fill();
-
-        ev++;
-        itr++;
-    }
-    tree->Write();
-    delete tree;
-
-    file->Write();
-    file->Close();
-    delete file;
-
-    return;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////// UPDATE DENSITY ALGORITHM ////////////////////////////////////////////////
@@ -439,13 +412,18 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
             out = muon.LineOut().origin - poca;
             float poca_prj = in.transpose() * out;
 //            DBG(trd,poca_prj);
+            // poca must be between in-out point
             use_poca &= ( poca_prj > 0 );
         }
+        if(!use_poca)
+            std::cout << "not valid PoCA !" << std::endl;
+        if(!this->GetVoxCollection()->IsInsideBounds(poca))
+            std::cout << "PoCA outside bounds!!" << std::endl;
+
         if(use_poca && this->GetVoxCollection()->IsInsideBounds(poca)) {
             poca = m_PocaAlgorithm->getPoca();
             ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,poca);
             ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(poca,exit_pt) );
-
         }
         else {
             ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,exit_pt);
@@ -475,6 +453,7 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
         else
             evc.elements.push_back(elc);
     }
+
     d->m_Events.push_back(evc);
 
 //    trd.Fill();
@@ -526,12 +505,12 @@ void IBAnalyzerEM::SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm)
     d->m_SijAlgorithm = MLAlgorithm;
 }
 
-void IBAnalyzerEM::filterEvents() {
-    d->filterEvents();
+void IBAnalyzerEM::filterEventsVoxelMask() {
+    d->filterEventsVoxelMask();
 }
 
-void IBAnalyzerEM::dumpEventsTTree(const char *filename) {
-    d->dumpEventsTTree(filename);
+void IBAnalyzerEM::filterEventsLineDistance(float min, float max) {
+    d->filterEventsLineDistance(min, max);
 }
 
 void IBAnalyzerEM::SijCut(float threshold) {
@@ -581,6 +560,9 @@ void IBAnalyzerEM::SetVoxcollectionShift(Vector3f shift)
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
+/////////////////// DUMP EVENTS ////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
 {
@@ -622,6 +604,77 @@ void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
 }
 
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// dump events on rootuple
+////////////////////////////////////////////////////////////////////////////////
+
+void IBAnalyzerEM::dumpEventsTTree(const char *filename)
+{
+    /// open file, tree
+    std::cout << "\n*** Dump event collection from IBAnalyzer on file " << filename << std::endl;
+    static TFile *file = new TFile(filename,"update");
+    gDirectory->cd(file->GetPath());
+
+    char name[100];
+    sprintf(name,"muons");
+    TTree *tree = (TTree*)file->Get("muons");
+    if(!tree)
+        tree = new TTree(name,name);
+
+    int ev = 0;
+    float mom, sumLij, dist;
+    TBranch *bev = tree->Branch("ev",&ev,"ev/I");
+    TBranch *bp = tree->Branch("p",&mom,"p/F");
+    TBranch *bsumLij = tree->Branch("sumLij",&sumLij,"sumLij/F");
+    TBranch *bdist = tree->Branch("dist",&dist,"dist/F");
+
+    /// event loop
+    Vector< Event >::iterator itr = d->m_Events.begin();
+    while (itr != d->m_Events.end()) {
+
+        Event & evc = *itr;
+
+        /// crossed voxel loop
+        sumLij = 0;
+        Vector< Event::Element >::iterator itre = evc.elements.begin();
+        while (itre != evc.elements.end()) {
+            Event::Element & elc = *itre;
+            sumLij += elc.Wij(0,0);
+            ++itre;
+        }
+        mom = $$.nominal_momentum/sqrt(evc.header.InitialSqrP);
+
+        bev->Fill();
+        bp->Fill();
+        bsumLij->Fill();
+
+        ev++;
+        itr++;
+    }
+
+    /// muon loop to add poca information
+    dist = 0;
+    IBMuonCollection *muons = this->GetMuonCollection();
+
+    for(int i=0; i<muons->size(); ++i){
+        MuonScatterData muon = muons->At(i);
+        bool use_poca = m_PocaAlgorithm->evaluate(muon);
+        dist = m_PocaAlgorithm->getDistance();
+        //uncomment to exclude distance when PoCA is outside voxel bounds
+        //if(use_poca)
+        bdist->Fill();
+    }
+
+    tree->Write();
+    delete tree;
+
+    file->Write();
+    file->Close();
+    delete file;
+
+    return;
+}
 
 
 

@@ -37,6 +37,8 @@ public:
     HPoint3f getOutTrackPoca();
     HPoint3f getInTrackPoca();
     void setDistanceCut(Scalarf length);
+    Scalarf getDistance();
+
 private:
     friend class IBLineDistancePocaEvaluatorPimpl;
     class IBLineDistancePocaEvaluatorPimpl *d;

@@ -47,6 +47,8 @@ public:
 
     void SetPocaAlgorithm(IBPocaEvaluator *evaluator);
 
+    void SetMuonCollection(IBMuonCollection *muons);
+
 private:
     class IBAnalyzerTrackLengthsPimpl *d;
 };
