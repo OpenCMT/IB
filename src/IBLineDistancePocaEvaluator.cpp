@@ -62,9 +62,10 @@ public:
                     m_integrity = false;
                     return;
                 }
-                std::cout << "ATTENTION from evaluatePoca : infinite den, prod " << prod
-                          << ", angles " << v << ", " << w
-                          << ", dist " << m_dist << std::endl;
+//                std::cout << "ATTENTION from evaluatePoca : infinite den, prod " << prod
+//                          << ", angles " << v << ", " << w
+//                          << ", dist " << m_dist << std::endl;
+                m_integrity = false;
             //}
         }
         else {

@@ -147,7 +147,7 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
 /// filter events after voxel mask has been applied
 void IBAnalyzerEMPimpl::filterEventsVoxelMask()
 {
-    std::cout << "\n*** Removing frozen voxels from " << this->m_Events.size() << " muon collection.";
+    std::cout << "\nIBAnalyzerEM: Removing frozen voxels from " << this->m_Events.size() << " muon collection.";
     Vector< Event >::iterator itr = this->m_Events.begin();
     const Vector< Event >::iterator begin = this->m_Events.begin();
 
@@ -167,6 +167,11 @@ void IBAnalyzerEMPimpl::filterEventsVoxelMask()
                 newvelc.push_back(elc);
             ++itre;
         }
+//        if(newvelc.size() != evc.elements.size()){
+//            std::cout << newvelc.size() << " voxels left from muon of " << evc.elements.size() << " voxels " << std::endl;
+//            std::cout << this->m_parent->m_MuonCollection->Data().at(itr-begin);
+//        }
+
         evc.elements = newvelc;
 
         /// erase event and muon with empty voxel collection
@@ -395,13 +400,13 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
     else return false;
 
     IBVoxRaytracer::RayData ray;
+    HPoint3f entry_pt,poca,exit_pt;
+    bool use_poca = false;
     { // Get RayTrace RayData //
-        HPoint3f entry_pt,poca,exit_pt;
         if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
                 !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
             return false;
 
-        bool use_poca = false;
         if(m_PocaAlgorithm) { //TODO:  move this to poca algorithm
             use_poca = m_PocaAlgorithm->evaluate(muon);
             poca = m_PocaAlgorithm->getPoca();
@@ -415,10 +420,10 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
             // poca must be between in-out point
             use_poca &= ( poca_prj > 0 );
         }
-        if(!use_poca)
-            std::cout << "not valid PoCA !" << std::endl;
-        if(!this->GetVoxCollection()->IsInsideBounds(poca))
-            std::cout << "PoCA outside bounds!!" << std::endl;
+//        if(!use_poca)
+//            std::cout << "not valid PoCA !" << std::endl;
+//        if(!this->GetVoxCollection()->IsInsideBounds(poca))
+//            std::cout << "PoCA outside bounds!!" << std::endl;
 
         if(use_poca && this->GetVoxCollection()->IsInsideBounds(poca)) {
             poca = m_PocaAlgorithm->getPoca();
@@ -623,13 +628,17 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         tree = new TTree(name,name);
 
     int ev = 0;
-    float mom, sumLij, dist;
+    float mom, sumLij, dist, scatX, scatZ;
     TBranch *bev = tree->Branch("ev",&ev,"ev/I");
     TBranch *bp = tree->Branch("p",&mom,"p/F");
     TBranch *bsumLij = tree->Branch("sumLij",&sumLij,"sumLij/F");
     TBranch *bdist = tree->Branch("dist",&dist,"dist/F");
+    TBranch *bscatX = tree->Branch("scatX",&scatX,"scatX/F");
+    TBranch *bscatZ = tree->Branch("scatZ",&scatZ,"scatZ/F");
 
+    IBMuonCollection *muons = this->GetMuonCollection();
     /// event loop
+    int pos = 0;
     Vector< Event >::iterator itr = d->m_Events.begin();
     while (itr != d->m_Events.end()) {
 
@@ -645,26 +654,37 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         }
         mom = $$.nominal_momentum/sqrt(evc.header.InitialSqrP);
 
+        scatX = evc.header.Di[0];
+        scatZ = evc.header.Di[2];
+
         bev->Fill();
+        bscatX->Fill();
+        bscatZ->Fill();
         bp->Fill();
         bsumLij->Fill();
 
+        pos++;
         ev++;
         itr++;
     }
 
     /// muon loop to add poca information
     dist = 0;
-    IBMuonCollection *muons = this->GetMuonCollection();
 
     for(int i=0; i<muons->size(); ++i){
         MuonScatterData muon = muons->At(i);
-        bool use_poca = m_PocaAlgorithm->evaluate(muon);
-        dist = m_PocaAlgorithm->getDistance();
-        //uncomment to exclude distance when PoCA is outside voxel bounds
-        //if(use_poca)
-        bdist->Fill();
+        if(m_PocaAlgorithm){
+            bool use_poca = m_PocaAlgorithm->evaluate(muon);
+            dist = m_PocaAlgorithm->getDistance();
+            //uncomment to exclude distance when PoCA is outside voxel bounds
+            //if(use_poca)
+            bdist->Fill();
+        }
     }
+
+    // testing
+    int sizeev = d->m_Events.size();
+    int sizemu = muons->size();
 
     tree->Write();
     delete tree;
