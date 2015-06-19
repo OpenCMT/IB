@@ -366,7 +366,7 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
 
     // FILE SAVE ------------------------------------------------------------ //
     std::cout << "Finalizing Data and Saving..." << std::flush;    
-    ofstream fout;
+    std::ofstream fout;
 
 //    char fname[200];
     sprintf(fname,argv[3],RecipeT::name());

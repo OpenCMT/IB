@@ -50,12 +50,12 @@ struct Parameters {
     int iteration;
     std::string algs;
 } p = {
-    "/var/local/data/vtk/ROC/ROC_LNL_1388/Source_12l/vtk_R7_10cm/min_0.5/image_%i_%i.vtk",
-    "/var/local/data/vtk/ROC/ROC_LNL_1388/NOSource/vtk_R7_10cm/min_0.5/image_%i_%i.vtk",
-    "ROC_r1388_%s_v10_t0.5.csv",
+    (char*)"/var/local/data/vtk/ROC/ROC_LNL_1388/Source_12l/vtk_R7_10cm/min_0.5/image_%i_%i.vtk",
+    (char*)"/var/local/data/vtk/ROC/ROC_LNL_1388/NOSource/vtk_R7_10cm/min_0.5/image_%i_%i.vtk",
+    (char*)"ROC_r1388_%s_v10_t0.5.csv",
     1000,
     300,
-    "NoFilter"
+    (char*)"NoFilter"
 };
 
 
@@ -325,7 +325,7 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
     // FILE SAVE ------------------------------------------------------------ //
     std::cout << "Finalizing Data and Saving..." << std::flush;
 
-    ofstream fout;
+    std::ofstream fout;
     sprintf(fname,p.file_out,RecipeT::name());
     fout.open( fname );
     fout << roc;
