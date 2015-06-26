@@ -174,6 +174,7 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
 
 void IBMuonCollection::DumpTTree(const char *filename)
 { 
+    std::cout << "\nCHIAMATA A DUMPTREE !!!\n";
     static TFile *file = new TFile(filename,"RECREATE");
 
     char name[100];
@@ -194,11 +195,11 @@ void IBMuonCollection::DumpTTree(const char *filename)
     }
 
     tree->Write();
-    delete tree;
 
-    file->Write();
+//    file->Write();
     file->Close();
-    delete file;
+//    delete tree;
+//    delete file;
 
     return;
 }

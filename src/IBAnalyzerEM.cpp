@@ -628,13 +628,15 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         tree = new TTree(name,name);
 
     int ev = 0;
-    float mom, sumLij, dist, scatX, scatZ;
+    float mom, sumLij, dist, DP, DX, DT, DZ;
     TBranch *bev = tree->Branch("ev",&ev,"ev/I");
     TBranch *bp = tree->Branch("p",&mom,"p/F");
     TBranch *bsumLij = tree->Branch("sumLij",&sumLij,"sumLij/F");
     TBranch *bdist = tree->Branch("dist",&dist,"dist/F");
-    TBranch *bscatX = tree->Branch("scatX",&scatX,"scatX/F");
-    TBranch *bscatZ = tree->Branch("scatZ",&scatZ,"scatZ/F");
+    TBranch *bDP = tree->Branch("DP",&DP,"DP/F");
+    TBranch *bDX = tree->Branch("DX",&DX,"DX/F");
+    TBranch *bDT = tree->Branch("DT",&DT,"DT/F");
+    TBranch *bDZ = tree->Branch("DZ",&DZ,"DZ/F");
 
     IBMuonCollection *muons = this->GetMuonCollection();
     /// event loop
@@ -654,14 +656,19 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         }
         mom = $$.nominal_momentum/sqrt(evc.header.InitialSqrP);
 
-        scatX = evc.header.Di[0];
-        scatZ = evc.header.Di[2];
+        DP = evc.header.Di[0];
+        DX = evc.header.Di[1];
+        DT = evc.header.Di[2];
+        DZ = evc.header.Di[3];
 
         bev->Fill();
-        bscatX->Fill();
-        bscatZ->Fill();
         bp->Fill();
         bsumLij->Fill();
+
+        bDP->Fill();
+        bDX->Fill();
+        bDT->Fill();
+        bDZ->Fill();
 
         pos++;
         ev++;
@@ -686,7 +693,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
     int sizeev = d->m_Events.size();
     int sizemu = muons->size();
 
-    tree->Write();
+    tree->Write("", TObject::kOverwrite);
     delete tree;
 
     file->Write();
