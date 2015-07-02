@@ -33,11 +33,12 @@ set(PACKAGE_AUTHOR "Andrea Rigoni Garola <andrea.rigoni@pd.infn.it>")
 
 ## First of all find uLib package to get imported locations ##
 unset(ULIB_CONFIG)
+set(ULIB_DIR /home/$ENV{USER}/MuTom/uLib/build/)
 find_package(ULIB 0.2 CONFIG REQUIRED
              NAMES uLib
              PATH_SUFFIXES mutom-0.2
 )
-
+message("ULIB_CONFIG=${ULIB_CONFIG}")
 
 if(NOT DEFINED IB_CMAKE_DIR)
 get_target_property(ULIB_CONFIG_CMD uLib_config LOCATION)
@@ -85,6 +86,7 @@ debug(ULIB_LIBRARIES)
 
 if(ULIB_CONFIG)
  set(ULIB_FOUND true)
+ message("Using ULib include directories: ${ULIB_INCLUDE_DIRS}")
  include_directories(${ULIB_INCLUDE_DIRS})
 endif()
 
@@ -96,14 +98,16 @@ include_directories(${SRC_DIR})
 add_subdirectory(${SRC_DIR})
 
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/utils/filters)
-add_subdirectory(${PROJECT_SOURCE_DIR}/utils/roc)
+#add_subdirectory(${PROJECT_SOURCE_DIR}/utils/filters)
+#add_subdirectory(${PROJECT_SOURCE_DIR}/utils/roc)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/examples EXCLUDE_FROM_ALL)
 
 
 
 ## INSTALLS AND EXPORTS ----------------------------------------------------- ##
+
+debug(ULIB_SHARED_LIBRARIES)
 
 export(PACKAGE IB)
 export(TARGETS ${ULIB_SHARED_LIBRARIES}
@@ -147,7 +151,3 @@ install(EXPORT "${PROJECT_NAME}Targets" DESTINATION
 add_custom_target(clean-cmake-files
    COMMAND ${CMAKE_COMMAND} -P ${IB_CMAKE_DIR}/clean-all.cmake
 )
-
-
-
-
