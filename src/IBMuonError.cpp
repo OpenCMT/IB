@@ -29,17 +29,20 @@
 
 using namespace uLib;
 
-IBMuonError::IBMuonError(Scalarf xA, Scalarf zA, Scalarf ratio) :
+IBMuonError::IBMuonError(Scalarf xA, Scalarf zA, Scalarf xB, Scalarf zB, Scalarf ratio) :
     m_simpler(new IBMESimpler(this)),
     m_shader(NULL)
 {
     m_Ax = xA;
     m_Az = zA;
+    m_Bx = xB;
+    m_Bz = zB;
     m_pratio = ratio;
     m_averPcorr = false;
     m_usePout = false;
     m_azimPcorr = false;
     m_chamberErcorr = false;
+    m_squareError = false;
 }
 
 IBMuonError::~IBMuonError()
@@ -75,6 +78,11 @@ void IBMuonError::crossChamberErrorCorrection(bool enable)
 void IBMuonError::averageMomentumCorrection(bool enable)
 {
     m_averPcorr = enable;
+}
+
+void IBMuonError::squareError(bool enable)
+{
+    m_squareError = enable;
 }
 
 void IBMuonError::setOutMomentum(bool enable)
@@ -117,10 +125,18 @@ bool IBMuonError::IBMESimpler::evaluate(MuonScatter &event, int i, int j)
         }
         event.SetMomentum(event.GetMomentumPrime()*d->m_pratio);
     }
-    event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Ax, event.GetMomentum(), event.LineIn().direction(0));
-    event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Az, event.GetMomentum(), event.LineIn().direction(i));
-    event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Ax, event.GetMomentumPrime(), event.LineOut().direction(0));
-    event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Az, event.GetMomentumPrime(), event.LineOut().direction(j));
+    if(d->m_squareError){
+        event.ErrorIn().direction_error(0)  = d->mpdSquareEval(d->m_Ax, d->m_Bx, event.GetMomentum(), event.LineIn().direction(0));
+        event.ErrorIn().direction_error(i)  = d->mpdSquareEval(d->m_Az, d->m_Bx, event.GetMomentum(), event.LineIn().direction(i));
+        event.ErrorOut().direction_error(0) = d->mpdSquareEval(d->m_Ax, d->m_Bx, event.GetMomentumPrime(), event.LineOut().direction(0));
+        event.ErrorOut().direction_error(j) = d->mpdSquareEval(d->m_Az, d->m_Bx, event.GetMomentumPrime(), event.LineOut().direction(j));
+    }
+    else{
+        event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Ax, event.GetMomentum(), event.LineIn().direction(0));
+        event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Az, event.GetMomentum(), event.LineIn().direction(i));
+        event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Ax, event.GetMomentumPrime(), event.LineOut().direction(0));
+        event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Az, event.GetMomentumPrime(), event.LineOut().direction(j));
+    }
 
     if (d->m_averPcorr)
         event.SetMomentum((event.GetMomentum()+event.GetMomentumPrime())/2.);
@@ -203,6 +219,18 @@ Scalarf IBMuonError::mpdEval(Scalarf a, Scalarf p, Scalarf d)
     /// SV 20141216 valid only for orizonthal or vertical chambers, not for furnace
     if(m_chamberErcorr)
             sigma *= (1+d*d);
+    return sigma;
+}
+
+
+Scalarf IBMuonError::mpdSquareEval(Scalarf a, Scalarf b, Scalarf p, Scalarf d)
+{
+    float sigma = 1E-3 * sqrt(pow((a/p),2.) + pow(b,2.));
+
+    /// SV 20141216 valid only for orizonthal or vertical chambers, not for furnace
+    if(m_chamberErcorr)
+        sigma *= (1+d*d);
+
     return sigma;
 }
 

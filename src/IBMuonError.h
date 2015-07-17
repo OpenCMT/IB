@@ -41,7 +41,7 @@ class IBMuonError
     friend class IBMESimpler;
 public:
 
-    IBMuonError(Scalarf xA, Scalarf zA, Scalarf ratio = 1);
+    IBMuonError(Scalarf xA, Scalarf zA, Scalarf xB = 0, Scalarf zB = 0, Scalarf ratio = 1);
     ~IBMuonError();
 
     bool evaluate(MuonScatter &event, int i, int j);
@@ -49,6 +49,7 @@ public:
     void crossChamberErrorCorrection(bool enable=true);
     void averageMomentumCorrection(bool enable=true);
     void setOutMomentum(bool enable=true);
+    void squareError(bool enable=true);
 
     void setScrapsImage(IBLightCollection &image);
 
@@ -78,12 +79,15 @@ private:
     };
 
     Scalarf mpdEval(Scalarf a, Scalarf p, Scalarf d);
+    Scalarf mpdSquareEval(Scalarf a, Scalarf b, Scalarf p, Scalarf d);
     Scalarf      m_Ax,m_Az;
+    Scalarf      m_Bx,m_Bz;
     Scalarf      m_pratio;
     bool         m_azimPcorr;
     bool         m_averPcorr;
     bool         m_usePout;
     bool         m_chamberErcorr;
+    bool         m_squareError;
     IBMEShader * m_shader;
     IBMESimpler* m_simpler;
 
