@@ -10,6 +10,7 @@
   Authors: Andrea Rigoni Garola < andrea.rigoni@pd.infn.it >
            Matteo Furlan        < nuright@gmail.com >
            Sara Vanini          < sara.vanini@pd.infn.it >
+	   Joel Klinger         < klinger@pd.infn.it >
 
   All rights reserved
   ------------------------------------------------------------------
@@ -55,8 +56,8 @@ class IBAnalyzerEMPimpl {
 public:
     IBAnalyzerEMPimpl(IBAnalyzerEM *parent) :
         m_parent(parent),
-        m_SijAlgorithm(NULL)
-    {}
+        m_SijAlgorithm(NULL){;}
+
 
 
     void Project(Event *evc);
@@ -212,7 +213,7 @@ void IBAnalyzerEMPimpl::filterEventsLineDistance(float min, float max)
             this->m_parent->m_MuonCollection->Data().remove_element(pos);
         }
         else
-            ++itr;
+	  ++itr;
     }
 
     std::cout << " " << this->m_Events.size() << " muons left!" << std::endl;
@@ -343,25 +344,28 @@ public:
 // IB ANALYZER EM  /////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels) :
+IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha) :
     m_PocaAlgorithm(NULL),
     m_VarAlgorithm(NULL),
     m_RayAlgorithm(NULL),
-    m_UpdateAlgorithm(NULL)
+    m_UpdateAlgorithm(NULL),
+    m_nPath(nPath),
+    m_alpha(alpha)
 {
-    BaseClass::SetVoxCollection(&voxels);
-    init_properties(); // < DANGER !!! should be moved away !!
-    d = new IBAnalyzerEMPimpl(this);
+  std::cout << "Using alpha = " << alpha << ", #path = " << nPath << std::endl;
+  BaseClass::SetVoxCollection(&voxels);
+  init_properties(); // < DANGER !!! should be moved away !!
+  m_d = new IBAnalyzerEMPimpl(this);
 }
 
 IBAnalyzerEM::~IBAnalyzerEM()
 {
-    delete d;
+    delete m_d;
 }
 
 Vector<IBAnalyzerEM::Event> &IBAnalyzerEM::Events()
 {
-    return d->m_Events;
+    return m_d->m_Events;
 }
 
 
@@ -399,42 +403,73 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
     }
     else return false;
 
+    //---- Perform raytracing 
     IBVoxRaytracer::RayData ray;
     HPoint3f entry_pt,poca,exit_pt;
     bool use_poca = false;
     { // Get RayTrace RayData //
-        if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
-                !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
-            return false;
 
-        if(m_PocaAlgorithm) { //TODO:  move this to poca algorithm
-            use_poca = m_PocaAlgorithm->evaluate(muon);
-            poca = m_PocaAlgorithm->getPoca();
-//            DBG(trd,poca,"x/F:y/F:z/F:h/F");
+      //---- Require entry and exit points
+      if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) return false;
+      if( !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt)  ) return false;
 
-            HVector3f in, out;
-            in  = poca - muon.LineIn().origin;
-            out = muon.LineOut().origin - poca;
-            float poca_prj = in.transpose() * out;
-//            DBG(trd,poca_prj);
-            // poca must be between in-out point
-            use_poca &= ( poca_prj > 0 );
-        }
-//        if(!use_poca)
-//            std::cout << "not valid PoCA !" << std::endl;
-//        if(!this->GetVoxCollection()->IsInsideBounds(poca))
-//            std::cout << "PoCA outside bounds!!" << std::endl;
+      //---- Check if this track has a valid POCA
+      //---- TODO:  move this to poca algorithm
+      if(m_PocaAlgorithm) { 
+	use_poca = m_PocaAlgorithm->evaluate(muon);
+	poca = m_PocaAlgorithm->getPoca();
+	
+	HVector3f in, out;
+	in  = poca - muon.LineIn().origin;
+	out = muon.LineOut().origin - poca;
+	float poca_prj = in.transpose() * out;
+	use_poca &= ( poca_prj > 0 );
+      }
 
-        if(use_poca && this->GetVoxCollection()->IsInsideBounds(poca)) {
-            poca = m_PocaAlgorithm->getPoca();
-            ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,poca);
-            ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(poca,exit_pt) );
-        }
-        else {
-            ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,exit_pt);
-        }
+      //---- Check if the POCA is valid
+      bool valid_poca = GetVoxCollection()->IsInsideBounds(poca);
+      if(!(use_poca && valid_poca)) return false;
+
+      //---- If doing 1-path method (Entry --> Exit)
+      if(m_nPath == 1){
+	ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,exit_pt);	
+      }
+      //---- If doing 2-path method (Entry --> POCA -> Exit)
+      else if(m_nPath == 2){
+	ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,poca);
+	ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(poca,exit_pt) );
+      }
+      //---- If doing 3/4-path method
+      else{
+
+	//---- Get the poca on the entry/exit tracks
+	HPoint3f entry_poca = m_PocaAlgorithm->getInTrackPoca();
+	HPoint3f exit_poca  = m_PocaAlgorithm->getOutTrackPoca();
+
+	//---- Get the distance down the tracks to the inflection points
+	double entry_length = m_alpha*(entry_pt - entry_poca).norm();
+	double exit_length  = m_alpha*(exit_pt  - exit_poca).norm();
+
+	//---- Get the inflection points
+	HVector3f point1 = entry_pt + entry_length*muon.LineIn().direction;
+	HVector3f point2 = exit_pt  - exit_length*muon.LineOut().direction;;
+	
+	//---- (Entry --> Point 1)
+	ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,point1);
+	  
+	//---- 3-Path (Point 1 --> Point 2)
+	if(m_nPath == 3) ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(point1,point2) );
+	//---- 4-Path (Point 1 --> POCA --> Point 2)
+	else{
+	  ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(point1,poca) );
+	  ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(poca,point2) );
+	}
+	//---- (Point 2 --> Exit)
+	ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(point2,exit_pt) );		    
+      }
     }
 
+    //
     Event::Element elc;
     Scalarf T = ray.TotalLength();
     for(int i=0; i<ray.Data().size(); ++i)
@@ -459,7 +494,7 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
             evc.elements.push_back(elc);
     }
 
-    d->m_Events.push_back(evc);
+    m_d->m_Events.push_back(evc);
 
 //    trd.Fill();
     return true;
@@ -472,21 +507,28 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
 ///
 void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons)
 {
+  std::cout << "Setting muon collection with collection " << muons << std::endl;
     uLibAssert(muons);
-    d->m_Events.clear();
+    std::cout << "Clearing " << std::endl;
+    m_d->m_Events.clear();
     Vector<MuonScatterData>::iterator itr = muons->Data().begin();
+    std::cout << "Adding muon " << std::endl;
+    int iMu=0;
     while(itr != muons->Data().end()){
+      iMu++;
+      std::cout << "\r" <<  iMu << std::flush;
         if(!this->AddMuon(*itr))
             muons->Data().remove_element(*itr);
         else
             itr++;
     }
+    std::cout << "Done, now calling base class..." << std::endl;
     BaseClass::SetMuonCollection(muons);
 }
 
 unsigned int IBAnalyzerEM::Size()
 {
-    return d->m_Events.size();
+    return m_d->m_Events.size();
 }
 
 void IBAnalyzerEM::Run(unsigned int iterations, float muons_ratio)
@@ -494,8 +536,8 @@ void IBAnalyzerEM::Run(unsigned int iterations, float muons_ratio)
     // performs iterations //
     for (unsigned int it = 0; it < iterations; it++) {
         fprintf(stderr,"\r[%d muons] EM -> performing iteration %i",
-                (int) d->m_Events.size(), it);
-        d->Evaluate(muons_ratio);          // run single iteration of proback //
+                (int) m_d->m_Events.size(), it);
+        m_d->Evaluate(muons_ratio);          // run single iteration of proback //
         if(!m_UpdateAlgorithm)
             this->GetVoxCollection()->
                 UpdateDensity<UpdateDensitySijCapAlgorithm>(10);                // HARDCODE THRESHOLD
@@ -507,37 +549,37 @@ void IBAnalyzerEM::Run(unsigned int iterations, float muons_ratio)
 
 void IBAnalyzerEM::SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm)
 {
-    d->m_SijAlgorithm = MLAlgorithm;
+    m_d->m_SijAlgorithm = MLAlgorithm;
 }
 
 void IBAnalyzerEM::filterEventsVoxelMask() {
-    d->filterEventsVoxelMask();
+    m_d->filterEventsVoxelMask();
 }
 
 void IBAnalyzerEM::filterEventsLineDistance(float min, float max) {
-    d->filterEventsLineDistance(min, max);
+    m_d->filterEventsLineDistance(min, max);
 }
 
 void IBAnalyzerEM::SijCut(float threshold) {
-    d->Evaluate(1);
-    d->SijCut(threshold);
+    m_d->Evaluate(1);
+    m_d->SijCut(threshold);
     this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
 }
 
 void IBAnalyzerEM::SijGuess(Vector<Vector2f> tpv)
 {
-    d->Evaluate(1);
+    m_d->Evaluate(1);
     // ATTENZIONE!! il vettore deve essere ordinato per threshold crescenti   //
     for (int i=0; i<tpv.size(); ++i)
-        d->SijGuess( tpv[i](0), tpv[i](1) );
+        m_d->SijGuess( tpv[i](0), tpv[i](1) );
     this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
 }
 
 void IBAnalyzerEM::Chi2Cut(float threshold)
 {
-    d->Evaluate(1);
+    m_d->Evaluate(1);
     this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
-    d->Chi2Cut(threshold);
+    m_d->Chi2Cut(threshold);
 }
 
 
@@ -588,8 +630,8 @@ void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
             sprintf(name,"inv_p_sq_%i",counter++);
             TH1F *h = new TH1F(name,"1/p^2 distribution [1/GeV^2]",1000,x0,x1);
             float p0sq = $$.nominal_momentum * $$.nominal_momentum;
-            for(Id_t i=0; i<d->m_Events.size(); ++i)
-                h->Fill(d->m_Events[i].header.InitialSqrP / p0sq );
+            for(Id_t i=0; i<m_d->m_Events.size(); ++i)
+                h->Fill(m_d->m_Events[i].header.InitialSqrP / p0sq );
             h->Write();
             delete h;
         }
@@ -599,8 +641,8 @@ void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
             sprintf(name,"p_%i",counter++);
             TH1F *h = new TH1F(name,"p distribution [GeV]",1000,x0,x1);
             float p0sq = $$.nominal_momentum * $$.nominal_momentum;
-            for(Id_t i=0; i<d->m_Events.size(); ++i)
-                h->Fill( sqrt(p0sq / d->m_Events[i].header.InitialSqrP) );
+            for(Id_t i=0; i<m_d->m_Events.size(); ++i)
+                h->Fill( sqrt(p0sq / m_d->m_Events[i].header.InitialSqrP) );
             h->Write();
             delete h;
         }
@@ -641,8 +683,8 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
     IBMuonCollection *muons = this->GetMuonCollection();
     /// event loop
     int pos = 0;
-    Vector< Event >::iterator itr = d->m_Events.begin();
-    while (itr != d->m_Events.end()) {
+    Vector< Event >::iterator itr = m_d->m_Events.begin();
+    while (itr != m_d->m_Events.end()) {
 
         Event & evc = *itr;
 
@@ -690,7 +732,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
     }
 
     // testing
-    int sizeev = d->m_Events.size();
+    int sizeev = m_d->m_Events.size();
     int sizemu = muons->size();
 
     tree->Write("", TObject::kOverwrite);

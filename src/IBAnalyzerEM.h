@@ -65,7 +65,7 @@ public:
     };
 
 public:
-    IBAnalyzerEM(IBVoxCollection &voxels);
+    IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0.);
     ~IBAnalyzerEM();
 
     bool AddMuon(const MuonScatterData &muon);
@@ -108,8 +108,11 @@ private:
     IBMinimizationVariablesEvaluator           *m_VarAlgorithm;
     IBVoxRaytracer                             *m_RayAlgorithm;
     IBAbstract::IBVoxCollectionUpdateAlgorithm *m_UpdateAlgorithm;
-    friend class IBAnalyzerEMPimpl;
-    class IBAnalyzerEMPimpl *d;
+    friend class IBAnalyzerEMPimpl;    
+    class IBAnalyzerEMPimpl *m_d;
+
+    bool m_nPath; //---- Bool to indicate whether to build a 3-path
+    double m_alpha;//---- Relative distance along the trajectory to build the 3-path   
 };
 
 inline void IBAnalyzerEM::init_properties() {

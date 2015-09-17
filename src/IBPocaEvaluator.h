@@ -48,8 +48,9 @@ public:
 
     virtual bool evaluate(MuonScatterData muon) = 0;
     virtual HPoint3f getPoca() = 0;
+    virtual HPoint3f getInTrackPoca() = 0;
+    virtual HPoint3f getOutTrackPoca() = 0;
     virtual Scalarf getDistance() = 0;
-
 protected:
     IBPocaEvaluator() {}
 };
