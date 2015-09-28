@@ -111,7 +111,7 @@ private:
     friend class IBAnalyzerEMPimpl;    
     class IBAnalyzerEMPimpl *m_d;
 
-    bool m_nPath; //---- Bool to indicate whether to build a 3-path
+    int m_nPath; //---- Int to indicate whether to build a 1, 2 or 3-path
     double m_alpha;//---- Relative distance along the trajectory to build the 3-path   
 };
 

@@ -352,7 +352,7 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha) :
     m_nPath(nPath),
     m_alpha(alpha)
 {
-  std::cout << "Using alpha = " << alpha << ", #path = " << nPath << std::endl;
+  std::cout << "Using alpha = " << m_alpha << ", #path = " << m_nPath << std::endl;
   BaseClass::SetVoxCollection(&voxels);
   init_properties(); // < DANGER !!! should be moved away !!
   m_d = new IBAnalyzerEMPimpl(this);
@@ -375,7 +375,10 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
     Event evc;
 
     evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
-    if(isnan(evc.header.InitialSqrP)) std::cout << "sono in AddMuon: nominalp:" << $$.nominal_momentum << " muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::flush;
+    if(isnan(evc.header.InitialSqrP)){
+      std::cout << "sono in AddMuon: nominalp:" << $$.nominal_momentum
+		<< " muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::flush;
+    }
 //    DBG(trd,evc.header.InitialSqrP,"invP2/F");
     if(likely(m_VarAlgorithm->evaluate(muon))) {
         evc.header.Di = m_VarAlgorithm->getDataVector();
@@ -403,100 +406,104 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon)
     }
     else return false;
 
+
     //---- Perform raytracing 
     IBVoxRaytracer::RayData ray;
-    HPoint3f entry_pt,poca,exit_pt;
-    bool use_poca = false;
+    //HPoint3f entry_pt,poca,exit_pt;
+    Vector<HPoint3f> pts;
     { // Get RayTrace RayData //
-
+      
       //---- Require entry and exit points
-      if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) return false;
-      if( !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt)  ) return false;
-
-      //---- Check if this track has a valid POCA
-      //---- TODO:  move this to poca algorithm
-      if(m_PocaAlgorithm) { 
-	use_poca = m_PocaAlgorithm->evaluate(muon);
-	poca = m_PocaAlgorithm->getPoca();
+      HPoint3f entry_pt, exit_pt;
+      if( m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) pts.push_back(entry_pt);
+      else return false;   
+      
+      //---- Get the exit point in advance (append to pts at the end)
+      if( !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) ) return false;
+      
+      //---- If we want to build tracks with more than one line
+      if(m_nPath > 1){
 	
-	HVector3f in, out;
-	in  = poca - muon.LineIn().origin;
-	out = muon.LineOut().origin - poca;
-	float poca_prj = in.transpose() * out;
-	use_poca &= ( poca_prj > 0 );
-      }
+	//---- Evaluate the POCA and check that it is valid
+	if(m_PocaAlgorithm && m_PocaAlgorithm->evaluate(muon)){;	  
+	  HPoint3f poca = m_PocaAlgorithm->getPoca();
 
-      //---- Check if the POCA is valid
-      bool valid_poca = GetVoxCollection()->IsInsideBounds(poca);
-      if(!(use_poca && valid_poca)) return false;
+	  //---- Check that the POCA is valid
+	  HVector3f in, out;
+	  in  = poca - muon.LineIn().origin;
+	  out = muon.LineOut().origin - poca;
+	  float poca_prj = in.transpose() * out;
+	  bool validPoca = poca_prj > 0 && GetVoxCollection()->IsInsideBounds(poca);
+	  if(!validPoca) return false;
 
-      //---- If doing 1-path method (Entry --> Exit)
-      if(m_nPath == 1){
-	ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,exit_pt);	
-      }
-      //---- If doing 2-path method (Entry --> POCA -> Exit)
-      else if(m_nPath == 2){
-	ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,poca);
-	ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(poca,exit_pt) );
-      }
-      //---- If doing 3/4-path method
-      else{
+	  //---- If using the two-line path
+	  if(m_nPath==2) pts.push_back(poca);
+	  //---- If using the three-line path
+	  else if(m_nPath == 3){
+	    //---- Get the poca on the entry/exit tracks
+	    HPoint3f entry_poca = m_PocaAlgorithm->getInTrackPoca();
+	    HPoint3f exit_poca  = m_PocaAlgorithm->getOutTrackPoca();
 
-	//---- Get the poca on the entry/exit tracks
-	HPoint3f entry_poca = m_PocaAlgorithm->getInTrackPoca();
-	HPoint3f exit_poca  = m_PocaAlgorithm->getOutTrackPoca();
+	    //---- Get the distance down the tracks to the inflection points
+	    double entry_length = m_alpha*(entry_pt - entry_poca).norm();
+	    double exit_length  = m_alpha*(exit_pt  - exit_poca).norm();
+	    
+	    //---- Get the inflection points
+	    HVector3f point1 = entry_pt + entry_length*muon.LineIn().direction;
+	    HVector3f point2 = exit_pt  - exit_length*muon.LineOut().direction;;
 
-	//---- Get the distance down the tracks to the inflection points
-	double entry_length = m_alpha*(entry_pt - entry_poca).norm();
-	double exit_length  = m_alpha*(exit_pt  - exit_poca).norm();
+	    //---- Add the points to the collection
+	    pts.push_back(point1);
+	    pts.push_back(point2);
+	  }
 
-	//---- Get the inflection points
-	HVector3f point1 = entry_pt + entry_length*muon.LineIn().direction;
-	HVector3f point2 = exit_pt  - exit_length*muon.LineOut().direction;;
-	
-	//---- (Entry --> Point 1)
-	ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,point1);
-	  
-	//---- 3-Path (Point 1 --> Point 2)
-	if(m_nPath == 3) ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(point1,point2) );
-	//---- 4-Path (Point 1 --> POCA --> Point 2)
-	else{
-	  ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(point1,poca) );
-	  ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(poca,point2) );
+	  //---- Get exit point
+	  pts.push_back(exit_pt);
 	}
-	//---- (Point 2 --> Exit)
-	ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(point2,exit_pt) );		    
       }
     }
 
-    //
-    Event::Element elc;
-    Scalarf T = ray.TotalLength();
-    for(int i=0; i<ray.Data().size(); ++i)
-    {
-        // voxel //
-        const IBVoxRaytracer::RayData::Element &el = ray.Data().at(i);
-        elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);    
-        // Wij   //
-        Scalarf L = el.L;  T = fabs(T-L);
-        elc.Wij << L ,          L*L/2 + L*T,
-                   L*L/2 + L*T, L*L*L/3 + L*L*T + L*T*T;
-        // pw    //
-        elc.pw = evc.header.InitialSqrP;
 
+    Scalarf H = muon.LineIn().direction.transpose() * (pts.back() - pts.front());
+    //---- Now trace between points and calculate length parameters
+    for (int i=0; i<pts.size()-1; ++i){ 
+      HPoint3f & pt1 = pts[i];
+      HPoint3f & pt2 = pts[i+1];
 
-        if(elc.voxel->Value <= 0){
-            // add both views
-            evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
-            evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
-        }
-        else
-            evc.elements.push_back(elc);
+      IBVoxRaytracer::RayData ray = m_RayAlgorithm->TraceBetweenPoints(pt1,pt2);
+      
+      Scalarf T = ray.TotalLength();
+      if(i < pts.size()-2) {
+	Scalarf h = muon.LineIn().direction.transpose() * (pt2-pt1);
+	T = T * H/h;
+      }
+      
+      //---- Now loop over each element in the ray
+      foreach(const IBVoxRaytracer::RayData::Element &el, ray.Data()){
+	Event::Element elc;
+	
+	//---- Retrieve the voxel
+	elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);
+	
+	//---- Wij
+	Scalarf L = el.L;
+	T = T-L;
+	if(T < 0) T = fabs(T);	
+	elc.Wij << L, L*L/2 + L*T, L*L/2 + L*T, L*L*L/3 + L*L*T + L*T*T;
+
+	//---- pw
+	elc.pw = evc.header.InitialSqrP;
+
+	//---- add both views to E if voxel is frozen 
+	if(elc.voxel->Value <= 0){
+	  evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+	  evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+	}
+	else evc.elements.push_back(elc);
+      }
     }
-
+    
     m_d->m_Events.push_back(evc);
-
-//    trd.Fill();
     return true;
 }
 

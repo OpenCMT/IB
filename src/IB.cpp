@@ -23,11 +23,14 @@
 
 
 #include <config.h>
+//#include <RConfigure.h>
 #include "IB.h"
 
 
-const char *IB::Version::PackageName = PACKAGE_NAME;
-const char *IB::Version::VersionNumber = PACKAGE_VERSION;
+//const char *IB::Version::PackageName = PACKAGE_NAME;
+//const char *IB::Version::VersionNumber = PACKAGE_VERSION;
+const char *IB::Version::PackageName = "mutom";
+const char *IB::Version::VersionNumber = "0.2";
 const char *IB::Version::Release = "x"; // SVN_REVISION;
 
 

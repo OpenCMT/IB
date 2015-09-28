@@ -40,6 +40,13 @@ find_package(ULIB 0.2 CONFIG REQUIRED
 )
 message("ULIB_CONFIG=${ULIB_CONFIG}")
 
+#----
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMake")
+FIND_PACKAGE(MUTOMIB REQUIRED)
+FIND_PACKAGE(ROOT REQUIRED)
+#INSTALL(MUTOMIB)
+
+#----
 if(NOT DEFINED IB_CMAKE_DIR)
 get_target_property(ULIB_CONFIG_CMD uLib_config LOCATION)
 message("uLib_config executable: ${ULIB_CONFIG_CMD}")
@@ -70,8 +77,9 @@ include(uLibConfigHeader)
 ## GLOBALS ------------------------------------------------------------------ ##
 
 include(uLibCommon)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ") ## Add flags here ##
-
+EXECUTE_PROCESS(COMMAND root-config --cflags OUTPUT_VARIABLE ROOT_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}") ## Add flags here ##
+SET(CMAKE_EXE_LINKER_FLAGS "${ROOT_LD_FLAGS} ${MUTOMIB_ROOTLINK_DIR}/dict.cxx")
 
 ## FIND PACKAGES ------------------------------------------------------------ ##
 
@@ -90,7 +98,7 @@ if(ULIB_CONFIG)
  include_directories(${ULIB_INCLUDE_DIRS})
 endif()
 
-
+INCLUDE_DIRECTORIES(${MUTOMIB_INCLUDE_DIR} ${MUTOMIB_ROOTLINK_DIR} ${ROOT_INCLUDE_DIR})
 
 ## ADD LIBRARIES SUBDIRECTORIES --------------------------------------------- ##
 
@@ -110,10 +118,10 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/examples EXCLUDE_FROM_ALL)
 debug(ULIB_SHARED_LIBRARIES)
 
 export(PACKAGE IB)
-export(TARGETS ${ULIB_SHARED_LIBRARIES}
+export(TARGETS ${ULIB_SHARED_LIBRARIES} 
        FILE "${PROJECT_BINARY_DIR}/IBTargets.cmake"
       )
-
+    
 # Create the FooBarConfig.cmake and FooBarConfigVersion files
 file(RELATIVE_PATH REL_INCLUDE_DIR "${PACKAGE_INSTALL_CMAKE_DIR}"
    "${PACKAGE_INSTALL_INC_DIR}")
