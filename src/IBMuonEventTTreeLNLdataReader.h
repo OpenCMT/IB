@@ -49,7 +49,7 @@ public:
     unsigned long getCurrentPosition();
 
     bool readNext(uLib::MuonScatter *event);
-
+    
 private:
     friend class IBMuonEventTTreeLNLdataReaderPimpl;
     class IBMuonEventTTreeLNLdataReaderPimpl *d;

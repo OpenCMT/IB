@@ -42,8 +42,10 @@ public:
     ~IBMuonCollection();
 
     void AddMuon(MuonScatter &mu);
-
+    void AddMuonFullPath(Vector<HPoint3f> fullPath);
+      
     Vector<MuonScatter> &Data();
+    Vector<Vector<HPoint3f> > &FullPath();
 
     const MuonScatter &At(int i) const;
 

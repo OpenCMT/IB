@@ -24,10 +24,14 @@
 #ifndef IBANALYZEREM_H
 #define IBANALYZEREM_H
 
+#include "MuonProjection.hh"
+#include "AlphaCalculator.hh"
+
 #include "IBAnalyzer.h"
 #include "IBVoxCollection.h"
 #include "IBVoxRaytracer.h"
 #include "IBVoxel.h"
+#include <string>
 
 class IBPocaEvaluator;
 class IBMinimizationVariablesEvaluator;
@@ -65,10 +69,13 @@ public:
     };
 
 public:
-    IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0.);
+    IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0., bool doRecoPath=false,
+		 bool scatterOnly=false, bool oldTCalculation=false,
+		 std::string projectFile="", std::string alphaFile="");
     ~IBAnalyzerEM();
 
-    bool AddMuon(const MuonScatterData &muon);
+    bool AddMuon(const MuonScatterData &muon){ return false;}
+    bool AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath);
 
     void SetMuonCollection(IBMuonCollection *muons);
 
@@ -101,8 +108,8 @@ public:
 
     void DumpP(const char *filename, float x0 = 0, float x1 = 10);
 
-    Vector<Event> & Events();
-
+    Vector<Event> & Events();    
+    
 private:    
     IBPocaEvaluator                            *m_PocaAlgorithm;
     IBMinimizationVariablesEvaluator           *m_VarAlgorithm;
@@ -111,8 +118,15 @@ private:
     friend class IBAnalyzerEMPimpl;    
     class IBAnalyzerEMPimpl *m_d;
 
-    int m_nPath; //---- Int to indicate whether to build a 1, 2 or 3-path
-    double m_alpha;//---- Relative distance along the trajectory to build the 3-path   
+    int m_nPath;            //---- Int to indicate whether to build a 1, 2 or 3-path
+    double m_alpha;         //---- Relative distance along the trajectory to build the 3-path   
+    bool m_useRecoPath;     //---- Use the true muon path from MC
+    bool m_scatterOnly;     //---- Only use scattering information to build images
+    bool m_oldTCalculation; //---- Use the old method of calculating length parameter T
+    bool m_project;
+
+    MuonProjection m_projector;
+    AlphaCalculator m_alphaCalc;
 };
 
 inline void IBAnalyzerEM::init_properties() {

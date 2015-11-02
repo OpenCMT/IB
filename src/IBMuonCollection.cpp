@@ -71,6 +71,7 @@ public:
     bool m_HiPass;
     unsigned int m_SliceIndex;
     Vector<MuonScatter> m_Data;
+  Vector<Vector<HPoint3f> > m_FullPathData;
 };
 
 
@@ -90,9 +91,19 @@ void IBMuonCollection::AddMuon(MuonScatter &mu)
     // FINIRE o PENSARE perche non si puo' fare add muon dopo set Hi/LowPass //
 }
 
+void IBMuonCollection::AddMuonFullPath(Vector<HPoint3f> fullPath)
+{
+    d->m_FullPathData.push_back(fullPath);
+}
+
 Vector<MuonScatter> &IBMuonCollection::Data()
 {
     return d->m_Data;
+}
+
+Vector<Vector<HPoint3f> > &IBMuonCollection::FullPath()
+{
+    return d->m_FullPathData;
 }
 
 
