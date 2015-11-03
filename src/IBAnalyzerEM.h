@@ -70,7 +70,7 @@ public:
 
 public:
     IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0., bool doRecoPath=false,
-		 bool scatterOnly=false, bool oldTCalculation=false,
+		 bool scatterOnly=false, bool displacementOnly=false, bool oldTCalculation=false,
 		 std::string projectFile="", std::string alphaFile="");
     ~IBAnalyzerEM();
 
@@ -122,6 +122,7 @@ private:
     double m_alpha;         //---- Relative distance along the trajectory to build the 3-path   
     bool m_useRecoPath;     //---- Use the true muon path from MC
     bool m_scatterOnly;     //---- Only use scattering information to build images
+    bool m_displacementOnly;//---- Only use displacement information to build images
     bool m_oldTCalculation; //---- Use the old method of calculating length parameter T
     bool m_project;
 

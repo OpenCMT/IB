@@ -42,6 +42,7 @@
 #include "AlphaCalculator.hh"
 
 #include <string>
+#include <map>
 
 class IBAnalyzerEMPimpl;
 
@@ -350,7 +351,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, bool useRecoPath,
-			   bool oldTCalculation, bool scatterOnly,
+			   bool oldTCalculation, bool scatterOnly, bool displacementOnly,
 			   std::string projectFile, std::string alphaFile) :
     m_PocaAlgorithm(NULL),
     m_VarAlgorithm(NULL),
@@ -361,6 +362,7 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, boo
     m_useRecoPath(useRecoPath),
     m_oldTCalculation(oldTCalculation),
     m_scatterOnly(scatterOnly),
+    m_displacementOnly(displacementOnly),
     m_project(false)
 {
   //----
@@ -370,11 +372,12 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, boo
     m_alphaCalc = AlphaCalculator(alphaFile);
   }  
 
-  std::cout << "Using alpha = "<< m_alpha << ", #path = " << m_nPath << std::endl;
-  std::cout << "True path ("   << m_useRecoPath     << "), "
-	    << "oldT ("        << m_oldTCalculation << "), "
-	    << "scatterOnly (" << m_scatterOnly     << "), "
-    	    << "project ("     << m_project         << ")" << std::endl;
+  std::cout << "Using alpha = " << m_alpha << ", #path = " << m_nPath << std::endl;
+  std::cout << "Reco path ("    << m_useRecoPath      << "), "
+	    << "Old T ("        << m_oldTCalculation  << "), "
+	    << "Scatter only (" << m_scatterOnly      << "), "
+    	    << "Displacement only (" << m_displacementOnly << "), "
+    	    << "project ("      << m_project          << ")" << std::endl;
   BaseClass::SetVoxCollection(&voxels);
   init_properties(); // < DANGER !!! should be moved away !!
   m_d = new IBAnalyzerEMPimpl(this);
@@ -542,6 +545,9 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     Scalarf normIn = muon.LineIn().direction.norm();
     Scalarf H = muon.LineIn().direction.transpose() * (pts.back() - pts.front());
     if(!m_oldTCalculation) H = H/normIn;
+
+    std::map<int,std::pair<int, std::pair<float,float> > > voxelMap;
+    std::map<int,Event::Element> elementMap;
     for(int i=0; i<pts.size()-1; ++i){ 
 
       HPoint3f & pt1 = pts[i];
@@ -570,25 +576,35 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 	
 	//---- Retrieve the voxel
 	elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);
+	if(voxelMap.find(el.vox_id) == voxelMap.end()){
+	  voxelMap[el.vox_id] = std::make_pair(0, std::make_pair(0.,0.));
+	}
+	voxelMap[el.vox_id].first = voxelMap[el.vox_id].first + 1;
 	
 	//---- Get length of ray in the voxel
 	Scalarf L = el.L;	
-
+	L += voxelMap[el.vox_id].second.first;
+	voxelMap[el.vox_id].second.first = L;
+		
 	//----> Old calculation of T
 	if(m_oldTCalculation) T = fabs(T-L);
 	//----> New calculation of T
 	else{
-	  cumulativeLength += L;
+	  cumulativeLength += el.L;
 	  HPoint3f pti = (cumulativeLength*rayDir + pt1);
 	  Scalarf h = (muon.LineIn().direction.transpose()*(pti-pts.front()));
 	  T = H - h/normIn;
 	  if(T < 0) T = 0.;
+	  T += voxelMap[el.vox_id].second.second;
+	  voxelMap[el.vox_id].second.second = T;
+	  T = (voxelMap[el.vox_id].second.second) / float(voxelMap[el.vox_id].first);
 	}
 	//<----
 
 	//---- Fill Wij
-	if(m_scatterOnly) elc.Wij << L, 0, 0, 0;
-	else              elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
+	if(m_scatterOnly)           elc.Wij << L, 0, 0, 0;
+	else if(m_displacementOnly) elc.Wij << 0, 0, 0, L*L*L/3. + L*L*T + L*T*T;
+	else                        elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
 
 	//---- pw
 	elc.pw = evc.header.InitialSqrP;
@@ -598,10 +614,17 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 	  evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
 	  evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
 	}
-	else evc.elements.push_back(elc);
+	else{
+	  elementMap[el.vox_id] = elc;
+	// evc.elements.push_back(elc);
+	}
       }
     }
-    
+
+    //----
+    for(std::map<int,Event::Element>::iterator it=elementMap.begin(); it!=elementMap.end(); it++){
+      evc.elements.push_back(it->second);
+    }    
     m_d->m_Events.push_back(evc);
     return true;
 }
