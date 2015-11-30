@@ -37,21 +37,37 @@ void IBAnalyzerEMAlgorithmSGA_PXTZ::evaluate(Matrix4f &Sigma,
                                                 IBAnalyzerEMAlgorithm::Event *evc)
 {
 
+  //std::cout << "------------------" << std::endl;
     Matrix4f iS;
     iS = Sigma.inverse();
+    // std::cout << Sigma << std::endl;
+    // std::cout << "-----" << std::endl;
+    // std::cout << iS << std::endl;
     Matrix4f Wij = Matrix4f::Zero();
     Matrix4f Dn = iS * (evc->header.Di * evc->header.Di.transpose());
-
+    
+    // std::cout << "\n--------------------" << std::endl;
+    // std::cout << "Data " << evc->header.Di << std::endl;
+    // std::cout << "Sigma" << std::endl;
+    // std::cout << Sigma << std::endl;
+    // std::cout << "iSigma " << std::endl;
+    // std::cout << iS << std::endl;    
     for (unsigned int j = 0; j < evc->elements.size(); ++j) {
-        Wij.block<2,2>(0,0) = evc->elements[j].Wij;
-        Wij.block<2,2>(2,2) = evc->elements[j].Wij;
-
+      //      std::cout << "\tElement:" << j << std::endl;
+      Wij.block<2,2>(0,0) = evc->elements[j].Wij;
+      Wij.block<2,2>(2,2) = evc->elements[j].Wij;
+      //      	std::cout << "\tWij" << std::endl;
+      //		std::cout << Wij << std::endl;
+	
         Matrix4f Bn = iS * Wij;
         evc->elements[j].Sij =  ((Bn * Dn).trace() - Bn.trace()) *
                 evc->elements[j].lambda * evc->elements[j].lambda *
                 evc->elements[j].pw / 4 / $$.inertia;
+	
+	//		std::cout << "\tSij" << std::endl;
+	//		std::cout << evc->elements[j].Sij << std::endl;
     }
-
+    //    std::cout << "=========================\n" << std::endl;
 }
 
 
@@ -105,7 +121,7 @@ bool IBAnalyzerEMAlgorithmSGA_PXTZ3::ComputeSigma(Matrix4f &Sigma, IBAnalyzerEMA
 void IBAnalyzerEMAlgorithmSGA_PXTZ4::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm::Event *evc)
 {
     Matrix4f iS;
-    iS = Sigma.inverse();
+    iS = Sigma.inverse();    
     Matrix4f Wij = Matrix4f::Zero();
 
     Matrix4f Dn = iS * (evc->header.Di * evc->header.Di.transpose());

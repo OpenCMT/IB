@@ -41,12 +41,12 @@ public:
     Matrix4f getCovarianceMatrix();
     Scalarf  getCovarianceMatrix(int i, int j);
     void setRaytracer(IBVoxRaytracer *tracer);
-
+    void setDisplacementScatterOnly(bool,bool,bool);
     // virtual void setConfiguration();
 private:
     friend class IBSimpleTwoViewsMinimizationVariablesEvaluatorPimpl;
     class IBSimpleTwoViewsMinimizationVariablesEvaluatorPimpl *d;
-
+    bool m_scatterOnly, m_displacementOnly;
 };
 
 #endif // IBSimpleTwoViewsMINIMIZATIONVARIABLESEVALUATOR_H

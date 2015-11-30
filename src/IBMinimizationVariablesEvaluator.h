@@ -50,7 +50,8 @@ public:
     virtual Scalarf  getCovarianceMatrix(int i, int j)  = 0;
 
     virtual void setRaytracer(IBVoxRaytracer* tracer)   = 0;
-
+    virtual void setDisplacementScatterOnly(bool,bool,bool) = 0;
+    
     // virtual void setConfiguration();
 
     virtual ~IBMinimizationVariablesEvaluator() {} // make this protected again!!

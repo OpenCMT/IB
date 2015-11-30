@@ -233,6 +233,8 @@ public:
             m_integrity=false;
     }
 
+  void setDisplacementScatterOnly(bool disp, bool scat, bool oneD){m_scatterOnly = scat; m_displacementOnly = disp;}
+
 public:
 
     Scalarf         t_phi,
@@ -240,7 +242,9 @@ public:
     VoxRaytracer*   m_tracer;
     MuonScatterData m_muon;
     bool            m_integrity;
-
+  bool m_displacementOnly;
+  bool m_scatterOnly;
+  
     Vector4f m_Data;
     Matrix4f m_ErrorMatrix;
 
@@ -314,4 +318,9 @@ Scalarf IBSimpleTwoViewsMinimizationVariablesEvaluator::getCovarianceMatrix(int 
 void IBSimpleTwoViewsMinimizationVariablesEvaluator::setRaytracer(IBVoxRaytracer *tracer)
 {
     d->m_tracer = tracer;
+}
+
+void IBSimpleTwoViewsMinimizationVariablesEvaluator::setDisplacementScatterOnly(bool disp, bool scat, bool oneD){
+  m_displacementOnly = disp;
+  m_scatterOnly = scat;
 }

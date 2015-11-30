@@ -40,10 +40,11 @@ class IBNormalPlaneMinimizationVariablesEvaluatorPimpl {
 public:
 
     IBNormalPlaneMinimizationVariablesEvaluatorPimpl(IBNormalPlaneMinimizationVariablesEvaluator *parent) : m_parent(parent)
-
+													    
     {
         m_tracer    = NULL;
-
+	//m_scatterOnly = false;
+	//	m_displacementOnly = false;
 #ifndef NDEBUG
         m_out  = new TFile("calibrazione.root", "RECREATE");
         m_tree = new TTree("stat", "Variables_Statistics");
@@ -102,15 +103,17 @@ public:
 
         m_Data        = this->evaluateVariables(  m_muon.LineIn(), m_muon.LineOut());
 
-        if (unlikely((fabs(m_Data(0)) > 1)||(fabs(m_Data(2)) > 1))) // << HARDCODED!!!
-            m_integrity = false;
-
+        if (unlikely((fabs(m_Data(0)) > 1)||(fabs(m_Data(2)) > 1))){ // << HARDCODED!!!
+	  m_integrity = false;
+	}
         m_ErrorMatrix = this->evaluateErrorMatrix(m_muon.LineIn(), m_muon.LineOut());
 
 
         if (unlikely((m_ErrorMatrix(0,0)>0.03 || m_ErrorMatrix(1,1)>1500 ||
-                      m_ErrorMatrix(2,2)>0.03 || m_ErrorMatrix(2,2)>1500 ))) // << HARDCODED
-            m_integrity = false;
+                      m_ErrorMatrix(2,2)>0.03 || m_ErrorMatrix(2,2)>1500 ))){ // << HARDCODED
+	  m_integrity = false;
+	}
+	
 
 
 #ifndef NDEBUG
@@ -200,21 +203,52 @@ public:
 
     Vector4f evaluateVariables(const HLine3f &ingoing_track, const HLine3f &outgoing_track)
     {
-        Matrix4f  rotation_matrix = this->getRotationMatrix(ingoing_track.direction);
-
-        HPoint3f  prj  = this->projectOnContainer(outgoing_track);
-
-        HVector3f disp = rotation_matrix * (prj - ingoing_track.origin);
-        HVector3f scat = rotation_matrix * outgoing_track.direction; //this->getDirectorCosines(outgoing_track.direction);
-
-        Scalarf scat_x = atan2(scat(0),scat(1));
-        Scalarf scat_z = atan2(scat(2),scat(1));
-
-        Vector4f out(scat_x, disp(0), scat_z, disp(2));
-
-        return out;
+      Vector4f out;
+      if(m_parent->m_oneD){
+	//----> NEW
+	//---- {Ingoing} = A, {Outgoing} = B, {Line normal to A which intersects B} = C
+	//---- pX = direction vector at point X
+	
+	Vector3f pA = ingoing_track.direction.block<3,1>(0,0);
+	pA.normalize();
+	
+	Vector3f pB = outgoing_track.direction.block<3,1>(0,0);
+	pB.normalize();
+	
+	Vector3f BA = (outgoing_track.origin - ingoing_track.origin).block<3,1>(0,0);      
+	float alpha = pA.dot(BA);
+	Vector3f BC = (BA - alpha*pA);
+	float disp = BC.norm();
+	float cosTheta = pA.dot(pB);
+	float scat = acos(pA.dot(pB));
+	if(fabs(1.-cosTheta) < 1e-6) scat = 0.;
+	if(scat!=scat){
+	  Matrix4f  rotation_matrix = this->getRotationMatrix(ingoing_track.direction);
+	  HPoint3f  prj  = this->projectOnContainer(outgoing_track);
+	  HVector3f scat1 = rotation_matrix * outgoing_track.direction; //this->getDirectorCosines(outgoing_track.direction);
+	  Scalarf scat_x = atan2(scat1(0),scat1(1));
+	  Scalarf scat_z = atan2(scat1(2),scat1(1));
+	  std::cout << "\t===> (" << scat_x << "), (" << scat_z << ")" << std::endl;
+	}
+	if(m_parent->m_displacementOnly) scat = 0;
+	if(m_parent->m_scatterOnly) disp = 0;
+	out = Vector4f(scat, disp, scat, disp);
+      }
+      else{
+	//----> OLD     
+	Matrix4f  rotation_matrix = this->getRotationMatrix(ingoing_track.direction);
+	HPoint3f  prj  = this->projectOnContainer(outgoing_track);
+	HVector3f disp = rotation_matrix * (prj - ingoing_track.origin);
+	HVector3f scat = rotation_matrix * outgoing_track.direction; //this->getDirectorCosines(outgoing_track.direction);
+	
+	Scalarf scat_x = atan2(scat(0),scat(1));
+	Scalarf scat_z = atan2(scat(2),scat(1));
+	out = Vector4f(scat_x, disp(0), scat_z, disp(2));
+	//<---- 
+      }
+      return out;
     }
-
+  
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -320,7 +354,7 @@ public:
         covariance = 0.5*(covariance_m + covariance_p); // p/m averaging
         for (int i=0; i<4; ++i){
             for (int k=i+1; k<4; ++k){
-                covariance(i, k) = covariance(k, i); // simmetrization
+                covariance(i, k) = covariance(k, i); // symmetrization
             }
         }
         return covariance;
@@ -342,7 +376,7 @@ public:
         // YZY rotations without angles
         Vector2f phi = Vector2f(dc(0),dc(2));       // phi
         Matrix4f first_y_rotation = compileYRotation(phi);
-
+	
         Vector2f the  = Vector2f(dc(1),phi.norm()); // theta
         Matrix4f first_z_rotation = compileZRotation(the);
 
@@ -537,7 +571,11 @@ public:
         Scalarf a2  = cos(phi)/den;
         return atan2(a1,a2);
     }
-
+  //  void setDisplacementScatterOnly(bool disp, bool scat){
+  //    m_scatterOnly = scat; m_displacementOnly = disp;
+  //  }
+  
+  
 public:
     IBNormalPlaneMinimizationVariablesEvaluator *m_parent;
     Scalarf         m_alpha;
@@ -546,7 +584,8 @@ public:
     VoxRaytracer*   m_tracer;
     MuonScatterData m_muon;
     bool            m_integrity;
-
+  bool m_scatterOnly, m_displacementOnly;
+  
     Vector4f m_Data;
     Matrix4f m_ErrorMatrix;
 
@@ -636,4 +675,10 @@ Scalarf IBNormalPlaneMinimizationVariablesEvaluator::getCovarianceMatrix(int i, 
 void IBNormalPlaneMinimizationVariablesEvaluator::setRaytracer(IBVoxRaytracer *tracer)
 {
     d->m_tracer = tracer;
+}
+
+void IBNormalPlaneMinimizationVariablesEvaluator::setDisplacementScatterOnly(bool scat, bool disp, bool oneD){
+  m_displacementOnly = disp;
+  m_scatterOnly = scat;
+  m_oneD = oneD;
 }

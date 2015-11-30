@@ -38,6 +38,9 @@ public:
         Scalarf alphaXZ;
     };
 
+    bool m_scatterOnly, m_displacementOnly, m_oneD;
+
+    
     IBNormalPlaneMinimizationVariablesEvaluator();
     ~IBNormalPlaneMinimizationVariablesEvaluator();
 
@@ -48,12 +51,11 @@ public:
     Matrix4f getCovarianceMatrix();
     Scalarf  getCovarianceMatrix(int i, int j);
     void setRaytracer(IBVoxRaytracer *tracer);
-
+    void setDisplacementScatterOnly(bool,bool,bool);
     // virtual void setConfiguration();
 private:
     friend class IBNormalPlaneMinimizationVariablesEvaluatorPimpl;
     class IBNormalPlaneMinimizationVariablesEvaluatorPimpl *d;
-
 };
 
 inline void IBNormalPlaneMinimizationVariablesEvaluator::init_properties() {
