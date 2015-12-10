@@ -142,7 +142,72 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
     else {
         std::cerr << "Error: Lamda ML Algorithm not set\n";
     }
+
+    // //---- Step 1: Map voxel ('elements[j]') to vector<sij + lambda??>
+    // std::map<int,std::vector<float> > voxelMap;
+    // for (unsigned int i = start; i < end; ++i){
+    //   for (unsigned int j = 0; j < evc->elements.size(); ++j) {
+    // 	int   vox = m_Events[i]->GETVOXELNUMBER;
+    // 	float sij = m_Events[i]->elements[j].Sij;
+    // 	if(voxelMap.find(vox)==voxelMap.end()) voxelMap[vox] = std::vector<float>();
+    // 	voxelMap[vox].push_back(sij);
+    //   }
+    // }
+    
+    // //---- Step 2: Map voxel to <Sij>, sd(Sij), med(Sij), q68(Sij)/2
+    // std::map<int,std::vector<float> > voxelMap2;
+    // for(std::map<int,std::vector<float> >::iterator it=voxelMap.begin(); it!=voxelMap.end(); it++){
+    //   std::vector<float> v = it->second;
+    //   std::sort(v.begin(), v.end());
+    //   float mean   = std::accumulate(v.begin(), v.end(), 0.0) / v.size();
+    //   float median = v.at(int(0.5*float(v.size())));
+    //   float q68    = (v.at(int(0.84*float(v.size()))) - v.at(int(0.16*float(v.size())))) / 2.;
+      
+    //   std::vector<float> diff(v.size());
+    //   std::transform(v.begin(), v.end(), diff.begin(),
+    // 		     std::bind2nd(std::minus<float>(), mean));
+    //   float sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    //   float stdev = std::sqrt(sq_sum / v.size());
+      
+    //   voxelMap2[it->first] = std::vector<float>();
+    //   voxelMap2[it->first].push_back(mean);
+    //   voxelMap2[it->first].push_back(stdev);
+    //   voxelMap2[it->first].push_back(median);
+    //   voxelMap2[it->first].push_back(q68);
+    // }
+    
+    // //---- Step 3: Delete map 1
+    // voxelMap2.clear();
+
+    // //---- Step 3.5 Make TFile and TTree
+    // TFile* tfile = new TFile("joelout.root","RECREATE");
+    // TTree* = make new tree;
+    // add branches to tree;    
+    
+    // //---- Step 4: For each muon "m_Events[i]" make a pair<vector< |sij - av|/sig,> >
+    // for (unsigned int i = start; i < end; ++i){
+    //   std::vector<float> v1, v2;
+    //   for (unsigned int j = 0; j < evc->elements.size(); ++j) {
+    // 	int   vox = m_Events[i]->GETVOXELNUMBER;
+    // 	float sij = m_Events[i]->elements[j].Sij;
+
+    // 	std::vector<float> v = voxelMap2[vox];
+    // 	v1.push_back(fabs(v[0]-sij)/v[1]);
+    // 	v2.push_back(fabs(v[2]-sij)/v[3]);
+    //   }
+
+    //   //---- Step 5: write vectors and 1/psq to file
+    //   ttree->Fill();
+    // }
+    // ttree->Write();
+    // tfile->Close();
+      
 }
+    
+
+
+    
+
 
 
 
@@ -393,284 +458,291 @@ Vector<IBAnalyzerEM::Event> &IBAnalyzerEM::Events()
 }
 
 
-bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath)
-{
-  //    std::cout << "\n\n================================" << std::endl;      
+//___________________________
+bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath){
   
-    if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)) return false;
-    Event evc;
+  if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)) return false;
+  Event evc;
+  
+  evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
+  if(isnan(evc.header.InitialSqrP)){
+    std::cout << "sono in AddMuon: nominalp:" << $$.nominal_momentum
+	      << " muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::endl;
+  }
 
-    evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
-    if(isnan(evc.header.InitialSqrP)){
-      std::cout << "sono in AddMuon: nominalp:" << $$.nominal_momentum
-		<< " muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::endl;
-    }
-//    DBG(trd,evc.header.InitialSqrP,"invP2/F");
-    if(likely(m_VarAlgorithm->evaluate(muon))) {
-        evc.header.Di = m_VarAlgorithm->getDataVector();
-        evc.header.E  = m_VarAlgorithm->getCovarianceMatrix();
-	//std::cout << "ERROR MATRIX = " << evc.header.E << std::endl;
+  if(likely(m_VarAlgorithm->evaluate(muon))) {
+    evc.header.Di = m_VarAlgorithm->getDataVector();
+    evc.header.E  = m_VarAlgorithm->getCovarianceMatrix();
+  }     
+  else return false;
 
-        // HARDCODED ... ZERO CROSS CORRELATION BETWEEN VARS //
-        //        evc.header.E(0,1) = 0.;
-        //        evc.header.E(1,0) = 0.;
-        //        evc.header.E(2,3) = 0.;
-        //        evc.header.E(3,2) = 0.;
-        // .................................................. //
-
-        // HARDCODED ... ZERO CROSS CORRELATION BETWEEN VIEWS //
-        //        evc.header.E.block<2,2>(2,0) = Matrix2f::Zero();
-        //        evc.header.E.block<2,2>(0,2) = Matrix2f::Zero();
-        // .................................................. //
-
-        // HARDCODED ... LESS ERROR ! //
-        //evc.header.E = Matrix4f::Zero();
-        //evc.header.E /= 2;
-        //        std::cout
-        //                << " evc.header.Di " << evc.header.Di.transpose() << "\n"
-        //                << " evc.header.E " << evc.header.E << "\n";
-
-    }     
-    else return false;
-
-    //---- Perform raytracing 
-    IBVoxRaytracer::RayData ray;
-    Vector<HPoint3f> pts;
-    HPoint3f front_pt, back_pt;
-
-    //---- If reconstructing the muon's path
-    if(m_useRecoPath){
+  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  //---- Perform raytracing 
+  //    IBVoxRaytracer::RayData ray;
+  Vector<HPoint3f> pts;
+  HPoint3f front_pt, back_pt;
+  
+  //---- If reconstructing the muon's path
+  if(m_useRecoPath){
+    
+    //---- Require entry and exit points
+    HPoint3f entry_pt, exit_pt;
+    if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) return false;
+    if( !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )  return false;
+    front_pt = entry_pt;
+    back_pt = exit_pt;      
+    double trackLength = (exit_pt-entry_pt).norm();
+    
+    //---- Add the entry point
+    pts.push_back(entry_pt);
+    
+    //---- If we want to build tracks with more than one line
+    if(m_nPath > 1){
       
-      //---- Require entry and exit points
-      HPoint3f entry_pt, exit_pt;
-      if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) return false;
-      if( !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )  return false;
-      front_pt = entry_pt;
-      back_pt = exit_pt;      
-      double trackLength = (exit_pt-entry_pt).norm();
-      
-      //---- If using 3-path then project the muon to the blast furnace
-      if(m_project){
-	//---- Get entry to furnace
-	double normIn   = muon.LineIn().direction.norm();
-	HVector3f dirIn = muon.LineIn().direction;
-	double distance = m_projector.GetIntersectionDistance(entry_pt[0],entry_pt[1],entry_pt[2],
-							      dirIn[0]/normIn,dirIn[1]/normIn,dirIn[2]/normIn);
-	if(distance < 0) return false;
-	entry_pt = entry_pt + (distance/normIn)*muon.LineIn().direction;
-	
-	//---- Get exit to furnace
-	double normOut   = -muon.LineOut().direction.norm();
-	HVector3f dirOut = muon.LineOut().direction;
-	distance = m_projector.GetIntersectionDistance(exit_pt[0], exit_pt[1], exit_pt[2], 
-						       dirOut[0]/normOut, dirOut[1]/normOut, dirOut[2]/normOut);
-	if(distance < 0) return false;
-	exit_pt = exit_pt + (distance/normOut)*muon.LineOut().direction;	
-      }
+      //---- Evaluate the POCA and check that it is valid
+      if(m_PocaAlgorithm && m_PocaAlgorithm->evaluate(muon)){;	  
+  	HPoint3f poca = m_PocaAlgorithm->getPoca();
+  	//---- Check that the POCA is valid
+  	HVector3f in, out;
+  	in  = poca - muon.LineIn().origin;
+  	out = muon.LineOut().origin - poca;
+  	float poca_prj = in.transpose() * out;
+  	bool validPoca = poca_prj > 0 && GetVoxCollection()->IsInsideBounds(poca);
 
-
-      //---- Add the entry point
-      pts.push_back(entry_pt);
-      
-
-      //---- If we want to build tracks with more than one line
-      if(m_nPath > 1){
-	
-	//---- Evaluate the POCA and check that it is valid
-	if(m_PocaAlgorithm && m_PocaAlgorithm->evaluate(muon)){;	  
-	  HPoint3f poca = m_PocaAlgorithm->getPoca();
-
-	  //---- Check that the POCA is valid
-	  HVector3f in, out;
-	  in  = poca - muon.LineIn().origin;
-	  out = muon.LineOut().origin - poca;
-	  float poca_prj = in.transpose() * out;
-	  bool validPoca = poca_prj > 0 && GetVoxCollection()->IsInsideBounds(poca);
-	  if(!validPoca) return false;
+  	//---- If using the two-line path
+  	if(m_nPath==2){
+	  if(validPoca) pts.push_back(poca);
+	  //else std::cout << "Invalid poca" << std::endl;
+	}
+  	//---- If using the three-line path
+  	else if(m_nPath == 3){
+  	  //---- Get the poca on the entry/exit tracks
+  	  HPoint3f entry_poca = m_PocaAlgorithm->getInTrackPoca();
+  	  HPoint3f exit_poca  = m_PocaAlgorithm->getOutTrackPoca();
 	  
-	  //---- If using the two-line path
-	  if(m_nPath==2) pts.push_back(poca);
-	  //---- If using the three-line path
-	  else if(m_nPath == 3){
-	    //---- Get the poca on the entry/exit tracks
-	    HPoint3f entry_poca = m_PocaAlgorithm->getInTrackPoca();
-	    HPoint3f exit_poca  = m_PocaAlgorithm->getOutTrackPoca();
-
-	    //---- Get the distance down the tracks to the inflection points
-	    double entry_length = (entry_pt - entry_poca).norm();
-	    double exit_length  = (exit_pt  - exit_poca).norm();
-	    if(entry_length > trackLength || exit_length > trackLength) return false; //<----Recently added
-
-	    double alpha = m_alpha;
-	    if(m_project) alpha = m_alphaCalc.Alpha(trackLength);
-	      
-	    //---- Get the inflection points
-	    double normIn  = muon.LineIn().direction.norm(); //<----Recently added
-	    double normOut = muon.LineOut().direction.norm();
-	    HVector3f point1 = entry_pt + alpha*(entry_length/normIn)*muon.LineIn().direction;
-	    HVector3f point2 = exit_pt  - alpha*(exit_length/normOut)*muon.LineOut().direction;
-
-	    //---- Add the points to the collection
-	    pts.push_back(point1);
-	    pts.push_back(point2);
-	  }
-
-	  //---- Get exit point
-	  pts.push_back(exit_pt);
-	}
+  	  //---- Get the distance down the tracks to the inflection points
+  	  double entry_length = (entry_pt - entry_poca).norm();
+  	  double exit_length  = (exit_pt  - exit_poca).norm();
+  	  if(entry_length > trackLength || exit_length > trackLength) return false;
+	  
+  	  double alpha = m_alpha;
+  	  if(m_project) alpha = m_alphaCalc.Alpha(trackLength);
+	  
+  	  //---- Get the inflection points
+  	  double normIn  = muon.LineIn().direction.norm(); //<----Recently added
+  	  double normOut = muon.LineOut().direction.norm();
+  	  HVector3f point1 = entry_pt + alpha*(entry_length/normIn)*muon.LineIn().direction;
+  	  HVector3f point2 = exit_pt  - alpha*(exit_length/normOut)*muon.LineOut().direction;
+	  
+  	  //---- Add the points to the collection
+  	  pts.push_back(point1);
+  	  pts.push_back(point2);
+  	}
+	
+  	//---- Get exit point
+  	pts.push_back(exit_pt);
       }
     }
-    //---- If reconstructing the muon's true path
-    else{
-      if(muonPath.size()==0) return false;
-      for(int i=0; i<muonPath.size(); ++i){
-	pts.push_back(muonPath[i]);
-      }
-      if(pts.size()==0) return false;
-      back_pt  = pts.back();
-      front_pt = pts.front();
+  }
+  //---- If reconstructing the muon's true path
+  else{
+    if(muonPath.size()==0) return false;
+    for(int i=0; i<muonPath.size(); ++i){
+      pts.push_back(muonPath[i]);
+    }
+    if(pts.size()==0) return false;
+    back_pt  = pts.back();
+    front_pt = pts.front();
+  }
+  
+  //std::cout << "Got " << pts.size() << " points " << std::endl;
+  
+  //---- Now loop over the points and rays in order to remove mid-voxel inflections
+  std::map<int,std::vector<HPoint3f> > voxelMap;
+  std::vector<int> voxelOrder; //<---- An ordered list of the voxels
+  Scalarf totalLength = 0.;
+  for(int i=0; i<pts.size()-1; ++i){
+    HPoint3f & pt1 = pts[i];
+    HPoint3f & pt2 = pts[i+1];
+  
+    //----
+    Scalarf  rayLength = (pt2-pt1).norm();
+    HPoint3f rayDir    = (pt2-pt1)/rayLength;
+    IBVoxRaytracer::RayData ray = m_RayAlgorithm->TraceBetweenPoints(pt1,pt2);
+  
+    //----
+    float cumulativeLength = 0.;
+    foreach(const IBVoxRaytracer::RayData::Element &el, ray.Data()){
+  
+  	HPoint3f pti = pt1 + cumulativeLength*rayDir;
+  	cumulativeLength += el.L;
+  	HPoint3f ptj = pt1 + cumulativeLength*rayDir;
+  
+  	//---- If this is a new voxel for this muon
+  	if(voxelMap.find(el.vox_id) == voxelMap.end()){
+  	  voxelMap[el.vox_id] = std::vector<HPoint3f>();
+  	  voxelOrder.push_back(el.vox_id);
+  	  voxelMap[el.vox_id].push_back(pti);
+  	  voxelMap[el.vox_id].push_back(ptj);
+  	}
+  	voxelMap[el.vox_id][1] = ptj;
     }
 
-    //---- Now loop over the points and rays in order to remove mid-voxel inflections
-    std::map<int,std::vector<HPoint3f> > voxelMap;
-    std::vector<int> voxelOrder; //<---- An ordered list of the voxels
-    for(int i=0; i<pts.size()-1; ++i){
-      HPoint3f & pt1 = pts[i];
-      HPoint3f & pt2 = pts[i+1];
-      
-      //----
-      Scalarf  rayLength = (pt2-pt1).norm();
-      HPoint3f rayDir    = (pt2-pt1)/rayLength;
-      IBVoxRaytracer::RayData ray = m_RayAlgorithm->TraceBetweenPoints(pt1,pt2);
+    //---- Increment the total length of the muon path
+    totalLength += rayLength;
+  }
+  
+  //---- Now reorder the points
+  // pts.clear();
+  // for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
+  //   std::vector<HPoint3f>& voxelPts = voxelMap[*it];
+  //   pts.push_back(voxelPts.front());
+  //   pts.push_back(voxelPts.back());
+  // }
+  
+  //---- Now trace between points and calculate length parameters
+  m_oldTCalculation = true;
+  Scalarf H = muon.LineIn().direction.transpose() * (back_pt - front_pt);
+  Scalarf normIn = muon.LineIn().direction.norm();
+  if(!m_oldTCalculation) H = H/normIn;  
 
-      //----
-      float cumulativeLength = 0.;
-      foreach(const IBVoxRaytracer::RayData::Element &el, ray.Data()){
+  //----
+  // m_oldTCalculation = true;
+  // if(m_oldTCalculation){
+  //   for(int i=0; i<pts.size()-1; ++i){
+  //     HPoint3f & pt1 = pts[i];
+  //     HPoint3f & pt2 = pts[i+1];
+  //     IBVoxRaytracer::RayData ray = m_RayAlgorithm->TraceBetweenPoints(pt1,pt2);
+  //     Scalarf T = ray.TotalLength();
+  //     if(i < pts.size()-2) {
+  // 	Scalarf h = muon.LineIn().direction.transpose()*(pt2-pt1);
+  // 	T = T * H/h;
+  //     }
+  //     //---- Now loop over each element in the ray
+  //     foreach(const IBVoxRaytracer::RayData::Element &el, ray.Data()){
+  // 	Event::Element elc;
+	
+  // 	//---- Retrieve the voxel
+  // 	elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);
+  // 	Scalarf L = el.L;
+  // 	T = fabs(T-L);
+  // 	elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
+	
+  // 	//---- pw
+  // 	elc.pw = evc.header.InitialSqrP;
+	
+  // 	//---- add both views to E if voxel is frozen 
+  // 	if(elc.voxel->Value <= 0){
+  // 	  evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+  // 	  evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+  // 	}
+  // 	else evc.elements.push_back(elc);
+  //     }
+  //   }
+  // }
+  // else{
 
-	HPoint3f pti = pt1 + cumulativeLength*rayDir;
-	cumulativeLength += el.L;
-	HPoint3f ptj = pt1 + cumulativeLength*rayDir;
-
-	//---- If this is a new voxel for this muon
-	if(voxelMap.find(el.vox_id) == voxelMap.end()){
-	  voxelMap[el.vox_id] = std::vector<HPoint3f>();
-	  //voxelOrder.push_back(el.vox_id);
-	  voxelMap[el.vox_id].push_back(pti);
-	  voxelMap[el.vox_id].push_back(ptj);
-	}
-	voxelMap[el.vox_id][1] = ptj;
-      }
-    }
-
-    // //---- Now reorder the points
-    // pts.clear();
-    // for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
-    //   std::vector<HPoint3f>& voxelPts = voxelMap[*it];
-    //   pts.push_back(voxelPts.front());
-    //   pts.push_back(voxelPts.back());
+  Scalarf T = totalLength;
+  for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
+    const HPoint3f & pt1 = voxelMap[*it][0];
+    const HPoint3f & pt2 = voxelMap[*it][1];    
+    
+  // for(std::map<int,std::vector<HPoint3f> >::const_iterator ptIt=voxelMap.begin(); ptIt!=voxelMap.end(); ptIt++){
+  
+  //   const HPoint3f & pt1 = ptIt->second[0];
+  //   const HPoint3f & pt2 = ptIt->second[1];
+  
+    //----> New calculation of T
+    //      Scalarf  rayLength = (pt2-pt1).norm();
+    //      HPoint3f rayDir    = (pt2-pt1)/rayLength;
+    //<---- 
+    
+    //----> 2nd Old calculation of T
+    // Scalarf T = ray.TotalLength(); //<---- This maybe should be sum(ray)
+    // if(m_oldTCalculation){
+    //   if(i < pts.size()-2) {
+    // 	Scalarf h = muon.LineIn().direction.transpose()*(pt2-pt1);
+    // 	T = T * H/h;
+    //   }
     // }
     
-    //---- Now trace between points and calculate length parameters
-    Scalarf normIn = muon.LineIn().direction.norm();
-    Scalarf H = muon.LineIn().direction.transpose() * (back_pt - front_pt);
-    if(!m_oldTCalculation) H = H/normIn;
-    //    for(int i=0; i<pts.size()-1; ++i){ 
-    for(std::map<int,std::vector<HPoint3f> >::const_iterator ptIt=voxelMap.begin(); ptIt!=voxelMap.end(); ptIt++){
-      
-      const HPoint3f & pt1 = ptIt->second[0];
-      const HPoint3f & pt2 = ptIt->second[1];
-      //  HPoint3f & pt1 = pts[i];
-      //HPoint3f & pt2 = pts[i+1];
-      // IBVoxRaytracer::RayData ray = m_RayAlgorithm->TraceBetweenPoints(pt1,pt2);
-
-      // //----> Old calculation of T
-      // Scalarf T = 0.;
-      // if(m_oldTCalculation){
-      // 	T = ray.TotalLength();
-      // 	//if(i < pts.size()-2) {
-      // 	Scalarf h = muon.LineIn().direction.transpose()*(pt2-pt1);
-      // 	  T = T * H/h;
-      // 	  //	}
-      // }
-      //----> New calculation of T
-      //      Scalarf  rayLength = (pt2-pt1).norm();
-      //      HPoint3f rayDir    = (pt2-pt1)/rayLength;
-      //<---- 
-
-
-      //---- Now loop over each element in the ray
-      //Scalarf cumulativeLength = 0.;
-      //      foreach(const IBVoxRaytracer::RayData::Element &el, ray.Data()){
-	Event::Element elc;
-	
-	//---- Retrieve the voxel
-	//	elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);
-	elc.voxel = &this->GetVoxCollection()->operator [](ptIt->first);
-
-	// //----> New ray tracing
-	// if(voxelMap.find(el.vox_id) == voxelMap.end()){
-	//   voxelMap[el.vox_id] = std::make_pair(0, std::make_pair(0.,0.));
-	// }
-	// voxelMap[el.vox_id].first = voxelMap[el.vox_id].first + 1;
-	// //<----
-	
-	//---- Get length of ray in the voxel
-	//Scalarf L = el.L;
-	Scalarf L = (pt2-pt1).norm();
-	
-	// //----> New ray tracing
-	// L += voxelMap[el.vox_id].second.first;
-	// voxelMap[el.vox_id].second.first = L;
-	// //<---- 
-	
-	//----> Old calculation of T
-	//	if(m_oldTCalculation) T = fabs(T-L);
-	//----> New calculation of T
-	//	else{	  
-	  //cumulativeLength += el.L;
-	  //HPoint3f pti = (cumulativeLength*rayDir + pt1);
-	  //Scalarf h = (muon.LineIn().direction.transpose()*(pti-front_pt));
-	  Scalarf h = (muon.LineIn().direction.transpose()*(pt2-front_pt));
-	  Scalarf T = H - h/normIn;
-	  if(T < 0) T = 0.;
-	  //----> New ray tracing
-	  // T += voxelMap[el.vox_id].second.second;
-	  // voxelMap[el.vox_id].second.second = T;
-	  // T = (voxelMap[el.vox_id].second.second) / float(voxelMap[el.vox_id].first);
-	  //----
-	  //}
-	//<----
-
-	//---- Fill Wij
-	  if(m_scatterOnly)           elc.Wij << L, 0, 0, 0;
-	  else if(m_displacementOnly) elc.Wij << 0, 0, 0, L*L*L/3. + L*L*T + L*T*T;
-	  else                        elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
-
-	//---- pw
-	elc.pw = evc.header.InitialSqrP;
-
-	//---- add both views to E if voxel is frozen 
-	if(elc.voxel->Value <= 0){
-	  evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
-	  evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
-	}
-	else{
-	  //----> New ray tracing
-	  //	  elementMap[el.vox_id] = elc;
-	  //----> Old ray tracing
-	  evc.elements.push_back(elc);
-	  //<----
-	}
-    }
-    //}
-
-    //----> New ray tracing
-    // for(std::map<int,Event::Element>::iterator it=elementMap.begin(); it!=elementMap.end(); it++){
-    //   evc.elements.push_back(it->second);
+    
+    //---- Now loop over each element in the ray
+    //Scalarf cumulativeLength = 0.;
+    //      foreach(const IBVoxRaytracer::RayData::Element &el, ray.Data()){
+    Event::Element elc;
+  
+    //---- Retrieve the voxel
+    //	elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);
+    //    elc.voxel = &this->GetVoxCollection()->operator [](ptIt->first);
+    elc.voxel = &this->GetVoxCollection()->operator [](*it);
+  
+    // //----> New ray tracing
+    // if(voxelMap.find(el.vox_id) == voxelMap.end()){
+    //   voxelMap[el.vox_id] = std::make_pair(0, std::make_pair(0.,0.));
     // }
+    // voxelMap[el.vox_id].first = voxelMap[el.vox_id].first + 1;
+    // //<----
+    
+    //---- Get length of ray in the voxel
+    //Scalarf L = el.L;
+    Scalarf L = (pt2-pt1).norm();
+  
+    // //----> New ray tracing
+    // L += voxelMap[el.vox_id].second.first;
+    // voxelMap[el.vox_id].second.first = L;
+    // //<---- 
+    
+    //----> Old calculation of T
+    if(m_oldTCalculation) T = fabs(T-L);
+    //----> New calculation of T
+    else{	  
+    //cumulativeLength += el.L;
+    //HPoint3f pti = (cumulativeLength*rayDir + pt1);
+    //Scalarf h = (muon.LineIn().direction.transpose()*(pti-front_pt));
+      Scalarf h = (muon.LineIn().direction.transpose()*(pt2-front_pt));
+      T = H - h/normIn;
+    }
+    if(T < 0) T = 0.;
+    //----> New ray tracing
+    // T += voxelMap[el.vox_id].second.second;
+    // voxelMap[el.vox_id].second.second = T;
+    // T = (voxelMap[el.vox_id].second.second) / float(voxelMap[el.vox_id].first);
+    //----
+    //}
     //<----
-    m_d->m_Events.push_back(evc);
-    return true;
+
+    //---- Fill Wij
+    if(m_scatterOnly)           elc.Wij << L, 0, 0, 0;
+    else if(m_displacementOnly) elc.Wij << 0, 0, 0, L*L*L/3. + L*L*T + L*T*T;
+    else                        elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
+    
+    //---- pw
+    elc.pw = evc.header.InitialSqrP;
+    
+    //---- add both views to E if voxel is frozen 
+    if(elc.voxel->Value <= 0){
+      evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+      evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+    }
+    else{
+      //----> New ray tracing
+      //	  elementMap[el.vox_id] = elc;
+      //----> Old ray tracing
+      evc.elements.push_back(elc);
+      //<----
+    }
+  }
+  //}
+  
+  //----> New ray tracing
+  // for(std::map<int,Event::Element>::iterator it=elementMap.begin(); it!=elementMap.end(); it++){
+  //   evc.elements.push_back(it->second);
+  // }
+  //<----
+     m_d->m_Events.push_back(evc);
+  return true;
+  //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 }
 
 ///
@@ -695,7 +767,7 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons)
       //      std::cout << "---" << iMu << " (" << path_itr->size() << ")" << std::endl;
       if(!AddMuonFullPath(*itr, *path_itr)){
 	muons->Data().remove_element(*itr);
-	muons->FullPath().remove_element(*path_itr);
+	if(muons->FullPath().size() > 0) muons->FullPath().remove_element(*path_itr);
       }
       else{
 	itr++;

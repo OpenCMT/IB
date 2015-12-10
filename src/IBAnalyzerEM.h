@@ -69,7 +69,7 @@ public:
     };
 
 public:
-    IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0., bool doRecoPath=false,
+    IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0., bool doRecoPath=true,
 		 bool scatterOnly=false, bool displacementOnly=false, bool oldTCalculation=false,
 		 std::string projectFile="", std::string alphaFile="");
     ~IBAnalyzerEM();
