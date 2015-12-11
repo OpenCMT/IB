@@ -49,7 +49,7 @@ class IBAnalyzerEMPimpl;
 
 namespace {
 typedef IBAnalyzerEM::Event Event;
-//static DebugTTree trd(__FILE__);
+  //static DebugTTree trd(__FILE__);
 } // namespace
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ public:
     IBAnalyzerEM          *m_parent;
     IBAnalyzerEMAlgorithm *m_SijAlgorithm;
     Vector<Event> m_Events;
-
+  bool m_firstIteration;
 };
 
 
@@ -142,66 +142,71 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
     else {
         std::cerr << "Error: Lamda ML Algorithm not set\n";
     }
-
-    // //---- Step 1: Map voxel ('elements[j]') to vector<sij + lambda??>
-    // std::map<int,std::vector<float> > voxelMap;
-    // for (unsigned int i = start; i < end; ++i){
-    //   for (unsigned int j = 0; j < evc->elements.size(); ++j) {
-    // 	int   vox = m_Events[i]->GETVOXELNUMBER;
-    // 	float sij = m_Events[i]->elements[j].Sij;
-    // 	if(voxelMap.find(vox)==voxelMap.end()) voxelMap[vox] = std::vector<float>();
-    // 	voxelMap[vox].push_back(sij);
+        
+    // if(m_firstIteration){
+    //   m_firstIteration = false;
+    //   //---- Step 1: Map voxel ('elements[j]') to vector<sij + lambda??>
+    //   std::map<IBVoxel*,std::vector<float> > voxelMap;      
+    //   for (unsigned int i = start; i < end; ++i){
+    // 	for (unsigned int j = 0; j < m_Events[i].elements.size(); ++j) {
+    // 	  IBVoxel* vox = m_Events[i].elements[j].voxel;
+    // 	  float sij = m_Events[i].elements[j].Sij;
+    // 	  if(voxelMap.find(vox)==voxelMap.end()) voxelMap[vox] = std::vector<float>();
+    // 	  voxelMap[vox].push_back(sij);
+    // 	}
     //   }
-    // }
     
-    // //---- Step 2: Map voxel to <Sij>, sd(Sij), med(Sij), q68(Sij)/2
-    // std::map<int,std::vector<float> > voxelMap2;
-    // for(std::map<int,std::vector<float> >::iterator it=voxelMap.begin(); it!=voxelMap.end(); it++){
-    //   std::vector<float> v = it->second;
-    //   std::sort(v.begin(), v.end());
-    //   float mean   = std::accumulate(v.begin(), v.end(), 0.0) / v.size();
-    //   float median = v.at(int(0.5*float(v.size())));
-    //   float q68    = (v.at(int(0.84*float(v.size()))) - v.at(int(0.16*float(v.size())))) / 2.;
-      
-    //   std::vector<float> diff(v.size());
-    //   std::transform(v.begin(), v.end(), diff.begin(),
-    // 		     std::bind2nd(std::minus<float>(), mean));
-    //   float sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
-    //   float stdev = std::sqrt(sq_sum / v.size());
-      
-    //   voxelMap2[it->first] = std::vector<float>();
-    //   voxelMap2[it->first].push_back(mean);
-    //   voxelMap2[it->first].push_back(stdev);
-    //   voxelMap2[it->first].push_back(median);
-    //   voxelMap2[it->first].push_back(q68);
-    // }
-    
-    // //---- Step 3: Delete map 1
-    // voxelMap2.clear();
-
-    // //---- Step 3.5 Make TFile and TTree
-    // TFile* tfile = new TFile("joelout.root","RECREATE");
-    // TTree* = make new tree;
-    // add branches to tree;    
-    
-    // //---- Step 4: For each muon "m_Events[i]" make a pair<vector< |sij - av|/sig,> >
-    // for (unsigned int i = start; i < end; ++i){
-    //   std::vector<float> v1, v2;
-    //   for (unsigned int j = 0; j < evc->elements.size(); ++j) {
-    // 	int   vox = m_Events[i]->GETVOXELNUMBER;
-    // 	float sij = m_Events[i]->elements[j].Sij;
-
-    // 	std::vector<float> v = voxelMap2[vox];
-    // 	v1.push_back(fabs(v[0]-sij)/v[1]);
-    // 	v2.push_back(fabs(v[2]-sij)/v[3]);
+    //   //---- Step 2: Map voxel to <Sij>, sd(Sij), med(Sij), q68(Sij)/2
+    //   std::map<IBVoxel*,std::vector<float> > voxelMap2;
+    //   for(std::map<IBVoxel*,std::vector<float> >::iterator it=voxelMap.begin(); it!=voxelMap.end(); it++){
+    // 	std::vector<float> v = it->second;
+    // 	std::sort(v.begin(), v.end());
+    // 	float mean   = std::accumulate(v.begin(), v.end(), 0.0) / float(v.size());
+    // 	float median = v.at(int(0.5*float(v.size())));
+    // 	float q68    = (v.at(int(0.84*float(v.size()))) - v.at(int(0.16*float(v.size())))) / 2.;
+	
+    // 	std::vector<float> diff(v.size());
+    // 	std::transform(v.begin(), v.end(), diff.begin(),
+    // 		       std::bind2nd(std::minus<float>(), mean));
+    // 	float sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    // 	float stdev  = std::sqrt(sq_sum / v.size());
+	
+    // 	voxelMap2[it->first] = std::vector<float>();
+    // 	voxelMap2[it->first].push_back(mean);
+    // 	voxelMap2[it->first].push_back(stdev);
+    // 	voxelMap2[it->first].push_back(median);
+    // 	voxelMap2[it->first].push_back(q68);
     //   }
+    
+    //   //---- Step 3: Delete map 1
+    //   voxelMap2.clear();
 
-    //   //---- Step 5: write vectors and 1/psq to file
-    //   ttree->Fill();
+    //   //---- Step 3.5 Make TFile and TTree
+    //   TFile* tfile = new TFile("joelout.root","RECREATE");
+    //   TTree* ttree = new TTree("joeltree","joeltree");
+    //   std::vector<float> sigmaMean,sigmaMedian;
+    //   float muonMomentum;
+    //   TBranch *sigmaMeanBranch   = ttree->Branch("sigmaMean", &sigmaMean);
+    //   TBranch *sigmaMedianBranch = ttree->Branch("sigmaMedian", &sigmaMedian);
+    //   TBranch *muonMomentumBranch= ttree->Branch("muonMomentum", &muonMomentum);      
+    
+    //   //---- Step 4: For each muon i calculate the sij distribution
+    //   for (unsigned int i = start; i < end; ++i) {
+    // 	sigmaMean.clear();
+    // 	sigmaMedian.clear();
+    // 	for (unsigned int j = 0; j < m_Events[i].elements.size(); ++j) {
+    // 	  IBVoxel* vox = m_Events[i].elements[j].voxel;
+    // 	  float sij = m_Events[i].elements[j].Sij;
+    // 	  std::vector<float>& v = voxelMap2[vox];
+    // 	  sigmaMean.push_back(fabs(v[0]-sij)/v[1]);
+    // 	  sigmaMedian.push_back(fabs(v[2]-sij)/v[3]);
+    // 	}
+    // 	muonMomentum = m_Events[i].header.InitialSqrP;
+    // 	ttree->Fill();
+    //   }
+    //   ttree->Write();
+    //   tfile->Close();  
     // }
-    // ttree->Write();
-    // tfile->Close();
-      
 }
     
 
