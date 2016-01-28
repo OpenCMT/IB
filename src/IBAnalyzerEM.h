@@ -71,7 +71,7 @@ public:
 public:
     IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0., bool doRecoPath=true,
 		 bool scatterOnly=false, bool displacementOnly=false, bool oldTCalculation=false,
-		 std::string projectFile="", std::string alphaFile="");
+		 std::string projectFile="", std::string alphaFile="", float rankLimit=-100.);
     ~IBAnalyzerEM();
 
     bool AddMuon(const MuonScatterData &muon){ return false;}
@@ -125,6 +125,7 @@ private:
     bool m_displacementOnly;//---- Only use displacement information to build images
     bool m_oldTCalculation; //---- Use the old method of calculating length parameter T
     bool m_project;
+    float m_rankLimit;
 
     MuonProjection m_projector;
     AlphaCalculator m_alphaCalc;

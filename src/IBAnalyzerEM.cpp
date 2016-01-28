@@ -25,6 +25,7 @@
 #include <TTree.h>
 #include <TFile.h>
 #include <TH1F.h>
+#include <TROOT.h>
 
 #include <Core/Vector.h>
 #include <Core/Debug.h>
@@ -61,9 +62,11 @@ class IBAnalyzerEMPimpl {
     typedef IBAnalyzerEM::Event Event;
 
 public:
-    IBAnalyzerEMPimpl(IBAnalyzerEM *parent) :
+  IBAnalyzerEMPimpl(IBAnalyzerEM *parent, float rankLimit) :
         m_parent(parent),
-        m_SijAlgorithm(NULL){;}
+        m_SijAlgorithm(NULL),
+	m_firstIteration(false),
+	m_rankLimit(rankLimit){;}
 
     void Project(Event *evc);
 
@@ -85,6 +88,8 @@ public:
     IBAnalyzerEM          *m_parent;
     IBAnalyzerEMAlgorithm *m_SijAlgorithm;
     Vector<Event> m_Events;
+
+  bool m_rankLimit;      
   bool m_firstIteration;
 };
 
@@ -142,11 +147,14 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
     else {
         std::cerr << "Error: Lamda ML Algorithm not set\n";
     }
-        
+    
+    //------------- SIJ RANK NEEDED FOR ALL SIJ RANK STUFF
     // if(m_firstIteration){
     //   m_firstIteration = false;
-    //   //---- Step 1: Map voxel ('elements[j]') to vector<sij + lambda??>
-    //   std::map<IBVoxel*,std::vector<float> > voxelMap;      
+            
+      
+    //   //---- Step 1: Map voxel ('elements[j]') to sij
+    //   std::map<IBVoxel*,std::vector<float> > voxelMap;
     //   for (unsigned int i = start; i < end; ++i){
     // 	for (unsigned int j = 0; j < m_Events[i].elements.size(); ++j) {
     // 	  IBVoxel* vox = m_Events[i].elements[j].voxel;
@@ -154,59 +162,83 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
     // 	  if(voxelMap.find(vox)==voxelMap.end()) voxelMap[vox] = std::vector<float>();
     // 	  voxelMap[vox].push_back(sij);
     // 	}
-    //   }
-    
-    //   //---- Step 2: Map voxel to <Sij>, sd(Sij), med(Sij), q68(Sij)/2
-    //   std::map<IBVoxel*,std::vector<float> > voxelMap2;
-    //   for(std::map<IBVoxel*,std::vector<float> >::iterator it=voxelMap.begin(); it!=voxelMap.end(); it++){
-    // 	std::vector<float> v = it->second;
-    // 	std::sort(v.begin(), v.end());
-    // 	float mean   = std::accumulate(v.begin(), v.end(), 0.0) / float(v.size());
-    // 	float median = v.at(int(0.5*float(v.size())));
-    // 	float q68    = (v.at(int(0.84*float(v.size()))) - v.at(int(0.16*float(v.size())))) / 2.;
-	
-    // 	std::vector<float> diff(v.size());
-    // 	std::transform(v.begin(), v.end(), diff.begin(),
-    // 		       std::bind2nd(std::minus<float>(), mean));
-    // 	float sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
-    // 	float stdev  = std::sqrt(sq_sum / v.size());
-	
-    // 	voxelMap2[it->first] = std::vector<float>();
-    // 	voxelMap2[it->first].push_back(mean);
-    // 	voxelMap2[it->first].push_back(stdev);
-    // 	voxelMap2[it->first].push_back(median);
-    // 	voxelMap2[it->first].push_back(q68);
-    //   }
-    
-    //   //---- Step 3: Delete map 1
-    //   voxelMap2.clear();
+    //   }      
+    //   //std::cout << "\n>> Got a voxel map of size " << voxelMap.size() << std::endl;
 
-    //   //---- Step 3.5 Make TFile and TTree
-    //   TFile* tfile = new TFile("joelout.root","RECREATE");
-    //   TTree* ttree = new TTree("joeltree","joeltree");
-    //   std::vector<float> sigmaMean,sigmaMedian;
-    //   float muonMomentum;
-    //   TBranch *sigmaMeanBranch   = ttree->Branch("sigmaMean", &sigmaMean);
-    //   TBranch *sigmaMedianBranch = ttree->Branch("sigmaMedian", &sigmaMedian);
-    //   TBranch *muonMomentumBranch= ttree->Branch("muonMomentum", &muonMomentum);      
+    //   //------------- SIJ RANK KILL
+    //   //---- NEED TO ALSO SET muon_event.SetMomentum(7); in *MUBLAST*p
+    //   //   //----
+    // //   std::vector<Event*> killList;
+    // //   for (unsigned int i = start; i < end; ++i) {	
+    // // 	float rankSum = 0.;
+    // // 	for (unsigned int j = 0; j < m_Events[i].elements.size(); ++j) {
+    // //  	  IBVoxel* vox = m_Events[i].elements[j].voxel;
+    // //  	  float sij = m_Events[i].elements[j].Sij;
+    // // 	  std::vector<float>& v = voxelMap[vox];
+    // // 	  std::sort(v.begin(), v.end());
+    // // 	  int sijPos = 0;
+    // // 	  for(; sijPos < v.size() && v[sijPos] != sij; sijPos++);
+    // // 	  rankSum += float(sijPos - v.size()/2)/sqrt(float(v.size()));
+    // // 	}
+    // // 	rankSum = rankSum/sqrt(m_Events[i].elements.size());
+    // // 	if(rankSum < m_rankLimit) killList.push_back(&m_Events.at(i));
+    // //   }
+      
+    // //   for(std::vector<Event*>::iterator it=killList.begin(); it!=killList.end(); it++){
+    // // 	m_Events.remove_element(**it);
+    // //   }
+    // // }
+    //   //------------- END SIJ RANK KILL
+
+    //   //------------- END SIJ RANK FIND
+    // //   //---- Step 3.5 Make TFile and TTree
+    // //   gROOT->ProcessLine("#include <vector>");
+    // //   TFile* tfile = new TFile("joelout.root","RECREATE");
+    // //   TTree* ttree = new TTree("joeltree","joeltree");
+    // //   //      std::vector<float> sigmaMean;  
+    // //   //      std::vector<float> sigmaMedian;
+    // //   std::vector<int> position;
+    // //   std::vector<int> size;
+    // //   float muonMomentum;
+    // //   //      ttree->Branch("sigmaMean", &sigmaMean);
+    // //   //      ttree->Branch("sigmaMedian", &sigmaMedian);
+    // //   ttree->Branch("position", &position);
+    // //   ttree->Branch("size", &size);
+    // //   ttree->Branch("muonMomentum", &muonMomentum);      
     
-    //   //---- Step 4: For each muon i calculate the sij distribution
-    //   for (unsigned int i = start; i < end; ++i) {
-    // 	sigmaMean.clear();
-    // 	sigmaMedian.clear();
-    // 	for (unsigned int j = 0; j < m_Events[i].elements.size(); ++j) {
-    // 	  IBVoxel* vox = m_Events[i].elements[j].voxel;
-    // 	  float sij = m_Events[i].elements[j].Sij;
-    // 	  std::vector<float>& v = voxelMap2[vox];
-    // 	  sigmaMean.push_back(fabs(v[0]-sij)/v[1]);
-    // 	  sigmaMedian.push_back(fabs(v[2]-sij)/v[3]);
-    // 	}
-    // 	muonMomentum = m_Events[i].header.InitialSqrP;
-    // 	ttree->Fill();
-    //   }
-    //   ttree->Write();
-    //   tfile->Close();  
-    // }
+    // //   //---- Step 4: For each muon i calculate the sij distribution
+    // //   for (unsigned int i = start; i < end; ++i) {
+    // // 	//    	sigmaMean.clear();
+    // // 	//    	sigmaMedian.clear();
+    // // 	position.clear();
+    // // 	size.clear();
+    // // 	for (unsigned int j = 0; j < m_Events[i].elements.size(); ++j) {
+    // // 	  IBVoxel* vox = m_Events[i].elements[j].voxel;
+    // // 	  float sij = m_Events[i].elements[j].Sij;
+	  
+    // // 	  //----
+    // // 	  std::vector<float>& v = voxelMap[vox];
+    // // 	  std::sort(v.begin(), v.end());
+    // // 	  int sijPos = 0;
+    // // 	  for(; sijPos < v.size() && v[sijPos] != sij; sijPos++);
+    // // 	  position.push_back(sijPos);
+    // // 	  size.push_back(v.size());
+
+    // // 	  // //----
+    // // 	  // if(voxelMap_stats.find(vox) == voxelMap_stats.end()) continue;
+    // // 	  // std::vector<float>& v_stats = voxelMap_stats[vox];
+    // // 	  // if(v_stats[1] == 0) continue;
+    // // 	  // sigmaMean.push_back((v_stats[0]-sij)/v_stats[1]);
+    // // 	  // sigmaMedian.push_back((v_stats[2]-sij)/v_stats[3]);
+    // // 	}
+    // // 	muonMomentum = m_Events[i].header.InitialSqrP;
+    // // 	std::cout << m_Events[i].header.InitialSqrP << std::endl;
+    // // 	ttree->Fill();
+    // //   }
+    // //   ttree->Write();
+    // //   tfile->Close();  
+    // // }
+      //------------- END SIJ RANK FIND END
 }
     
 
@@ -421,7 +453,7 @@ public:
 
 IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, bool useRecoPath,
 			   bool oldTCalculation, bool scatterOnly, bool displacementOnly,
-			   std::string projectFile, std::string alphaFile) :
+			   std::string projectFile, std::string alphaFile, float rankLimit) :
     m_PocaAlgorithm(NULL),
     m_VarAlgorithm(NULL),
     m_RayAlgorithm(NULL),
@@ -432,7 +464,8 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, boo
     m_oldTCalculation(oldTCalculation),
     m_scatterOnly(scatterOnly),
     m_displacementOnly(displacementOnly),
-    m_project(false)
+    m_project(false),
+    m_rankLimit(rankLimit)
 {
   //----
   if(projectFile!="" && alphaFile!=""){
@@ -449,7 +482,7 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, boo
     	    << "project ("      << m_project          << ")" << std::endl;
   BaseClass::SetVoxCollection(&voxels);
   init_properties(); // < DANGER !!! should be moved away !!
-  m_d = new IBAnalyzerEMPimpl(this);
+  m_d = new IBAnalyzerEMPimpl(this, m_rankLimit);
 }
 
 IBAnalyzerEM::~IBAnalyzerEM()
@@ -470,6 +503,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   Event evc;
   
   evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
+  //std::cout << $$.nominal_momentum << " / " << muon.GetMomentum() << " ---> " << evc.header.InitialSqrP << std::endl;
   if(isnan(evc.header.InitialSqrP)){
     std::cout << "sono in AddMuon: nominalp:" << $$.nominal_momentum
 	      << " muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::endl;
@@ -606,7 +640,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   // }
   
   //---- Now trace between points and calculate length parameters
-  m_oldTCalculation = true;
+  //  m_oldTCalculation = true;
   Scalarf H = muon.LineIn().direction.transpose() * (back_pt - front_pt);
   Scalarf normIn = muon.LineIn().direction.norm();
   if(!m_oldTCalculation) H = H/normIn;  

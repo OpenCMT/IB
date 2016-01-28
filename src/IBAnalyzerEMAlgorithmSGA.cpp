@@ -235,6 +235,7 @@ void IBAnalyzerEMAlgorithmSGA_PXT::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorit
 void IBAnalyzerEMAlgorithmSGA_PT::evaluate(Matrix4f &Sigma,
                                               IBAnalyzerEMAlgorithm::Event *evc)
 {
+
     Matrix2f S;
     Matrix2f iS;
     {
