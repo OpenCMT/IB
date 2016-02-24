@@ -515,11 +515,15 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   }     
   else return false;
 
+  
   //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   //---- Perform raytracing 
   //    IBVoxRaytracer::RayData ray;
   Vector<HPoint3f> pts;
   HPoint3f front_pt, back_pt;
+
+  //  std::cout << "\n----------------\nRay tracing..." << std::endl;
+
   
   //---- If reconstructing the muon's path
   if(m_useRecoPath){
@@ -529,16 +533,19 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) return false;
     if( !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )  return false;
     front_pt = entry_pt;
-    back_pt = exit_pt;      
+    back_pt = exit_pt;
     double trackLength = (exit_pt-entry_pt).norm();
+    //    std::cout << "\tTrack length is " << trackLength << std::endl;
     
     //---- Add the entry point
     pts.push_back(entry_pt);
-    
+    //    std::cout << "\tAdding entry point " << std::endl;
+   
     //---- If we want to build tracks with more than one line
     if(m_nPath > 1){
       
       //---- Evaluate the POCA and check that it is valid
+      //      std::cout << m_PocaAlgorithm->evaluate(muon) << std::endl;
       if(m_PocaAlgorithm && m_PocaAlgorithm->evaluate(muon)){;	  
   	HPoint3f poca = m_PocaAlgorithm->getPoca();
   	//---- Check that the POCA is valid
@@ -547,7 +554,9 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   	out = muon.LineOut().origin - poca;
   	float poca_prj = in.transpose() * out;
   	bool validPoca = poca_prj > 0 && GetVoxCollection()->IsInsideBounds(poca);
-
+	//	std::cout << "\tGot a poca = " << poca_prj << std::endl;
+	//	std::cout << "\tIs valid = " << validPoca << std::endl;
+	
   	//---- If using the two-line path
   	if(m_nPath==2){
 	  if(validPoca) pts.push_back(poca);
@@ -580,6 +589,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 	
   	//---- Get exit point
   	pts.push_back(exit_pt);
+	//	std::cout << "Adding exit point" << std::endl;
       }
     }
   }
@@ -593,8 +603,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     back_pt  = pts.back();
     front_pt = pts.front();
   }
+  //  std::cout << "Got " << pts.size() << " points " << std::endl;
   
-  //std::cout << "Got " << pts.size() << " points " << std::endl;
   
   //---- Now loop over the points and rays in order to remove mid-voxel inflections
   std::map<int,std::vector<HPoint3f> > voxelMap;
@@ -612,11 +622,11 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //----
     float cumulativeLength = 0.;
     foreach(const IBVoxRaytracer::RayData::Element &el, ray.Data()){
-  
+      
   	HPoint3f pti = pt1 + cumulativeLength*rayDir;
   	cumulativeLength += el.L;
   	HPoint3f ptj = pt1 + cumulativeLength*rayDir;
-  
+
   	//---- If this is a new voxel for this muon
   	if(voxelMap.find(el.vox_id) == voxelMap.end()){
   	  voxelMap[el.vox_id] = std::vector<HPoint3f>();
@@ -680,12 +690,12 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   //   }
   // }
   // else{
-
   Scalarf T = totalLength;
   for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
+
     const HPoint3f & pt1 = voxelMap[*it][0];
     const HPoint3f & pt2 = voxelMap[*it][1];    
-    
+          
   // for(std::map<int,std::vector<HPoint3f> >::const_iterator ptIt=voxelMap.begin(); ptIt!=voxelMap.end(); ptIt++){
   
   //   const HPoint3f & pt1 = ptIt->second[0];
@@ -726,7 +736,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //---- Get length of ray in the voxel
     //Scalarf L = el.L;
     Scalarf L = (pt2-pt1).norm();
-  
+    
     // //----> New ray tracing
     // L += voxelMap[el.vox_id].second.first;
     // voxelMap[el.vox_id].second.first = L;
@@ -743,6 +753,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
       T = H - h/normIn;
     }
     if(T < 0) T = 0.;
+    
     //----> New ray tracing
     // T += voxelMap[el.vox_id].second.second;
     // voxelMap[el.vox_id].second.second = T;
@@ -794,27 +805,28 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons)
   std::cout << "Setting muon collection with collection " << muons << std::endl;
   std::cout << "'Using full path ?' = '" << !m_useRecoPath << "'" << std::endl;
   uLibAssert(muons);
-    std::cout << "Clearing " << std::endl;
-    m_d->m_Events.clear();
-    Vector<MuonScatterData>::iterator itr = muons->Data().begin();
-    Vector<Vector<HPoint3f> >::iterator path_itr = muons->FullPath().begin();    
-    std::cout << "Adding " << muons->Data().size() << " muons " << std::endl;    
-    int iMu=0;
-    while(itr != muons->Data().end()){
-      iMu++;
-      //      std::cout << "=============================" << std::endl;
-      //      std::cout << "---" << iMu << " (" << path_itr->size() << ")" << std::endl;
-      if(!AddMuonFullPath(*itr, *path_itr)){
-	muons->Data().remove_element(*itr);
-	if(muons->FullPath().size() > 0) muons->FullPath().remove_element(*path_itr);
-      }
-      else{
-	itr++;
-	path_itr++;
-      }
+
+  std::cout << "Clearing " << std::endl;
+  m_d->m_Events.clear();
+  Vector<MuonScatterData>::iterator itr = muons->Data().begin();
+  Vector<Vector<HPoint3f> >::iterator path_itr = muons->FullPath().begin();    
+  std::cout << "Adding " << muons->Data().size() << " muons " << std::endl;    
+  int iMu=0;
+  while(itr != muons->Data().end()){
+    iMu++;
+    //      std::cout << "=============================" << std::endl;
+    //      std::cout << "---" << iMu << " (" << path_itr->size() << ")" << std::endl;
+    if(!AddMuonFullPath(*itr, *path_itr)){
+      muons->Data().remove_element(*itr);
+      if(muons->FullPath().size() > 0) muons->FullPath().remove_element(*path_itr);
     }
-    std::cout << "\nDone, now calling base class..." << std::endl;
-    BaseClass::SetMuonCollection(muons);
+    else{
+      itr++;
+      path_itr++;
+    }
+  }
+  std::cout << "\nDone, now calling base class..." << std::endl;
+  BaseClass::SetMuonCollection(muons);
 }
 
 unsigned int IBAnalyzerEM::Size()

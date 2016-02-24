@@ -59,13 +59,21 @@ public:
                 dist /= pr;
                 m_dist = dist.head(3).norm();
                 if (unlikely(m_cutlength != 0.f && dist.head(3).norm()>m_cutlength)) {
-                    m_integrity = false;
+		    m_integrity = false;
                     return;
                 }
 //                std::cout << "ATTENTION from evaluatePoca : infinite den, prod " << prod
 //                          << ", angles " << v << ", " << w
 //                          << ", dist " << m_dist << std::endl;
+
+		// std::cout << "The following event fails" << std::endl;
+		// std::cout << "Point " << p << std::endl;
+		// std::cout << "to point " << q << std::endl;
+		// std::cout << "with directions " << v << std::endl;
+		// std::cout << "and " << w << std::endl;
+		// std::cout << "Giving a product of " << prod << std::endl;
                 m_integrity = false;
+				  
             //}
         }
         else {
