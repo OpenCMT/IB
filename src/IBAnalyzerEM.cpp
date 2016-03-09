@@ -469,7 +469,6 @@ Vector<IBAnalyzerEM::Event> &IBAnalyzerEM::Events(){
 //___________________________
 bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath){
 
-  //  std::cout << "\n-----------\nGetting points..." << std::endl;
   //-------------------------
   //---- STEP #1: Fill the event info
   
@@ -484,7 +483,6 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     evc.header.E  = m_VarAlgorithm->getCovarianceMatrix();
     //---- Momentum square (the "$$" notation is a bit much...)
     evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
-    //    std::cout << "Set psq to " << pow($$.nominal_momentum/muon.GetMomentum() ,2);
     if(isnan(evc.header.InitialSqrP)){
       std::cout << "AddMuonFullPath: nominalp:" << $$.nominal_momentum
 		<< "muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::endl;
@@ -515,8 +513,6 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     
     //---- Add the entry point
     pts.push_back(entry_pt);
-    //std::cout << "\tGot an entry point at " << entry_pt << std::endl;
-    //std::cout << "\t\t Which has direction " << muon.LineIn() << std::endl;
     
     //---- If we want to build tracks with more than one line
     if(m_nPath > 1){
@@ -524,8 +520,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
       //---- Evaluate the POCA and check that it is valid
       if(m_PocaAlgorithm && m_PocaAlgorithm->evaluate(muon)){;	  
   	HPoint3f poca = m_PocaAlgorithm->getPoca();	
-	//std::cout << "\t\tGot a poca at " << poca << std::endl;
-	
+
   	//---- Check that the POCA is valid
   	HVector3f in, out;
   	in  = poca - muon.LineIn().origin;
@@ -533,8 +528,6 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   	float poca_prj = in.transpose() * out;
   	bool validPoca = poca_prj > 0 && GetVoxCollection()->IsInsideBounds(poca);
 
-	//std::cout << "path,valid = " << m_nPath << ", " << validPoca << std::endl;
-	
   	//---- If using the two-line path
   	if(m_nPath==2){
 	  if(validPoca) pts.push_back(poca);
@@ -549,14 +542,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   	  double entry_length = (entry_pt - entry_poca).norm();
   	  double exit_length  = (exit_pt  - exit_poca).norm();
 
-	  //std::cout << "\t\t\tCalculated entry/exit lengths of "
-	  //		    << entry_length << ", " << exit_length
-	  //		    << "; compared to track length of " << trackLength << std::endl;
-	  
 	  //---- Remove points which are unreasonably far away
   	  if(entry_length > trackLength || exit_length > trackLength) return false;
-	  
-	  //std::cout << "\t\t\t\tPassed!" << std::endl;
 	  
   	  //---- Get the inflection points
   	  double normIn  = muon.LineIn().direction.norm(); //<----Recently added
@@ -571,8 +558,6 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 	
   	//---- Get exit point
   	pts.push_back(exit_pt);
-	//std::cout << "\tGot an exit point at " << exit_pt << std::endl;
-	//std::cout << "\t\t Which has direction " << muon.LineOut() << std::endl;
       }
     }
   }
@@ -585,7 +570,6 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     back_pt  = pts.back();
     front_pt = pts.front();
   }
-  //  std::cout << "Got " << pts.size() << " points " << std::endl;
 
   //---------
   //---- STEP #2.2: Remove mid-voxel inflections
@@ -630,7 +614,6 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //---- Increment the total length of the muon path
     totalLength += rayLength;
   }
-  //std::cout << "Got " << voxelMap.size() << " voxels" << std::endl;
   
   //---------
   //---- STEP #2.3: Remove mid-voxel inflections
@@ -669,17 +652,13 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     if(T < 0) T = 0.;
 
 
-    //std::cout << "\t\t Voxel " << (*it) << " has {T,L} = " << T << ", " << L << std::endl;
     //---- Fill Wij (algorithm variables) and pw (momentum weight)
     elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
     elc.pw = evc.header.InitialSqrP;
 
-    //    std::cout << "\tGot Wij = \n" << elc.Wij << std::endl;
-    
     //---- Add both views to E if voxel the is "frozen"
     //---- "Frozen" means the voxel has a constant value of LSD
     if(elc.voxel->Value <= 0){
-      //std::cout << "\t\t\t---> Frozen" << std::endl;
       //---- Get a 2x2 block in the top left corner of the Error (E) matrix
       evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
       //---- Get a 2x2 block in the bottom right corner of the Error (E) matrix
@@ -687,7 +666,6 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     }
     //---- If the voxel ISN'T frozen, keep the Element in the Event
     else{
-      //std::cout << "\t\t\t====> NOT frozen" << std::endl;
       evc.elements.push_back(elc);
     }
   }
