@@ -70,8 +70,7 @@ public:
 
 public:
     IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0., bool doRecoPath=true,
-		 bool scatterOnly=false, bool displacementOnly=false, bool oldTCalculation=false,
-		 std::string projectFile="", std::string alphaFile="", float rankLimit=-100.);
+		 bool oldTCalculation=false, float rankLimit=-100.);
     ~IBAnalyzerEM();
 
     bool AddMuon(const MuonScatterData &muon){ return false;}
@@ -121,14 +120,8 @@ private:
     int m_nPath;            //---- Int to indicate whether to build a 1, 2 or 3-path
     double m_alpha;         //---- Relative distance along the trajectory to build the 3-path   
     bool m_useRecoPath;     //---- Use the true muon path from MC
-    bool m_scatterOnly;     //---- Only use scattering information to build images
-    bool m_displacementOnly;//---- Only use displacement information to build images
     bool m_oldTCalculation; //---- Use the old method of calculating length parameter T
-    bool m_project;
     float m_rankLimit;
-
-    MuonProjection m_projector;
-    AlphaCalculator m_alphaCalc;
 };
 
 inline void IBAnalyzerEM::init_properties() {
