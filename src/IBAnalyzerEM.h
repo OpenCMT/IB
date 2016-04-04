@@ -24,9 +24,6 @@
 #ifndef IBANALYZEREM_H
 #define IBANALYZEREM_H
 
-#include "MuonProjection.hh"
-#include "AlphaCalculator.hh"
-
 #include "IBAnalyzer.h"
 #include "IBVoxCollection.h"
 #include "IBVoxRaytracer.h"
