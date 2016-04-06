@@ -77,6 +77,8 @@ public:
 
     void SijCut(float threshold);
 
+    Vector<Event > SijCutCount(float threshold_low, float threshold_high);
+
     void SijGuess(float threshold, float p);
 
     void Chi2Cut(float threshold);
@@ -335,6 +337,26 @@ static bool em_test_SijCut(const Event &evc, float cut_level){
     else return false;
 }
 
+//________________________
+Vector<Event > IBAnalyzerEMPimpl::SijCutCount(float threshold_low, float threshold_high)
+{
+    Vector< Event > ve;
+    Vector< Event >::iterator itr = this->m_Events.begin();
+    const Vector< Event >::iterator begin = this->m_Events.begin();
+    int count = 0;
+
+    while (itr != this->m_Events.end()) {
+        if(em_test_SijCut(*itr, threshold_low) && !em_test_SijCut(*itr, threshold_high)){
+            ve.push_back(*itr);
+        }
+        count++;
+        ++itr;
+    }
+    std::cout << "SijCutCount: muons between thresholds ["
+              << threshold_low << "," << threshold_high << "] = "
+              << ve.size() << " over " << count << "\n";
+    return ve;
+}
 //________________________
 void IBAnalyzerEMPimpl::SijCut(float threshold){
     Vector< Event >::iterator itr = this->m_Events.begin();
@@ -748,6 +770,11 @@ void IBAnalyzerEM::filterEventsLineDistance(float min, float max) {
     m_d->filterEventsLineDistance(min, max);
 }
 
+//________________________
+Vector<Event > IBAnalyzerEM::SijCutCount(float threshold_low, float threshold_high) {
+    m_d->Evaluate(1);
+    return m_d->SijCutCount(threshold_low,threshold_high);
+}
 //________________________
 void IBAnalyzerEM::SijCut(float threshold) {
     m_d->Evaluate(1);

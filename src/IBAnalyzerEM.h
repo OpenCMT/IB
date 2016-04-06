@@ -20,7 +20,6 @@
 //////////////////////////////////////////////////////////////////////////////*/
 
 
-
 #ifndef IBANALYZEREM_H
 #define IBANALYZEREM_H
 
@@ -93,6 +92,8 @@ public:
     void dumpEventsTTree(const char *filename);
 
     void SijCut(float threshold);
+
+    Vector<Event > SijCutCount(float threshold_low, float threshold_high);
 
     void SijGuess(Vector<Vector2f> tpv);
 
