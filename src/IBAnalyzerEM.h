@@ -28,6 +28,7 @@
 #include "IBVoxRaytracer.h"
 #include "IBVoxel.h"
 #include <string>
+#include <iomanip>
 
 class IBPocaEvaluator;
 class IBMinimizationVariablesEvaluator;
@@ -89,11 +90,11 @@ public:
 
     void filterEventsLineDistance(float min, float max);
 
-    void dumpEventsTTree(const char *filename);
-
     void SijCut(float threshold);
 
     Vector<Event > SijCutCount(float threshold_low, float threshold_high);
+
+    void dumpEventsSijInfo(const char *filename, Vector<float> N);
 
     void SijGuess(Vector<Vector2f> tpv);
 
@@ -103,9 +104,10 @@ public:
 
     void SetVoxcollectionShift(Vector3f shift);
 
+    void dumpEventsTTree(const char *filename);
     void DumpP(const char *filename, float x0 = 0, float x1 = 10);
 
-    Vector<Event> & Events();    
+    Vector<Event> & Events();
     
 private:    
     IBPocaEvaluator                            *m_PocaAlgorithm;

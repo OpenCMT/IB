@@ -21,6 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////*/
 
 #include <stdio.h>
+#include <fstream>
 
 #include <TTree.h>
 #include <TFile.h>
@@ -78,6 +79,8 @@ public:
     void SijCut(float threshold);
 
     Vector<Event > SijCutCount(float threshold_low, float threshold_high);
+
+    void dumpEventsSijInfo(const char *filename, Vector<float> N);
 
     void SijGuess(float threshold, float p);
 
@@ -326,36 +329,87 @@ void IBAnalyzerEMPimpl::filterEventsLineDistance(float min, float max)
 //________________________
 ////////////////////////////////////////////////////////////////////////////////
 /// SijCut RECIPE1:  (true if Sij cut proposed) //
-static bool em_test_SijCut(const Event &evc, float cut_level){
-    int n_cuts = 0;
-    for (unsigned int i = 0; i < evc.elements.size(); i++) {
+static bool em_test_SijCut(const Event &evc, float cut_level, int &nvox_cut){
+    nvox_cut = 0;
+//    std::cout << "Testing treshold " << cut_level << std::endl;
+
+   for (unsigned int i = 0; i < evc.elements.size(); i++) {
         const Event::Element &el = evc.elements[i];
         if (fabs( (el.Sij * el.voxel->Count - el.voxel->SijCap)
-                  / el.voxel->SijCap ) > cut_level) n_cuts++;
+                  / el.voxel->SijCap ) > cut_level) nvox_cut++;
+//        if(isnan(el.voxel->SijCap)){
+//            std::cout << "ATTENTION: nan Sij sum!....";
+//            /// this voxel should increment n_cuts, which is not at the moment. FIX it in the future
+//            /// this "bug" consequence is that 2% of events is nasty and not classified with SijCutCount
+//        }
     }
-    if (n_cuts > (int)(evc.elements.size()/3) ) return true;
+//    std::cout << "\n n_cuts=" << nvox_cut << ", 1/3 of the voxels=" << evc.elements.size()/3  << std::endl;
+    if (nvox_cut > (int)(evc.elements.size()/3) ) return true;
     else return false;
+
+    /// MEMORANDUM : testing this function I see that voxel Count doubles at each call ... WHY?
+    /// SijCap updates, so the Sij incrementum is the same, no difference in computation.
+    /// 20160408 SV stop inquiring.... no time now!
 }
 
 //________________________
 Vector<Event > IBAnalyzerEMPimpl::SijCutCount(float threshold_low, float threshold_high)
 {
+    //std::cout << "Cut tresholds : " << std::dec << threshold_low << ", " << threshold_high << " ... " << std::endl;
     Vector< Event > ve;
     Vector< Event >::iterator itr = this->m_Events.begin();
     const Vector< Event >::iterator begin = this->m_Events.begin();
-    int count = 0;
+    int evnum = 0;
+    int nvox_cut_low = 0;
+    int nvox_cut_high = 0;
 
     while (itr != this->m_Events.end()) {
-        if(em_test_SijCut(*itr, threshold_low) && !em_test_SijCut(*itr, threshold_high)){
+//        std::cout << "\n\n *** Event " << evnum << std::endl;
+        if(em_test_SijCut(*itr, threshold_low,nvox_cut_low) && !em_test_SijCut(*itr, threshold_high,nvox_cut_high)){
             ve.push_back(*itr);
+//            std::cout << "Passed!\n";
         }
-        count++;
+        evnum++;
         ++itr;
     }
-    std::cout << "SijCutCount: muons between thresholds ["
-              << threshold_low << "," << threshold_high << "] = "
-              << ve.size() << " over " << count << "\n";
+//    std::cout << "SijCutCount: muons between tresholds ["
+//              << threshold_low << "," << threshold_high << "] = "
+//              << ve.size() << " over " << m_Events.size() << "\n";
     return ve;
+}
+//________________________
+void IBAnalyzerEMPimpl::dumpEventsSijInfo(const char *name, Vector<float> N)
+{
+/// dump event Sij info on file
+    std::fstream fout;
+    fout.open(name, std::fstream::out | std::fstream::app);
+
+    Vector< Event > ve;
+    Vector< Event >::iterator itr = this->m_Events.begin();
+    const Vector< Event >::iterator begin = this->m_Events.begin();
+
+
+    /// loop over events
+    while (itr != this->m_Events.end()) {
+        //        std::cout << "\n\n *** Event " << evnum << std::endl;
+        float p0sq = 3. * 3.;
+        float mom = sqrt(p0sq/(*itr).header.InitialSqrP);
+        fout << mom << " " << (*itr).elements.size() << " ";
+
+        /// loop over Sij tresholds
+        Vector< float >::iterator itrN = N.begin();
+        const Vector< float >::iterator beginN = N.begin();
+        while (itrN != N.end()) {
+            int nvox_cut = 0;
+            em_test_SijCut(*itr, *itrN, nvox_cut);
+            fout << nvox_cut << " ";
+            ++itrN;
+        }
+        fout << "\n";
+        ++itr;
+    }
+    fout.close();
+    return;
 }
 //________________________
 void IBAnalyzerEMPimpl::SijCut(float threshold){
@@ -363,8 +417,9 @@ void IBAnalyzerEMPimpl::SijCut(float threshold){
     const Vector< Event >::iterator begin = this->m_Events.begin();
 
     int count = 0;
+    int nvox_cut=0;
     while (itr != this->m_Events.end()) {
-        if(em_test_SijCut(*itr, threshold))
+        if(em_test_SijCut(*itr, threshold, nvox_cut))
         {
             unsigned int pos = itr - begin;
             this->m_Events.remove_element(*itr);
@@ -381,8 +436,9 @@ void IBAnalyzerEMPimpl::SijCut(float threshold){
 void IBAnalyzerEMPimpl::SijGuess(float threshold, float p){
     Vector< Event >::iterator itr = this->m_Events.begin();
     int count = 0;
+    int nvox_cut=0;
     while (itr != this->m_Events.end()) {
-        if(em_test_SijCut(*itr, threshold))
+        if(em_test_SijCut(*itr, threshold, nvox_cut))
         {
             itr->header.InitialSqrP = m_parent->$$.nominal_momentum / p;
             itr->header.InitialSqrP *= itr->header.InitialSqrP;
@@ -775,6 +831,15 @@ Vector<Event > IBAnalyzerEM::SijCutCount(float threshold_low, float threshold_hi
     m_d->Evaluate(1);
     return m_d->SijCutCount(threshold_low,threshold_high);
 }
+
+//________________________
+void IBAnalyzerEM::dumpEventsSijInfo(const char *name, Vector<float> N) {
+    m_d->Evaluate(1);
+    m_d->dumpEventsSijInfo(name, N);
+    return;
+}
+
+
 //________________________
 void IBAnalyzerEM::SijCut(float threshold) {
     m_d->Evaluate(1);
@@ -826,7 +891,8 @@ void IBAnalyzerEM::SetVoxcollectionShift(Vector3f shift){
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////// DUMP EVENTS ////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1){
+void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
+{
     static int counter = 0;
     static TFile *file = new TFile(filename,"RECREATE");
 
@@ -863,7 +929,6 @@ void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1){
 
     }
 }
-
 
 //________________________
 ////////////////////////////////////////////////////////////////////////////////
