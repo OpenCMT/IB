@@ -732,7 +732,9 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
     //---- Fill Wij (algorithm variables) and pw (momentum weight)
     elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
-    elc.pw = evc.header.InitialSqrP;
+    //elc.pw = evc.header.InitialSqrP; //DEFAULT
+    // SV for Sij studies
+    elc.pw = muon.GetMomentumPrime();
 
     //---- Add both views to E if voxel the is "frozen"
     //---- "Frozen" means the voxel has a constant value of LSD
