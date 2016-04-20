@@ -839,9 +839,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     elc.pw = muon.GetMomentumPrime();
 
     if(m_initialSqrPfromVtk){
-      //std::cout << (*it) << " --> " << m_initialSqrPfromVtk->operator [](*it).Value << std::endl;
       elc.pw = pow($$.nominal_momentum,2.)*m_initialSqrPfromVtk->operator [](*it).Value*1e6;
-      //if(elc.pw > 1e-4) std::cout << "Got " << elc.pw << " instead of " << pow($$.nominal_momentum,2.)/25. << std::endl;
     }
     
     //---- Add both views to E if voxel the is "frozen"
