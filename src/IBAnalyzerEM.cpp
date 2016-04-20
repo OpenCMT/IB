@@ -513,7 +513,7 @@ public:
 
 //___________________________
 IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, bool useRecoPath,
-			   bool oldTCalculation, float rankLimit) :
+			   bool oldTCalculation, float rankLimit, IBVoxCollection* initialSqrPfromVtk) :
     m_PocaAlgorithm(NULL),
     m_VarAlgorithm(NULL),
     m_RayAlgorithm(NULL),
@@ -522,7 +522,8 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, boo
     m_alpha(alpha),
     m_useRecoPath(useRecoPath),
     m_oldTCalculation(oldTCalculation),
-    m_rankLimit(rankLimit)
+    m_rankLimit(rankLimit),
+    m_initialSqrPfromVtk(initialSqrPfromVtk)
 {
   //---- Print the settings
   std::cout << "Using alpha = " << m_alpha << ", #path = " << m_nPath << std::endl;
@@ -543,8 +544,109 @@ Vector<IBAnalyzerEM::Event> &IBAnalyzerEM::Events(){
     return m_d->m_Events;
 }
 
+//___________________________
+//---- **Deprecated** version of IBAnalyzerEM::AddMuon, please use IBAnalyzerEM::AddMuonFullPath
+//---- Only has 2-path mode, and bugs in the calculation of L and T
+bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon){
+  if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)) return false;
+  Event evc;
+  
+  evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
+  if(isnan(evc.header.InitialSqrP)) std::cout << "sono in AddMuon: nominalp:" << $$.nominal_momentum << " muon.GetMomentum():" << muon.GetMomentum() <<"\n"
+					      << std::flush;
+  //    DBG(trd,evc.header.InitialSqrP,"invP2/F");
+  if(likely(m_VarAlgorithm->evaluate(muon))) {
+    evc.header.Di = m_VarAlgorithm->getDataVector();
+    evc.header.E  = m_VarAlgorithm->getCovarianceMatrix();
+    
+    // HARDCODED ... ZERO CROSS CORRELATION BETWEEN VARS //
+    //        evc.header.E(0,1) = 0.;
+    //        evc.header.E(1,0) = 0.;
+    //        evc.header.E(2,3) = 0.;
+    //        evc.header.E(3,2) = 0.;
+    // .................................................. //
+    
+    // HARDCODED ... ZERO CROSS CORRELATION BETWEEN VIEWS //
+    //        evc.header.E.block<2,2>(2,0) = Matrix2f::Zero();
+    //        evc.header.E.block<2,2>(0,2) = Matrix2f::Zero();
+    // .................................................. //
+    
+    // HARDCODED ... LESS ERROR ! //
+    //evc.header.E = Matrix4f::Zero();
+    //evc.header.E /= 2;
+    //        std::cout
+    //                << " evc.header.Di " << evc.header.Di.transpose() << "\n"
+    //                << " evc.header.E " << evc.header.E << "\n";
+
+    
+  }
+  else return false;
+  
+  IBVoxRaytracer::RayData ray;
+  { // Get RayTrace RayData //
+    HPoint3f entry_pt,poca,exit_pt;
+    if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
+	!m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
+      return false;
+    
+    bool use_poca = false;
+    if(m_PocaAlgorithm) { //TODO:  move this to poca algorithm
+      use_poca = m_PocaAlgorithm->evaluate(muon);
+      poca = m_PocaAlgorithm->getPoca();
+      //            DBG(trd,poca,"x/F:y/F:z/F:h/F");
+
+      HVector3f in, out;
+      in  = poca - muon.LineIn().origin;
+      out = muon.LineOut().origin - poca;
+      float poca_prj = in.transpose() * out;
+      //            DBG(trd,poca_prj);
+      use_poca &= ( poca_prj > 0 );
+    }
+    if(use_poca && this->GetVoxCollection()->IsInsideBounds(poca)) {
+      poca = m_PocaAlgorithm->getPoca();
+      ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,poca);
+      ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(poca,exit_pt) );      
+    }
+    else {
+      ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,exit_pt);
+    }
+  }
+  
+  Event::Element elc;
+  Scalarf T = ray.TotalLength();
+  for(int i=0; i<ray.Data().size(); ++i)
+    {
+      // voxel //
+      const IBVoxRaytracer::RayData::Element &el = ray.Data().at(i);
+      elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);
+      // Wij   //
+      Scalarf L = el.L;  T = fabs(T-L);
+      elc.Wij << L ,          L*L/2 + L*T,
+	L*L/2 + L*T, L*L*L/3 + L*L*T + L*T*T;
+      // pw    //
+      elc.pw = evc.header.InitialSqrP;
+      
+      
+      if(elc.voxel->Value <= 0){
+	// add both views
+	evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+	evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+      }
+      else
+	evc.elements.push_back(elc);
+    }
+  m_d->m_Events.push_back(evc);
+  
+  //    trd.Fill();
+  return true;
+}
 
 //___________________________
+//---- The "new" version of IBAnalyzerEM::AddMuon
+//---- Compared to IBAnalyzerEM::AddMuon, this function:
+//---- 1) Fixes bugs in L and T
+//---- 2) Allows one to use the true muon path (provided by the argument muonPath)
+//---- 3) Allows one to use any arbitrary path (see 3-path implementation)
 bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath){
 
   //-------------------------
@@ -731,11 +833,17 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
 
     //---- Fill Wij (algorithm variables) and pw (momentum weight)
-    elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
+    elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;        
     //elc.pw = evc.header.InitialSqrP; //DEFAULT
     // SV for Sij studies
     elc.pw = muon.GetMomentumPrime();
 
+    if(m_initialSqrPfromVtk){
+      //std::cout << (*it) << " --> " << m_initialSqrPfromVtk->operator [](*it).Value << std::endl;
+      elc.pw = pow($$.nominal_momentum,2.)*m_initialSqrPfromVtk->operator [](*it).Value*1e6;
+      //if(elc.pw > 1e-4) std::cout << "Got " << elc.pw << " instead of " << pow($$.nominal_momentum,2.)/25. << std::endl;
+    }
+    
     //---- Add both views to E if voxel the is "frozen"
     //---- "Frozen" means the voxel has a constant value of LSD
     if(elc.voxel->Value <= 0){
