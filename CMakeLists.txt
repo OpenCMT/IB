@@ -31,6 +31,8 @@ set(PACKAGE_AUTHOR "Andrea Rigoni Garola <andrea.rigoni@pd.infn.it>")
 ## CONFIG FIND PACKAGE
 #set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/lib/cmake") # enable this to search installed cmake dir by default
 
+message(STATUS "Install prefix is ${PWD}")
+
 ## First of all find uLib package to get imported locations ##
 unset(ULIB_CONFIG)
 set(ULIB_DIR /home/$ENV{USER}/MuTom/uLib/build/)
@@ -39,6 +41,8 @@ find_package(ULIB 0.2 CONFIG REQUIRED
              PATH_SUFFIXES mutom-0.2
 )
 message("ULIB_CONFIG=${ULIB_CONFIG}")
+
+
 
 #----
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMake")

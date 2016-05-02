@@ -65,7 +65,8 @@ public:
         m_SijAlgorithm(NULL),
 	m_firstIteration(false),
 	m_rankLimit(rankLimit){;}
-
+  
+  
     void Project(Event *evc);
 
     void BackProject(Event *evc);
@@ -834,13 +835,13 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
     //---- Fill Wij (algorithm variables) and pw (momentum weight)
     elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;        
-    //elc.pw = evc.header.InitialSqrP; //DEFAULT
+    elc.pw = evc.header.InitialSqrP; //DEFAULT
     // SV for Sij studies
-    elc.pw = muon.GetMomentumPrime();
-
-    if(m_initialSqrPfromVtk){
-      elc.pw = pow($$.nominal_momentum,2.)*m_initialSqrPfromVtk->operator [](*it).Value*1e6;
-    }
+    //elc.pw = muon.GetMomentumPrime();
+    
+    //if(m_initialSqrPfromVtk){
+    //      elc.pw = pow($$.nominal_momentum,2.)*m_initialSqrPfromVtk->operator [](*it).Value*1e6;
+    //    }
     
     //---- Add both views to E if voxel the is "frozen"
     //---- "Frozen" means the voxel has a constant value of LSD
