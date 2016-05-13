@@ -54,6 +54,7 @@ public:
             Vector4f Di;
             Matrix4f E;
             Scalarf  InitialSqrP;
+            Scalarf  pTrue;
         } header;
         Vector<Element> elements;
     };

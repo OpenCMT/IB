@@ -388,14 +388,14 @@ void IBAnalyzerEMPimpl::dumpEventsSijInfo(const char *name, Vector<float> N)
     Vector< Event > ve;
     Vector< Event >::iterator itr = this->m_Events.begin();
     const Vector< Event >::iterator begin = this->m_Events.begin();
-
+    int nev = 0;
 
     /// loop over events
     while (itr != this->m_Events.end()) {
         //        std::cout << "\n\n *** Event " << evnum << std::endl;
         float p0sq = 3. * 3.;
         float mom = sqrt(p0sq/(*itr).header.InitialSqrP);
-        fout << mom << " " << (*itr).elements.size() << " ";
+        fout << nev << " " << mom << " " << (*itr).elements.size() << " ";
 
         /// loop over Sij tresholds
         Vector< float >::iterator itrN = N.begin();
@@ -407,6 +407,7 @@ void IBAnalyzerEMPimpl::dumpEventsSijInfo(const char *name, Vector<float> N)
             ++itrN;
         }
         fout << "\n";
+	nev++;
         ++itr;
     }
     fout.close();
@@ -664,6 +665,9 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     evc.header.E  = m_VarAlgorithm->getCovarianceMatrix();
     //---- Momentum square (the "$$" notation is a bit much...)
     evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
+    // SV for Sij studies
+    evc.header.pTrue = muon.GetMomentumPrime();
+
     if(isnan(evc.header.InitialSqrP)){
       std::cout << "AddMuonFullPath: nominalp:" << $$.nominal_momentum
 		<< "muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::endl;
@@ -834,15 +838,9 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
 
     //---- Fill Wij (algorithm variables) and pw (momentum weight)
-    elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;        
+    elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
     elc.pw = evc.header.InitialSqrP; //DEFAULT
-    // SV for Sij studies
-    //elc.pw = muon.GetMomentumPrime();
-    
-    //if(m_initialSqrPfromVtk){
-    //      elc.pw = pow($$.nominal_momentum,2.)*m_initialSqrPfromVtk->operator [](*it).Value*1e6;
-    //    }
-    
+
     //---- Add both views to E if voxel the is "frozen"
     //---- "Frozen" means the voxel has a constant value of LSD
     if(elc.voxel->Value <= 0){
