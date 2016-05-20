@@ -108,7 +108,7 @@ public:
 	}
         m_ErrorMatrix = this->evaluateErrorMatrix(m_muon.LineIn(), m_muon.LineOut());
 
-
+// SV 20160521: TO BE FIXED, should be m_ErrorMatrix(3,3)>1500
         if (unlikely((m_ErrorMatrix(0,0)>0.03 || m_ErrorMatrix(1,1)>1500 ||
                       m_ErrorMatrix(2,2)>0.03 || m_ErrorMatrix(2,2)>1500 ))){ // << HARDCODED
 	  m_integrity = false;
