@@ -367,6 +367,7 @@ float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
         Si.push_back(fabs( (el.Sij * el.voxel->Count - el.voxel->SijCap) / el.voxel->SijCap ));
     }
     std::sort(Si.begin(),Si.end());
+
     float median = size % 2 ? Si[size / 2] : (Si[size / 2 - 1] + Si[size / 2]) / 2;
 
     // debug
@@ -1105,7 +1106,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
             ++itre;
         }
         mom = $$.nominal_momentum/sqrt(evc.header.InitialSqrP);
-        si = SijMedian(evc);
+        si = m_d->SijMedian(evc);
         DP = evc.header.Di[0];
         DX = evc.header.Di[1];
         DT = evc.header.Di[2];
