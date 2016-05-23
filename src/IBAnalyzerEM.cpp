@@ -1066,6 +1066,8 @@ void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
 ////////////////////////////////////////////////////////////////////////////////
 void IBAnalyzerEM::dumpEventsTTree(const char *filename)
 {
+    m_d->Evaluate(1);
+
     /// open file, tree
     std::cout << "\n*** Dump event collection from IBAnalyzer on file " << filename << std::endl;
     static TFile *file = new TFile(filename,"update");
