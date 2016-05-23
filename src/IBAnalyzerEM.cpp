@@ -1104,6 +1104,9 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         Vector< Event::Element >::iterator itre = evc.elements.begin();
         while (itre != evc.elements.end()) {
             Event::Element & elc = *itre;
+
+            std::cout << "Sij " << elc.Sij << ", N " << elc.voxel->Count << ", Cap " << elc.voxel->SijCap << std::endl;
+
             sumLij += elc.Wij(0,0);
             Si.push_back(fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap ));
 
