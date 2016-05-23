@@ -1099,14 +1099,27 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
 
         /// crossed voxel loop
         sumLij = 0;
+        Vector< float > Si;
+
         Vector< Event::Element >::iterator itre = evc.elements.begin();
         while (itre != evc.elements.end()) {
             Event::Element & elc = *itre;
             sumLij += elc.Wij(0,0);
+            Si.push_back(fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap ));
+
             ++itre;
         }
         mom = $$.nominal_momentum/sqrt(evc.header.InitialSqrP);
-        si = m_d->SijMedian(evc);
+
+        std::sort(Si.begin(),Si.end());
+        int size = evc.elements.size();
+        float median = size % 2 ? Si[size / 2] : (Si[size / 2 - 1] + Si[size / 2]) / 2;
+
+        // debug
+        for(int i=0; i<size; i++) std::cout << Si[i] << ",";
+        std::cout << "\n     MEDIAN =" << median << std::endl;
+
+        si = median; //m_d->SijMedian(evc);
         DP = evc.header.Di[0];
         DX = evc.header.Di[1];
         DT = evc.header.Di[2];
