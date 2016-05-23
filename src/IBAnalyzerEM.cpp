@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <fstream>
+#include <algorithm>
 
 #include <TTree.h>
 #include <TFile.h>
@@ -80,6 +81,8 @@ public:
     void SijCut(float threshold);
 
     Vector<Event > SijCutCount(float threshold_low, float threshold_high);
+
+    float SijMedian(const Event &evc);
 
     void dumpEventsSijInfo(const char *filename, Vector<float> N);
 
@@ -354,6 +357,22 @@ static bool em_test_SijCut(const Event &evc, float cut_level, int &nvox_cut){
 }
 
 //________________________
+float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
+
+    Vector< float > Si;
+    int size = evc.elements.size();
+
+    for (unsigned int i = 0; i < size; i++) {
+        const Event::Element &el = evc.elements[i];
+        Si.push_back(fabs( (el.Sij * el.voxel->Count - el.voxel->SijCap) / el.voxel->SijCap ));
+    }
+    std::sort(Si.begin()),Si.end());
+    float median = size % 2 ? Si[size / 2] : (Si[size / 2 - 1] + Si[size / 2]) / 2;
+
+    return median;
+}
+
+//________________________
 Vector<Event > IBAnalyzerEMPimpl::SijCutCount(float threshold_low, float threshold_high)
 {
     //std::cout << "Cut tresholds : " << std::dec << threshold_low << ", " << threshold_high << " ... " << std::endl;
@@ -444,9 +463,8 @@ void IBAnalyzerEMPimpl::SijGuess(float threshold, float p){
         {
             itr->header.InitialSqrP = m_parent->$$.nominal_momentum / p;
             itr->header.InitialSqrP *= itr->header.InitialSqrP;
-            for (unsigned int j = 0; j < itr->elements.size(); ++j) {
+            for (unsigned int j = 0; j < itr->elements.size(); ++j)
                 itr->elements[j].pw = itr->header.InitialSqrP;
-            }
             count ++;
         }
         itr++;
@@ -940,6 +958,12 @@ Vector<Event > IBAnalyzerEM::SijCutCount(float threshold_low, float threshold_hi
 }
 
 //________________________
+float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
+    m_d->Evaluate(1);
+    return m_d->SijMedian(const Event &evc);
+}
+
+//________________________
 void IBAnalyzerEM::dumpEventsSijInfo(const char *name, Vector<float> N) {
     m_d->Evaluate(1);
     m_d->dumpEventsSijInfo(name, N);
@@ -1055,10 +1079,11 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         tree = new TTree(name,name);
 
     int ev = 0;
-    float mom, sumLij, dist, DP, DX, DT, DZ;
+    float mom, sumLij, si, dist, DP, DX, DT, DZ;
     TBranch *bev = tree->Branch("ev",&ev,"ev/I");
     TBranch *bp = tree->Branch("p",&mom,"p/F");
     TBranch *bsumLij = tree->Branch("sumLij",&sumLij,"sumLij/F");
+    TBranch *bSijMedian = tree->Branch("SijMedian",&si,"SijMedian/F");
     TBranch *bdist = tree->Branch("dist",&dist,"dist/F");
     TBranch *bDP = tree->Branch("DP",&DP,"DP/F");
     TBranch *bDX = tree->Branch("DX",&DX,"DX/F");
@@ -1082,7 +1107,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
             ++itre;
         }
         mom = $$.nominal_momentum/sqrt(evc.header.InitialSqrP);
-
+        si = SijMedian(evc);
         DP = evc.header.Di[0];
         DX = evc.header.Di[1];
         DT = evc.header.Di[2];
@@ -1091,7 +1116,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         bev->Fill();
         bp->Fill();
         bsumLij->Fill();
-
+        bSijMedian->Fill();
         bDP->Fill();
         bDX->Fill();
         bDT->Fill();

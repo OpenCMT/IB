@@ -95,6 +95,8 @@ public:
 
     Vector<Event > SijCutCount(float threshold_low, float threshold_high);
 
+    float SijMedian(const Event &evc);
+
     void dumpEventsSijInfo(const char *filename, Vector<float> N);
 
     void SijGuess(Vector<Vector2f> tpv);
