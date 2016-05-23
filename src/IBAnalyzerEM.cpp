@@ -358,7 +358,7 @@ static bool em_test_SijCut(const Event &evc, float cut_level, int &nvox_cut){
 
 //________________________
 float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
-
+    m_d->Evaluate(1);
     Vector< float > Si;
     int size = evc.elements.size();
 
@@ -371,8 +371,8 @@ float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
     float median = size % 2 ? Si[size / 2] : (Si[size / 2 - 1] + Si[size / 2]) / 2;
 
     // debug
-    for(int i=0; i<size; i++) std::cout << Si[i] << ",";
-    std::cout << "\n     MEDIAN =" << median << std::endl;
+//    for(int i=0; i<size; i++) std::cout << Si[i] << ",";
+//    std::cout << "\n     MEDIAN =" << median << std::endl;
 
     return median;
 }
@@ -1099,7 +1099,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
 
         Event & evc = *itr;
 
-        /// crossed voxel loop
+        /// crossed voxel loop for Lij and Sij median computation
         sumLij = 0;
         Vector< float > Si;
 
@@ -1107,11 +1107,8 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         while (itre != evc.elements.end()) {
             Event::Element & elc = *itre;
 
-            std::cout << "Sij " << elc.Sij << ", N " << elc.voxel->Count << ", Cap " << elc.voxel->SijCap << std::endl;
-
             sumLij += elc.Wij(0,0);
             Si.push_back(fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap ));
-
             ++itre;
         }
         mom = $$.nominal_momentum/sqrt(evc.header.InitialSqrP);
@@ -1133,7 +1130,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         bev->Fill();
         bp->Fill();
         bsumLij->Fill();
-        bSijMedian->Fill();
+        //bSijMedian->Fill();
         bDP->Fill();
         bDX->Fill();
         bDT->Fill();
