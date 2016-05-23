@@ -366,8 +366,12 @@ float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
         const Event::Element &el = evc.elements[i];
         Si.push_back(fabs( (el.Sij * el.voxel->Count - el.voxel->SijCap) / el.voxel->SijCap ));
     }
-    std::sort(Si.begin()),Si.end());
+    std::sort(Si.begin(),Si.end());
     float median = size % 2 ? Si[size / 2] : (Si[size / 2 - 1] + Si[size / 2]) / 2;
+
+    // debug
+    for(int i=0; i<size; i++) std::cout << Si[i] << ",";
+    std::cout << "\n     MEDIAN =" << median << std::endl;
 
     return median;
 }
@@ -955,12 +959,6 @@ void IBAnalyzerEM::filterEventsLineDistance(float min, float max) {
 Vector<Event > IBAnalyzerEM::SijCutCount(float threshold_low, float threshold_high) {
     m_d->Evaluate(1);
     return m_d->SijCutCount(threshold_low,threshold_high);
-}
-
-//________________________
-float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
-    m_d->Evaluate(1);
-    return m_d->SijMedian(const Event &evc);
 }
 
 //________________________
