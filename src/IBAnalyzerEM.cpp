@@ -358,23 +358,29 @@ static bool em_test_SijCut(const Event &evc, float cut_level, int &nvox_cut){
 
 //________________________
 float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
-    m_d->Evaluate(1);
-    Vector< float > Si;
-    int size = evc.elements.size();
+    Evaluate(1);
 
-    for (unsigned int i = 0; i < size; i++) {
+    Vector< float > Si;
+    for (unsigned int i = 0; i < evc.elements.size(); i++) {
         const Event::Element &el = evc.elements[i];
         Si.push_back(fabs( (el.Sij * el.voxel->Count - el.voxel->SijCap) / el.voxel->SijCap ));
     }
+
+    // compute median
+    float Smedian;
     std::sort(Si.begin(),Si.end());
+   int nS = Si.size();
+   if(nS){
+       if(nS%2)
+           Smedian = Si[nS / 2];
+       else
+           Smedian = (Si[nS / 2 - 1] + Si[nS / 2]) / 2;
 
-    float median = size % 2 ? Si[size / 2] : (Si[size / 2 - 1] + Si[size / 2]) / 2;
+       // debug
+//           for(int i=0; i<nS; i++) std::cout << Si[i] << ",";
+//           std::cout << "\n     MEDIAN =" << median << std::endl;
 
-    // debug
-//    for(int i=0; i<size; i++) std::cout << Si[i] << ",";
-//    std::cout << "\n     MEDIAN =" << median << std::endl;
-
-    return median;
+    return Smedian;
 }
 
 //________________________
@@ -1080,68 +1086,72 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         tree = new TTree(name,name);
 
     int ev = 0;
-    float mom, sumLij, si, dist, DP, DX, DT, DZ;
+    float mom, sumLij, dist, DP, DX, DT, DZ;
+    float Smedian;
     TBranch *bev = tree->Branch("ev",&ev,"ev/I");
     TBranch *bp = tree->Branch("p",&mom,"p/F");
     TBranch *bsumLij = tree->Branch("sumLij",&sumLij,"sumLij/F");
-    TBranch *bSijMedian = tree->Branch("SijMedian",&si,"SijMedian/F");
     TBranch *bdist = tree->Branch("dist",&dist,"dist/F");
     TBranch *bDP = tree->Branch("DP",&DP,"DP/F");
     TBranch *bDX = tree->Branch("DX",&DX,"DX/F");
     TBranch *bDT = tree->Branch("DT",&DT,"DT/F");
     TBranch *bDZ = tree->Branch("DZ",&DZ,"DZ/F");
+    TBranch *bSmedian = tree->Branch("Smedian",&Smedian,"Smedian/F");
 
-    IBMuonCollection *muons = this->GetMuonCollection();
     /// event loop
-    int pos = 0;
     Vector< Event >::iterator itr = m_d->m_Events.begin();
+    std::cout << "Reading " << m_d->m_Events.size() << " events " << std::endl;
     while (itr != m_d->m_Events.end()) {
-
         Event & evc = *itr;
 
-        /// crossed voxel loop for Lij and Sij median computation
+        /// crossed voxel loop
         sumLij = 0;
         Vector< float > Si;
-
         Vector< Event::Element >::iterator itre = evc.elements.begin();
+
         while (itre != evc.elements.end()) {
             Event::Element & elc = *itre;
-
             sumLij += elc.Wij(0,0);
-            Si.push_back(fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap ));
+            float Nij = fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap );
+            Si.push_back(Nij);
             ++itre;
         }
         mom = $$.nominal_momentum/sqrt(evc.header.InitialSqrP);
-
-        std::sort(Si.begin(),Si.end());
-        int size = evc.elements.size();
-        float median = size % 2 ? Si[size / 2] : (Si[size / 2 - 1] + Si[size / 2]) / 2;
-
-        // debug
-        for(int i=0; i<size; i++) std::cout << Si[i] << ",";
-        std::cout << "\n     MEDIAN =" << median << std::endl;
-
-        si = median; //m_d->SijMedian(evc);
         DP = evc.header.Di[0];
         DX = evc.header.Di[1];
         DT = evc.header.Di[2];
         DZ = evc.header.Di[3];
 
+        // compute median
+        std::sort(Si.begin(),Si.end());
+       int nS = Si.size();
+       if(nS){
+           if(nS%2)
+               Smedian = Si[nS / 2];
+           else
+               Smedian = (Si[nS / 2 - 1] + Si[nS / 2]) / 2;
+
+           // debug
+//           for(int i=0; i<nS; i++) std::cout << Si[i] << ",";
+//           std::cout << "\n     MEDIAN =" << median << std::endl;
+           bSmedian->Fill();
+       }
+
         bev->Fill();
         bp->Fill();
         bsumLij->Fill();
-        //bSijMedian->Fill();
+
         bDP->Fill();
         bDX->Fill();
         bDT->Fill();
         bDZ->Fill();
 
-        pos++;
         ev++;
         itr++;
     }
 
     /// muon loop to add poca information
+    IBMuonCollection *muons = this->GetMuonCollection();
     dist = 0;
 
     for(int i=0; i<muons->size(); ++i){
