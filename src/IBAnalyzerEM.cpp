@@ -375,7 +375,7 @@ float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
            Smedian = Si[nS / 2];
        else
            Smedian = (Si[nS / 2 - 1] + Si[nS / 2]) / 2;
-
+    }
        // debug
 //           for(int i=0; i<nS; i++) std::cout << Si[i] << ",";
 //           std::cout << "\n     MEDIAN =" << median << std::endl;
@@ -1116,7 +1116,9 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
             Si.push_back(Nij);
             ++itre;
         }
+        // momentum used in the algorithm
         mom = $$.nominal_momentum/sqrt(evc.header.InitialSqrP);
+
         DP = evc.header.Di[0];
         DX = evc.header.Di[1];
         DT = evc.header.Di[2];
