@@ -424,16 +424,29 @@ void IBAnalyzerEMPimpl::dumpEventsSijInfo(const char *name, Vector<float> N)
     while (itr != this->m_Events.end()) {
         //        std::cout << "\n\n *** Event " << evnum << std::endl;
         float p0sq = 3. * 3.;
-        float mom = sqrt(p0sq/(*itr).header.InitialSqrP);
-        fout << nev << " " << mom << " " << (*itr).elements.size() << " ";
+        //float mom = sqrt(p0sq/(*itr).header.InitialSqrP);
+        float mom =  (*itr).header.pTrue;
+        fout << nev << " " << mom << " ";
+        // fout << (*itr).elements.size() << " ";
 
         /// loop over Sij tresholds
         Vector< float >::iterator itrN = N.begin();
         const Vector< float >::iterator beginN = N.begin();
         while (itrN != N.end()) {
             int nvox_cut = 0;
-            em_test_SijCut(*itr, *itrN, nvox_cut);
-            fout << nvox_cut << " ";
+
+//            // dump number of voxels aboce the threshold
+//            em_test_SijCut(*itr, *itrN, nvox_cut);
+//            fout << nvox_cut << " ";
+
+            // dump N cut bin low edge
+            float threshold_low = *itrN;
+            float threshold_high = *(itrN+1);
+            if(itrN+1==N.end())
+                threshold_high = 10000;
+             if(em_test_SijCut(*itr, threshold_low,nvox_cut) && !em_test_SijCut(*itr, threshold_high,nvox_cut))
+                 fout << threshold_low << " ";
+
             ++itrN;
         }
         fout << "\n";
@@ -984,6 +997,13 @@ void IBAnalyzerEM::SijCut(float threshold) {
 }
 
 //________________________
+float IBAnalyzerEM::SijMedian(const Event &evc) {
+    m_d->Evaluate(1);
+    m_d->SijMedian(evc);
+    this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
+}
+
+//________________________
 void IBAnalyzerEM::SijGuess(Vector<Vector2f> tpv){
     m_d->Evaluate(1);
     // ATTENZIONE!! il vettore deve essere ordinato per threshold crescenti   //
@@ -1134,8 +1154,9 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
                Smedian = (Si[nS / 2 - 1] + Si[nS / 2]) / 2;
 
            // debug
-//           for(int i=0; i<nS; i++) std::cout << Si[i] << ",";
-//           std::cout << "\n     MEDIAN =" << median << std::endl;
+           std::cout << "Event pTrue " << evc.header.pTrue << std::endl;
+           for(int i=0; i<nS; i++) std::cout << Si[i] << ",";
+           std::cout << "\n     MEDIAN =" << Smedian << std::endl;
            bSmedian->Fill();
        }
 
