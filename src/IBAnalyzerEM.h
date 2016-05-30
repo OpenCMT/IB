@@ -109,6 +109,8 @@ public:
     void DumpP(const char *filename, float x0 = 0, float x1 = 10);
 
     Vector<Event> & Events();
+
+    float SijMedian(const Event &evc);
     
 private:    
     IBPocaEvaluator                            *m_PocaAlgorithm;
