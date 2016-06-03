@@ -90,6 +90,8 @@ public:
 
     void Chi2Cut(float threshold);
 
+    void SetSijMedianMomentum();
+
     // members //
     IBAnalyzerEM          *m_parent;
     IBAnalyzerEMAlgorithm *m_SijAlgorithm;
@@ -358,7 +360,6 @@ static bool em_test_SijCut(const Event &evc, float cut_level, int &nvox_cut){
 
 //________________________
 float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
-    Evaluate(1);
 
     Vector< float > Si;
     for (unsigned int i = 0; i < evc.elements.size(); i++) {
@@ -422,15 +423,35 @@ void IBAnalyzerEMPimpl::dumpEventsSijInfo(const char *name, Vector<float> N)
 
     /// loop over events
     while (itr != this->m_Events.end()) {
-        //        std::cout << "\n\n *** Event " << evnum << std::endl;
+        //std::cout << "\n\n *** Event " << nev << std::endl;
+        Event & evc = *itr;
+        /// momentum
         float p0sq = 3. * 3.;
-        //float mom = sqrt(p0sq/(*itr).header.InitialSqrP);
-        float mom =  (*itr).header.pTrue;
-        fout << nev << " " << mom << " ";
-        // fout << (*itr).elements.size() << " ";
+        //float mom = sqrt(p0sq/evc.header.InitialSqrP);
+        float mom =  evc.header.pTrue;
 
-        // just dump median
-        float median =  SijMedian(*itr);
+        /// compute and dump median
+        Vector< float > Si;
+        float median;
+        Vector< Event::Element >::iterator itre = evc.elements.begin();
+        while (itre != evc.elements.end()) {
+            Event::Element & elc = *itre;
+            float Nij = fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap );
+            Si.push_back(Nij);
+            ++itre;
+        }
+        std::sort(Si.begin(),Si.end());
+        int nS = Si.size();
+        if(nS){
+           if(nS%2)
+               median = Si[nS / 2];
+           else
+               median = (Si[nS / 2 - 1] + Si[nS / 2]) / 2;
+        }
+
+        fout << nev << " " << mom << " ";
+        // fout << evc.elements.size() << " ";
+        //float median =  SijMedian(*itr);
         fout << median << " ";
 
 //        /// loop over Sij tresholds
@@ -438,11 +459,9 @@ void IBAnalyzerEMPimpl::dumpEventsSijInfo(const char *name, Vector<float> N)
 //        const Vector< float >::iterator beginN = N.begin();
 //        while (itrN != N.end()) {
 //            int nvox_cut = 0;
-
-////            // dump number of voxels aboce the threshold
-////            em_test_SijCut(*itr, *itrN, nvox_cut);
-////            fout << nvox_cut << " ";
-
+//            // dump number of voxels above the threshold
+//            em_test_SijCut(*itr, *itrN, nvox_cut);
+//            fout << nvox_cut << " ";
 //            // dump N cut bin low edge
 //            float threshold_low = *itrN;
 //            float threshold_high = *(itrN+1);
@@ -500,6 +519,36 @@ void IBAnalyzerEMPimpl::SijGuess(float threshold, float p){
     }
     std::cout << "Guess class " << threshold << ", p=" << p << "   counted muons: " << count << "\n" << std::endl;
 }
+
+//________________________
+///////////////////////////////////////////////////////////////////////////////////////
+void IBAnalyzerEMPimpl::SetSijMedianMomentum(){
+    Vector< Event >::iterator itr = this->m_Events.begin();
+
+    while (itr != this->m_Events.end()) {
+        const Event evc = (*itr);
+        float m = SijMedian(evc);
+
+        std::cout << "SetSijMedianMomentum \n"
+                  << "old p = " << sqrt(m_parent->$$.nominal_momentum * m_parent->$$.nominal_momentum / itr->header.InitialSqrP)
+                  << ", median = " << m;
+
+        //fit function for pguess from Sij median
+        //1/p2=13.9786 +-47.4669*1/log(x) + 78.2999*1/(x)
+        float pguess = sqrt(1/ (13.9786 - 47.4669*1/log(m) + 78.2999*1/(m)));
+
+        itr->header.InitialSqrP = m_parent->$$.nominal_momentum / pguess;
+        itr->header.InitialSqrP *= itr->header.InitialSqrP;
+
+        // cut off if p>50GeV i.e. 1/p2 < 0.0004
+        if(itr->header.InitialSqrP < 0.0004)
+            itr->header.InitialSqrP = 0.0004;
+
+        std::cout << ", pguess = " <<  sqrt(m_parent->$$.nominal_momentum *m_parent-> $$.nominal_momentum/itr->header.InitialSqrP) << std::endl;
+        itr++;
+    }
+}
+
 
 //________________________
 ////////////////////////////////////////////////////////////////////////////////
@@ -1003,7 +1052,7 @@ void IBAnalyzerEM::SijCut(float threshold) {
 
 //________________________
 float IBAnalyzerEM::SijMedian(const Event &evc) {
-    //m_d->Evaluate(1);
+    m_d->Evaluate(1);
     m_d->SijMedian(evc);
 }
 
@@ -1013,6 +1062,13 @@ void IBAnalyzerEM::SijGuess(Vector<Vector2f> tpv){
     // ATTENZIONE!! il vettore deve essere ordinato per threshold crescenti   //
     for (int i=0; i<tpv.size(); ++i)
         m_d->SijGuess( tpv[i](0), tpv[i](1) );
+    this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
+}
+
+//________________________
+void IBAnalyzerEM::SetSijMedianMomentum(){
+    m_d->Evaluate(1);
+    m_d->SetSijMedianMomentum();
     this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(0);   // HARDCODE THRESHOLD
 }
 
