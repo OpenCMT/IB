@@ -112,6 +112,8 @@ public:
 
     float SijMedian(const Event &evc);
     
+    void SetSijMedianMomentum();
+
 private:    
     IBPocaEvaluator                            *m_PocaAlgorithm;
     IBMinimizationVariablesEvaluator           *m_VarAlgorithm;
