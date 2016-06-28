@@ -936,14 +936,16 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //---- Fill Wij (algorithm variables) and pw (momentum weight)
     elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
     elc.pw = evc.header.InitialSqrP; //DEFAULT
+    if(m_initialSqrPfromVtk) elc.pw = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6);
 
+        
     //---- Add both views to E if voxel the is "frozen"
     //---- "Frozen" means the voxel has a constant value of LSD
     if(elc.voxel->Value <= 0){
       //---- Get a 2x2 block in the top left corner of the Error (E) matrix
-      evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+      evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * elc.pw;//evc.header.InitialSqrP;
       //---- Get a 2x2 block in the bottom right corner of the Error (E) matrix
-      evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
+      evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * elc.pw;//evc.header.InitialSqrP;
     }
     //---- If the voxel ISN'T frozen, keep the Element in the Event
     else{
