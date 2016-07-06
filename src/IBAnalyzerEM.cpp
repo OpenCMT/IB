@@ -731,7 +731,7 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon){
 	evc.header.E.block<2,2>(0,2) += elc.Wij * fabs(elc.voxel->Value) * evc.header.InitialSqrP;
       }
       else
-	evc.elements.push_back(elc);
+    evc.elements.push_back(elc);
     }
   m_d->m_Events.push_back(evc);
   
@@ -932,12 +932,19 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //---- Negative T can arise due to precision
     if(T < 0) T = 0.;
 
-
     //---- Fill Wij (algorithm variables) and pw (momentum weight)
     elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
+    // NB evc.header.InitialSqrP = (p0/p)^2,  if p=5, pw=0.36
     elc.pw = evc.header.InitialSqrP; //DEFAULT
-    if(m_initialSqrPfromVtk) elc.pw = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6);
-
+    if(m_initialSqrPfromVtk){
+        float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  $$.nominal_momentum *  $$.nominal_momentum;
+        if(voxel_1op2!=0.){
+          elc.pw = voxel_1op2;
+          //std::cout << "ATTENTION : Replacing 1/p2 " << evc.header.InitialSqrP << " with " << elc.pw << std::endl;
+        }
+        else
+            elc.pw = 0.36;
+    }
         
     //---- Add both views to E if voxel the is "frozen"
     //---- "Frozen" means the voxel has a constant value of LSD
