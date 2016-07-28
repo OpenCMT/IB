@@ -910,29 +910,22 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   /// 20160728 SV filling p voxel by hand using the following parameters
   /// Angle range [60,90]         IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075
   float totalLengthFurnace = 0.;
-  IBVoxCollection imgMC;
+  float deltaP = 0;
   float p_in = sqrt(1/0.0131459);
   float p_out = sqrt(1/0.197075);
   if(m_pVoxelMean){
-      /// get MC furnace to locate voxel in furnace
-      //const char *mcFurnace =  "/home/sara/workspace/experiments/radmu/mublast/analysis/20150522_imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
-      const char *mcFurnace =  "/mnt/mutom-gluster/data/mublast/imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
-      if( !imgMC.ImportFromVtk(mcFurnace) ){
-          std::cout << "ATTENTION : error opening image from file..." << mcFurnace << std::endl;
-          return 0;
-      }
       // loop ever voxels to find total length in furnace
       for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
-        const HPoint3f& pt1 = voxelMap[*it][0];
-        const HPoint3f& pt2 = voxelMap[*it][1];
-        Scalarf L = (pt2-pt1).norm();
-
-        if( (imgMC.operator [](*it).Value * (1.e6)) > 0.01)
+          if( (m_imgMC.operator [](*it).Value * (1.e6)) > 0.01){
+            const HPoint3f& pt1 = voxelMap[*it][0];
+            const HPoint3f& pt2 = voxelMap[*it][1];
+            Scalarf L = (pt2-pt1).norm();
             totalLengthFurnace += L;
+        }
       }
       //std::cout << "totalLength " << totalLength << ", in furnace " << totalLengthFurnace << std::endl;
+      deltaP = (p_out - p_in)/totalLengthFurnace;
   }
-
 
   float sumLijFurnace = 0.;
   //---- Loop over the ordered list of voxels
@@ -951,7 +944,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     Scalarf L = (pt2-pt1).norm();
 
     if(m_pVoxelMean){
-        if( (imgMC.operator [](*it).Value * (1.e6)) > 0.01)
+        if( (m_imgMC.operator [](*it).Value * (1.e6)) > 0.01)
             sumLijFurnace += L;
     }
 
@@ -970,7 +963,16 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     elc.Wij << L, L*L/2. + L*T, L*L/2. + L*T, L*L*L/3. + L*L*T + L*T*T;
     // NB evc.header.InitialSqrP = (p0/p)^2,  if p=5, pw=0.36
     elc.pw = evc.header.InitialSqrP; //DEFAULT
-    if(m_initialSqrPfromVtk){
+
+    if(m_pVoxelMean){
+        //std::cout << "\n*** Computing p voxel from IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075 *** " << std::endl;
+        elc.pw = 1/((deltaP * sumLijFurnace + p_in)*(deltaP * sumLijFurnace + p_in))*  $$.nominal_momentum *  $$.nominal_momentum;
+//        float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  $$.nominal_momentum *  $$.nominal_momentum;
+//        std::cout << "p_in " << p_in <<  ", p_out " << p_out << ", p_voxel " << p_voxel << std::endl;
+//        std::cout << "Voxel " <<  *it << ":   pw_file " <<  voxel_1op2 << ", pw_hand " << elc.pw
+//                  << " MC voxel value " << imgMC.operator [](*it).Value * (1.e6) << std::endl;
+    }
+    else if(m_initialSqrPfromVtk){
         float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  $$.nominal_momentum *  $$.nominal_momentum;
         if(voxel_1op2!=0.){
           elc.pw = voxel_1op2;
@@ -978,16 +980,6 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
         }
         else
             elc.pw = 0.36;
-    }
-
-    if(m_pVoxelMean){
-        //std::cout << "\n*** Computing p voxel from IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075 *** " << std::endl;
-        float p_voxel = (p_out - p_in)/totalLengthFurnace * sumLijFurnace + p_in;
-        elc.pw = 1/(p_voxel*p_voxel) *  $$.nominal_momentum *  $$.nominal_momentum;
-//        float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  $$.nominal_momentum *  $$.nominal_momentum;
-//        std::cout << "p_in " << p_in <<  ", p_out " << p_out << ", p_voxel " << p_voxel << std::endl;
-//        std::cout << "Voxel " <<  *it << ":   pw_file " <<  voxel_1op2 << ", pw_hand " << elc.pw
-//                  << " MC voxel value " << imgMC.operator [](*it).Value * (1.e6) << std::endl;
     }
 
     //---- Add both views to E if voxel the is "frozen"
@@ -1040,12 +1032,19 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
   Vector<Vector<HPoint3f> >::iterator path_itr = muons->FullPath().begin();    
   std::cout << "Adding " << muons->Data().size() << " muons " << std::endl;    
 
-  if(m_pVoxelMean)
+  if(m_pVoxelMean){
       std::cout << "\n*** Computing p voxel from linear function from <1/p2> mean IN to <1/p2> mean OUT *** " << std::endl;
+      /// get MC furnace to locate voxel in furnace
+      //const char *mcFurnace =  "/home/sara/workspace/experiments/radmu/mublast/analysis/20150522_imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
+      const char *mcFurnace =  "/mnt/mutom-gluster/data/mublast/imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
+      if( !m_imgMC.ImportFromVtk(mcFurnace) ){
+          std::cout << "ATTENTION : error opening image from file..." << mcFurnace << std::endl;
+          return;
+      }
+  }
   else if(m_initialSqrPfromVtk)
       std::cout << "\n*** Computing p voxel from file vtk*** " << std::endl;
 
-  int im = 0;
   while(itr != muons->Data().end()){
     //---- If the muon full path has an error, remove the muon
     if(!AddMuonFullPath(*itr, *path_itr)){
@@ -1053,9 +1052,7 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
       if(muons->FullPath().size() > 0) muons->FullPath().remove_element(*path_itr);
     }
     //---- Otherwise, iterate
-    else{
-      std::cout << "Mu " << im << std::endl;
-      im++;
+    else{  
       itr++;
       path_itr++;
     }

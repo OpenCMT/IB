@@ -130,6 +130,7 @@ private:
 
     IBVoxCollection* m_initialSqrPfromVtk;
     bool m_pVoxelMean;   //---- compute p voxel by hand
+    IBVoxCollection m_imgMC;
 };
 
 inline void IBAnalyzerEM::init_properties() {
