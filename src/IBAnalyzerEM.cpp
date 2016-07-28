@@ -611,7 +611,7 @@ public:
 
 //___________________________
 IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, bool useRecoPath,
-			   bool oldTCalculation, float rankLimit, IBVoxCollection* initialSqrPfromVtk) :
+               bool oldTCalculation, float rankLimit, IBVoxCollection* initialSqrPfromVtk, bool pVoxelMean) :
     m_PocaAlgorithm(NULL),
     m_VarAlgorithm(NULL),
     m_RayAlgorithm(NULL),
@@ -621,7 +621,8 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, boo
     m_useRecoPath(useRecoPath),
     m_oldTCalculation(oldTCalculation),
     m_rankLimit(rankLimit),
-    m_initialSqrPfromVtk(initialSqrPfromVtk)
+    m_initialSqrPfromVtk(initialSqrPfromVtk),
+    m_pVoxelMean(pVoxelMean)
 {
   //---- Print the settings
   std::cout << "Using alpha = " << m_alpha << ", #path = " << m_nPath << std::endl;
@@ -905,7 +906,32 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   
   if(!m_oldTCalculation) H = H/normIn;  //<---- The old (buggy) calculation of T needs this value of H
   Scalarf T = totalLength; //<---- Needed if using the old (buggy) calculation of T
-  
+
+  /// 20160728 SV hand-made p_voxel
+  IBVoxCollection imgMC;
+  float totalLengthFurnace = 0.;
+  if(m_pVoxelMean){
+      /// get MC furnace to locate voxel in furnace
+      //const char *mcFurnace =  "/home/sara/workspace/experiments/radmu/mublast/analysis/20150522_imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
+      const char *mcFurnace =  "/mnt/mutom-gluster/data/mublast/imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
+      if( !imgMC.ImportFromVtk(mcFurnace) ){
+          std::cout << "ATTENTION : error opening image from file..." << mcFurnace << std::endl;
+          return 0;
+      }
+      // loop ever voxels to find total length in furnace
+      for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
+        const HPoint3f& pt1 = voxelMap[*it][0];
+        const HPoint3f& pt2 = voxelMap[*it][1];
+        Scalarf L = (pt2-pt1).norm();
+
+        if( (imgMC.operator [](*it).Value * (1.e6)) > 0.01)
+            totalLengthFurnace += L;
+      }
+      //std::cout << "totalLength " << totalLength << ", in furnace " << totalLengthFurnace << std::endl;
+  }
+
+
+  float sumLijFurnace = 0.;
   //---- Loop over the ordered list of voxels
   for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
     const HPoint3f& pt1 = voxelMap[*it][0];
@@ -920,15 +946,20 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //---- Get length of ray in the voxel
     //---- (NOT == to el.L, due to mid-voxel inflections)
     Scalarf L = (pt2-pt1).norm();
-    
+
+    if(m_pVoxelMean){
+        if( (imgMC.operator [](*it).Value * (1.e6)) > 0.01)
+            sumLijFurnace += L;
+    }
+
     //----> Old calculation of T
     if(m_oldTCalculation) T = fabs(T-L);
     //----> New calculation of T
-    else{	  
+    else{
       Scalarf h = (muon.LineIn().direction.transpose()*(pt2-front_pt));
       T = H - h/normIn;
     }
-    
+
     //---- Negative T can arise due to precision
     if(T < 0) T = 0.;
 
@@ -945,7 +976,22 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
         else
             elc.pw = 0.36;
     }
-        
+
+    if(m_pVoxelMean){
+        /// 20160728 SV filling p voxel by hand using the following parameters
+        /// Angle range [60,90]         IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075
+        float p_in = sqrt(1/0.0131459);
+        float p_out = sqrt(1/0.197075);
+        float p_voxel = (p_out - p_in)/totalLengthFurnace * sumLijFurnace + p_in;
+
+        elc.pw = 1/(p_voxel*p_voxel) *  $$.nominal_momentum *  $$.nominal_momentum;
+        float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  $$.nominal_momentum *  $$.nominal_momentum;
+
+//        std::cout << "p_in " << p_in <<  ", p_out " << p_out << ", p_voxel " << p_voxel << std::endl;
+//        std::cout << "Voxel " <<  *it << ":   pw_file " <<  voxel_1op2 << ", pw_hand " << elc.pw
+//                  << " MC voxel value " << imgMC.operator [](*it).Value * (1.e6) << std::endl;
+    }
+
     //---- Add both views to E if voxel the is "frozen"
     //---- "Frozen" means the voxel has a constant value of LSD
     if(elc.voxel->Value <= 0){
@@ -959,9 +1005,18 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
       evc.elements.push_back(elc);
     }
   }
+  //std::cout << "=== >  Muon in FURNACE  sumLij " << sumLijFurnace << ", totalLenght " << totalLengthFurnace << std::endl;
 
   //---- Keep the event
   m_d->m_Events.push_back(evc);
+
+//  /// cross check
+//  Vector< Event::Element >::iterator itre = evc.elements.begin();
+//  while (itre != evc.elements.end()) {
+//      Event::Element & elc = *itre;
+//      std::cout << "Voxel pw " << elc.pw << std::endl;
+//      ++itre;
+//  }
   return true;
 }
 
