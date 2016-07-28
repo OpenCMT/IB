@@ -1042,9 +1042,10 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
 
   if(m_pVoxelMean)
       std::cout << "\n*** Computing p voxel from linear function from <1/p2> mean IN to <1/p2> mean OUT *** " << std::endl;
-  if(m_initialSqrPfromVtk)
+  else if(m_initialSqrPfromVtk)
       std::cout << "\n*** Computing p voxel from file vtk*** " << std::endl;
 
+  int im = 0;
   while(itr != muons->Data().end()){
     //---- If the muon full path has an error, remove the muon
     if(!AddMuonFullPath(*itr, *path_itr)){
@@ -1053,6 +1054,8 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
     }
     //---- Otherwise, iterate
     else{
+      std::cout << "Mu " << im << std::endl;
+      im++;
       itr++;
       path_itr++;
     }
