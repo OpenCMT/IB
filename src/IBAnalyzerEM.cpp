@@ -1039,6 +1039,12 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
   Vector<MuonScatterData>::iterator itr = muons->Data().begin();
   Vector<Vector<HPoint3f> >::iterator path_itr = muons->FullPath().begin();    
   std::cout << "Adding " << muons->Data().size() << " muons " << std::endl;    
+
+  if(m_pVoxelMean)
+      std::cout << "\n*** Computing p voxel from linear function from <1/p2> mean IN to <1/p2> mean OUT *** " << std::endl;
+  if(m_initialSqrPfromVtk)
+      std::cout << "\n*** Computing p voxel from file vtk*** " << std::endl;
+
   while(itr != muons->Data().end()){
     //---- If the muon full path has an error, remove the muon
     if(!AddMuonFullPath(*itr, *path_itr)){
