@@ -907,9 +907,12 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   if(!m_oldTCalculation) H = H/normIn;  //<---- The old (buggy) calculation of T needs this value of H
   Scalarf T = totalLength; //<---- Needed if using the old (buggy) calculation of T
 
-  /// 20160728 SV hand-made p_voxel
-  IBVoxCollection imgMC;
+  /// 20160728 SV filling p voxel by hand using the following parameters
+  /// Angle range [60,90]         IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075
   float totalLengthFurnace = 0.;
+  IBVoxCollection imgMC;
+  float p_in = sqrt(1/0.0131459);
+  float p_out = sqrt(1/0.197075);
   if(m_pVoxelMean){
       /// get MC furnace to locate voxel in furnace
       //const char *mcFurnace =  "/home/sara/workspace/experiments/radmu/mublast/analysis/20150522_imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
@@ -978,15 +981,10 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     }
 
     if(m_pVoxelMean){
-        /// 20160728 SV filling p voxel by hand using the following parameters
-        /// Angle range [60,90]         IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075
-        float p_in = sqrt(1/0.0131459);
-        float p_out = sqrt(1/0.197075);
+        //std::cout << "\n*** Computing p voxel from IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075 *** " << std::endl;
         float p_voxel = (p_out - p_in)/totalLengthFurnace * sumLijFurnace + p_in;
-
         elc.pw = 1/(p_voxel*p_voxel) *  $$.nominal_momentum *  $$.nominal_momentum;
-        float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  $$.nominal_momentum *  $$.nominal_momentum;
-
+//        float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  $$.nominal_momentum *  $$.nominal_momentum;
 //        std::cout << "p_in " << p_in <<  ", p_out " << p_out << ", p_voxel " << p_voxel << std::endl;
 //        std::cout << "Voxel " <<  *it << ":   pw_file " <<  voxel_1op2 << ", pw_hand " << elc.pw
 //                  << " MC voxel value " << imgMC.operator [](*it).Value * (1.e6) << std::endl;
@@ -1011,6 +1009,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   m_d->m_Events.push_back(evc);
 
 //  /// cross check
+//  std::cout << "\n\n Event\n";
 //  Vector< Event::Element >::iterator itre = evc.elements.begin();
 //  while (itre != evc.elements.end()) {
 //      Event::Element & elc = *itre;
