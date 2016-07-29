@@ -918,15 +918,15 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   invp2_IN = 0.0131459;
   invp2_OUT = 0.197075;
 
-  /// compute p_in and p_out with a angle-dependent function
-  float a = fabs((3.14159265359 - acos(muon.LineIn().direction[1]/normIn))/3.14159265359*180);
-  invp2_IN = -0.1054 + (0.003615*a) - (0.0000269*a*a);
-  invp2_OUT = -0.5815 + (0.0309*a) - (0.0002711*a*a);
-  if(invp2_IN<0 || invp2_OUT<0)
-      std::cout << "ATTENTION: negative 1/p2 in pVoxelMean calculation...." << std::endl;
+//  /// compute p_in and p_out with a angle-dependent function
+//  float a = fabs((3.14159265359 - acos(muon.LineIn().direction[1]/normIn))/3.14159265359*180);
+//  invp2_IN = -0.1054 + (0.003615*a) - (0.0000269*a*a);
+//  invp2_OUT = -0.5815 + (0.0309*a) - (0.0002711*a*a);
+//  if(invp2_IN<0 || invp2_OUT<0)
+//      std::cout << "ATTENTION: negative 1/p2 in pVoxelMean calculation...." << std::endl;
 
   float p_in = sqrt(1/invp2_IN);
-  float p_out = sqrt(1/invp2_OUT);
+  float p_out = sqrt(1/invp2_OUT) * 2;
 
   //std::cout << "\n\n Mu p_in " << p_in << ", p_out " << p_out << ", invp2_IN " << invp2_IN << ", invp2_OUT " << invp2_OUT << std::endl;
 
