@@ -907,12 +907,29 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   if(!m_oldTCalculation) H = H/normIn;  //<---- The old (buggy) calculation of T needs this value of H
   Scalarf T = totalLength; //<---- Needed if using the old (buggy) calculation of T
 
-  /// 20160728 SV filling p voxel by hand using the following parameters
-  /// Angle range [60,90]         IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075
+  /// 20160728 SV filling p voxel by hand using the following parameters1/p2> mean : 0.197075
   float totalLengthFurnace = 0.;
   float deltaP = 0;
-  float p_in = sqrt(1/0.0131459);
-  float p_out = sqrt(1/0.197075);
+  float invp2_IN = 0.;
+  float invp2_OUT = 0.;
+
+  /// compute p_in and p_out from fixed parameters, average values in angle range [60,90]
+  /// NB p_in 8.72177, p_out 2.2526, Dp 6.46917
+  invp2_IN = 0.0131459;
+  invp2_OUT = 0.197075;
+
+  /// compute p_in and p_out with a angle-dependent function
+  float a = fabs((3.14159265359 - acos(muon.LineIn().direction[1]/normIn))/3.14159265359*180);
+  invp2_IN = -0.1054 + (0.003615*a) - (0.0000269*a*a);
+  invp2_OUT = -0.5815 + (0.0309*a) - (0.0002711*a*a);
+  if(invp2_IN<0 || invp2_OUT<0)
+      std::cout << "ATTENTION: negative 1/p2 in pVoxelMean calculation...." << std::endl;
+
+  float p_in = sqrt(1/invp2_IN);
+  float p_out = sqrt(1/invp2_OUT);
+
+  //std::cout << "\n\n Mu p_in " << p_in << ", p_out " << p_out << ", invp2_IN " << invp2_IN << ", invp2_OUT " << invp2_OUT << std::endl;
+
   if(m_pVoxelMean){
       // loop ever voxels to find total length in furnace
       for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
@@ -969,7 +986,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
         elc.pw = 1/((deltaP * sumLijFurnace + p_in)*(deltaP * sumLijFurnace + p_in))*  $$.nominal_momentum *  $$.nominal_momentum;
 //        float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  $$.nominal_momentum *  $$.nominal_momentum;
 //        std::cout << "p_in " << p_in <<  ", p_out " << p_out << ", p_voxel " << p_voxel << std::endl;
-//        std::cout << "Voxel " <<  *it << ":   pw_file " <<  voxel_1op2 << ", pw_hand " << elc.pw
+//        std::cout << "Voxel " <<  *it  << ", pw_hand " << elc.pw << std::endl;
+//                  << ":   pw_file " <<  voxel_1op2
 //                  << " MC voxel value " << imgMC.operator [](*it).Value * (1.e6) << std::endl;
     }
     else if(m_initialSqrPfromVtk){
