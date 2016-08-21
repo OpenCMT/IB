@@ -68,7 +68,7 @@ public:
 
 public:
     IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0., bool doRecoPath=true,
-         bool oldTCalculation=false, float rankLimit=-100., IBVoxCollection* initialSqrPfromVtk=NULL, bool pVoxelMean=false);
+         bool oldTCalculation=false, float rankLimit=-100., IBVoxCollection* initialSqrPfromVtk=NULL, int pVoxelMean=0);
     ~IBAnalyzerEM();
 
     bool AddMuon(const MuonScatterData &muon);//{ return false;}
@@ -129,7 +129,7 @@ private:
     float m_rankLimit;
 
     IBVoxCollection* m_initialSqrPfromVtk;
-    bool m_pVoxelMean;   //---- compute p voxel by hand
+    int m_pVoxelMean;   //---- compute p voxel by hand
     IBVoxCollection m_imgMC;
 };
 

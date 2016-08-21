@@ -320,6 +320,7 @@ void IBAnalyzerEMPimpl::filterEventsLineDistance(float min, float max)
 
         /// erase event and muon with distance out of range
         if(!isFinite(dist) || dist >= max || dist < min){
+
             this->m_Events.remove_element(evc);
             this->m_parent->m_MuonCollection->Data().remove_element(pos);
         }
@@ -611,7 +612,7 @@ public:
 
 //___________________________
 IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, bool useRecoPath,
-               bool oldTCalculation, float rankLimit, IBVoxCollection* initialSqrPfromVtk, bool pVoxelMean) :
+               bool oldTCalculation, float rankLimit, IBVoxCollection* initialSqrPfromVtk, int pVoxelMean) :
     m_PocaAlgorithm(NULL),
     m_VarAlgorithm(NULL),
     m_RayAlgorithm(NULL),
@@ -907,26 +908,70 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   if(!m_oldTCalculation) H = H/normIn;  //<---- The old (buggy) calculation of T needs this value of H
   Scalarf T = totalLength; //<---- Needed if using the old (buggy) calculation of T
 
-  /// 20160728 SV filling p voxel by hand using the following parameters1/p2> mean : 0.197075
+
+  //std::cout << "\n *** Muon momentum " << muon.GetMomentum() << ", momentum prime " << muon.GetMomentumPrime() << std::endl;
+  /// 20160731 SV voxel momentum implementation
+  /// pVoxelMean=0 NO voxel momentum
+  /// pVoxelMean=1 fixed voxel momentum
+  /// pVoxelMean=2 fixed voxel momentum with angle dependency
+  /// pVoxelMean=3 voxel momentum from real momentum
+  // parameters
   float totalLengthFurnace = 0.;
   float deltaP = 0;
   float invp2_IN = 0.;
   float invp2_OUT = 0.;
+  bool noAddMuon = false;
 
-  /// compute p_in and p_out from fixed parameters, average values in angle range [60,90]
-  /// NB p_in 8.72177, p_out 2.2526, Dp 6.46917
-  invp2_IN = 0.0131459;
-  invp2_OUT = 0.197075;
+  if(m_pVoxelMean==1){
+    // compute p_in and p_out from fixed parameters, average values in angle range [60,90]
+    // NB p_in 8.72177, p_out 2.2526, Dp 6.46917
+    invp2_IN = 0.0131459;
+    invp2_OUT = 0.197075;
+  } else if (m_pVoxelMean==2){
+    // compute p_in and p_out with a angle-dependent function
+    float a = fabs((3.14159265359 - acos(muon.LineIn().direction[1]/normIn))/3.14159265359*180);
+    invp2_IN = -0.1054 + (0.003615*a) - (0.0000269*a*a);
+    invp2_OUT = -0.5815 + (0.0309*a) - (0.0002711*a*a);
+    if(invp2_IN<0 || invp2_OUT<0)
+      std::cout << "ATTENTION: negative 1/p2 in pVoxelMean calculation...." << std::endl;
+  } else if (m_pVoxelMean==3){
+      // p_in and p_out real values
+      invp2_IN = 1/(muon.GetMomentum()*muon.GetMomentum());
+      invp2_OUT = 1/(muon.GetMomentumPrime()*muon.GetMomentumPrime());
+    } else if (m_pVoxelMean>=4){
+      // use average values from 3 momentum classes. run500all. Angle range [60,90]
+      // p range [0,0.5] IN <1/p2> mean : 0.0658179, OUT <1/p2> mean : 5.80614
+      // p range [0.5,1] IN <1/p2> mean : 0.0570832, OUT <1/p2> mean : 1.89081
+      // p range [1,10000] IN <1/p2> mean : 0.0106817, OUT <1/p2> mean : 0.0772919
 
-//  /// compute p_in and p_out with a angle-dependent function
-//  float a = fabs((3.14159265359 - acos(muon.LineIn().direction[1]/normIn))/3.14159265359*180);
-//  invp2_IN = -0.1054 + (0.003615*a) - (0.0000269*a*a);
-//  invp2_OUT = -0.5815 + (0.0309*a) - (0.0002711*a*a);
-//  if(invp2_IN<0 || invp2_OUT<0)
-//      std::cout << "ATTENTION: negative 1/p2 in pVoxelMean calculation...." << std::endl;
+      float pclass = muon.GetMomentumPrime();
+      // I class
+      if(pclass <= 0.5){
+          invp2_IN = 0.0658179;
+          invp2_OUT = 5.80614;
+          if(m_pVoxelMean != 5) noAddMuon = true;
+      }
+      // II class
+      else if(pclass > 0.5 && pclass<=1.0){
+          invp2_IN = 0.0570832;
+          invp2_OUT = 1.89081;
+          if(m_pVoxelMean !=6 ) noAddMuon = true;
+      }
+      // III class
+      else if(pclass >1.0){
+          invp2_IN = 0.0106817;
+          invp2_OUT = 0.0772919;
+          if(m_pVoxelMean !=7 ) noAddMuon = true;
+      }
+      else
+          std::cout << "No CLASS !" << std::endl;
+      // to keep all the muons
+      if(m_pVoxelMean==4)
+          noAddMuon=false;
+  }
 
   float p_in = sqrt(1/invp2_IN);
-  float p_out = sqrt(1/invp2_OUT) * 2;
+  float p_out = sqrt(1/invp2_OUT);
 
   //std::cout << "\n\n Mu p_in " << p_in << ", p_out " << p_out << ", invp2_IN " << invp2_IN << ", invp2_OUT " << invp2_OUT << std::endl;
 
@@ -984,8 +1029,6 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     if(m_pVoxelMean){
         //std::cout << "\n*** Computing p voxel from IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075 *** " << std::endl;
         elc.pw = 1/((deltaP * sumLijFurnace + p_in)*(deltaP * sumLijFurnace + p_in))*  $$.nominal_momentum *  $$.nominal_momentum;
-//        float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  $$.nominal_momentum *  $$.nominal_momentum;
-//        std::cout << "p_in " << p_in <<  ", p_out " << p_out << ", p_voxel " << p_voxel << std::endl;
 //        std::cout << "Voxel " <<  *it  << ", pw_hand " << elc.pw << std::endl;
 //                  << ":   pw_file " <<  voxel_1op2
 //                  << " MC voxel value " << imgMC.operator [](*it).Value * (1.e6) << std::endl;
@@ -1016,17 +1059,20 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   //std::cout << "=== >  Muon in FURNACE  sumLij " << sumLijFurnace << ", totalLenght " << totalLengthFurnace << std::endl;
 
   //---- Keep the event
-  m_d->m_Events.push_back(evc);
+  if(!noAddMuon){
+    m_d->m_Events.push_back(evc);
 
-//  /// cross check
-//  std::cout << "\n\n Event\n";
-//  Vector< Event::Element >::iterator itre = evc.elements.begin();
-//  while (itre != evc.elements.end()) {
-//      Event::Element & elc = *itre;
-//      std::cout << "Voxel pw " << elc.pw << std::endl;
-//      ++itre;
-//  }
-  return true;
+//      /// cross check
+//      //std::cout << "\n\n Add Event to collection\n";
+//      Vector< Event::Element >::iterator itre = evc.elements.begin();
+//      while (itre != evc.elements.end()) {
+//          Event::Element & elc = *itre;
+//          std::cout << "Voxel pw " << elc.pw << std::endl;
+//          ++itre;
+//      }
+      return true;
+  } else
+      return false;
 }
 
 
@@ -1053,8 +1099,8 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
   if(m_pVoxelMean){
       std::cout << "\n*** Computing p voxel from linear function from <1/p2> mean IN to <1/p2> mean OUT *** " << std::endl;
       /// get MC furnace to locate voxel in furnace
-      //const char *mcFurnace =  "/home/sara/workspace/experiments/radmu/mublast/analysis/20150522_imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
-      const char *mcFurnace =  "/mnt/mutom-gluster/data/mublast/imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
+      const char *mcFurnace =  "/home/sara/workspace/experiments/radmu/mublast/analysis/20150522_imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
+      //const char *mcFurnace =  "/mnt/mutom-gluster/data/mublast/imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
       if( !m_imgMC.ImportFromVtk(mcFurnace) ){
           std::cout << "ATTENTION : error opening image from file..." << mcFurnace << std::endl;
           return;
@@ -1078,6 +1124,13 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
   //---- Pass the muons to the base class
   std::cout << "\nDone, now calling base class..." << std::endl;
   BaseClass::SetMuonCollection(muons);
+
+//  //--- cross check: dump muon collection
+//  std::cout << "Dumping muon collection.... " << std::endl;
+//  itr = muons->Data().begin();
+//  while(itr != muons->Data().end())
+//    std::cout << (*itr) << std::endl;
+
 }
 
 //________________________
