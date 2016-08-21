@@ -912,9 +912,12 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   //std::cout << "\n *** Muon momentum " << muon.GetMomentum() << ", momentum prime " << muon.GetMomentumPrime() << std::endl;
   /// 20160731 SV voxel momentum implementation
   /// pVoxelMean=0 NO voxel momentum
-  /// pVoxelMean=1 fixed voxel momentum
-  /// pVoxelMean=2 fixed voxel momentum with angle dependency
+  /// pVoxelMean=1 descending fixed voxel momentum
+  /// pVoxelMean=2 descending fixed voxel momentum with angle dependency
   /// pVoxelMean=3 voxel momentum from real momentum
+  /// pVoxelMean=4 voxel momentum from real momentum p classes
+  /// pVoxelMean=5,6,7 voxel momentum from real momentum p classes I,II,II
+  ///
   // parameters
   float totalLengthFurnace = 0.;
   float deltaP = 0;
