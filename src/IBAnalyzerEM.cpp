@@ -1099,8 +1099,8 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
   if(m_pVoxelMean){
       std::cout << "\n*** Computing p voxel from linear function from <1/p2> mean IN to <1/p2> mean OUT *** " << std::endl;
       /// get MC furnace to locate voxel in furnace
-      const char *mcFurnace =  "/home/sara/workspace/experiments/radmu/mublast/analysis/20150522_imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
-      //const char *mcFurnace =  "/mnt/mutom-gluster/data/mublast/imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
+      //const char *mcFurnace =  "/home/sara/workspace/experiments/radmu/mublast/analysis/20150522_imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
+      const char *mcFurnace =  "/mnt/mutom-gluster/data/mublast/imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
       if( !m_imgMC.ImportFromVtk(mcFurnace) ){
           std::cout << "ATTENTION : error opening image from file..." << mcFurnace << std::endl;
           return;
