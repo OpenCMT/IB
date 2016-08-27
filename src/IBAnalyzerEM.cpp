@@ -909,7 +909,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   Scalarf T = totalLength; //<---- Needed if using the old (buggy) calculation of T
 
 
-  //std::cout << "\n *** Muon momentum " << muon.GetMomentum() << ", momentum prime " << muon.GetMomentumPrime() << std::endl;
+  std::cout << "\n *** Muon momentum " << muon.GetMomentum() << ", momentum prime " << muon.GetMomentumPrime() << std::endl;
   /// 20160731 SV voxel momentum implementation
   /// pVoxelMean=0 NO voxel momentum
   /// pVoxelMean=1 descending fixed voxel momentum
@@ -948,22 +948,34 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
       // p range [1,10000] IN <1/p2> mean : 0.0106817, OUT <1/p2> mean : 0.0772919
 
       float pclass = muon.GetMomentumPrime();
-      // I class
-      if(pclass <= 0.5){
-          invp2_IN = 0.0658179;
-          invp2_OUT = 5.80614;
-          if(m_pVoxelMean != 5) noAddMuon = true;
-      }
-      // II class
-      else if(pclass > 0.5 && pclass<=1.0){
-          invp2_IN = 0.0570832;
-          invp2_OUT = 1.89081;
-          if(m_pVoxelMean !=6 ) noAddMuon = true;
-      }
+//      // I class
+//      if(pclass <= 0.5){
+//          invp2_IN = 0.0658179;
+//          invp2_OUT = 5.80614;
+//          if(m_pVoxelMean != 5) noAddMuon = true;
+//      }
+//      // II class
+//      else if(pclass > 0.5 && pclass<=1.0){
+//          invp2_IN = 0.0570832;
+//          invp2_OUT = 1.89081;
+//          if(m_pVoxelMean !=6 ) noAddMuon = true;
+//      }
+//        // III class
+//        else if(pclass >1.0){
+//            invp2_IN = 0.0106817;
+//            invp2_OUT = 0.0772919;
+//            if(m_pVoxelMean !=7 ) noAddMuon = true;
+//        }
+        // II class
+        if(pclass<=1.0){
+            invp2_IN = 1/(muon.GetMomentum()*muon.GetMomentum());
+            invp2_OUT = 1/(muon.GetMomentumPrime()*muon.GetMomentumPrime());
+            if(m_pVoxelMean !=6 ) noAddMuon = true;
+        }
       // III class
       else if(pclass >1.0){
-          invp2_IN = 0.0106817;
-          invp2_OUT = 0.0772919;
+          invp2_IN = 1./25.;
+          invp2_OUT = 1./25.;
           if(m_pVoxelMean !=7 ) noAddMuon = true;
       }
       else
@@ -1149,10 +1161,11 @@ void IBAnalyzerEM::Run(unsigned int iterations, float muons_ratio){
                 (int) m_d->m_Events.size(), it);
         m_d->Evaluate(muons_ratio);          // run single iteration of proback //
         if(!m_UpdateAlgorithm)
-            this->GetVoxCollection()->
-                UpdateDensity<UpdateDensitySijCapAlgorithm>(10);                // HARDCODE THRESHOLD
+//            this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(10);                // DEFAULT HARDCODE THRESHOLD
+            this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(2);                // HARDCODE THRESHOLD
         else
-            this->m_UpdateAlgorithm->operator()(this->GetVoxCollection(),10);   // HARDCODE THRESHOLD
+//            this->m_UpdateAlgorithm->operator()(this->GetVoxCollection(),10);   // DEFAULT HARDCODE THRESHOLD
+            this->m_UpdateAlgorithm->operator()(this->GetVoxCollection(),2);   // HARDCODE THRESHOLD
     }
     printf("\nEM -> done\n");
 }
@@ -1301,6 +1314,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
     std::cout << "\n*** Dump event collection from IBAnalyzer on file " << filename << std::endl;
     static TFile *file = new TFile(filename,"update");
     gDirectory->cd(file->GetPath());
+    gROOT->ProcessLine("#include<vector>");
 
     char name[100];
     sprintf(name,"muons");
@@ -1311,6 +1325,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
     int ev = 0;
     float mom, sumLij, dist, DP, DX, DT, DZ;
     float Smedian;
+    std::vector<float> *vpw = new std::vector<float>();
     TBranch *bev = tree->Branch("ev",&ev,"ev/I");
     TBranch *bp = tree->Branch("p",&mom,"p/F");
     TBranch *bsumLij = tree->Branch("sumLij",&sumLij,"sumLij/F");
@@ -1320,6 +1335,8 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
     TBranch *bDT = tree->Branch("DT",&DT,"DT/F");
     TBranch *bDZ = tree->Branch("DZ",&DZ,"DZ/F");
     TBranch *bSmedian = tree->Branch("Smedian",&Smedian,"Smedian/F");
+    TBranch *bpw = tree->Branch("pw","vector<float>",&vpw);
+
 
     /// event loop
     Vector< Event >::iterator itr = m_d->m_Events.begin();
@@ -1329,6 +1346,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
 
         /// crossed voxel loop
         sumLij = 0;
+        vpw->clear();
         Vector< float > Si;
         Vector< Event::Element >::iterator itre = evc.elements.begin();
 
@@ -1337,6 +1355,9 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
             sumLij += elc.Wij(0,0);
             float Nij = fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap );
             Si.push_back(Nij);
+
+            vpw->push_back($$.nominal_momentum/sqrt(elc.pw));
+
             ++itre;
         }
         // momentum used in the algorithm
@@ -1371,6 +1392,8 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         bDX->Fill();
         bDT->Fill();
         bDZ->Fill();
+
+        bpw->Fill();
 
         ev++;
         itr++;
