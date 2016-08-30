@@ -909,7 +909,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   Scalarf T = totalLength; //<---- Needed if using the old (buggy) calculation of T
 
 
-  std::cout << "\n *** Muon momentum " << muon.GetMomentum() << ", momentum prime " << muon.GetMomentumPrime() << std::endl;
+  //std::cout << "\n *** Muon momentum " << muon.GetMomentum() << ", momentum prime " << muon.GetMomentumPrime() << std::endl;
   /// 20160731 SV voxel momentum implementation
   /// pVoxelMean=0 NO voxel momentum
   /// pVoxelMean=1 descending fixed voxel momentum
@@ -985,10 +985,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
           noAddMuon=false;
   }
 
-  float p_in = sqrt(1/invp2_IN);
-  float p_out = sqrt(1/invp2_OUT);
-
-  //std::cout << "\n\n Mu p_in " << p_in << ", p_out " << p_out << ", invp2_IN " << invp2_IN << ", invp2_OUT " << invp2_OUT << std::endl;
+  //std::cout << "\n\n Mu p_in " << sqrt(1/invp2_IN) << ", p_out " << sqrt(1/invp2_OUT) << ", invp2_IN " << invp2_IN << ", invp2_OUT " << invp2_OUT << std::endl;
 
   if(m_pVoxelMean){
       // loop ever voxels to find total length in furnace
@@ -1001,7 +998,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
         }
       }
       //std::cout << "totalLength " << totalLength << ", in furnace " << totalLengthFurnace << std::endl;
-      deltaP = (p_out - p_in)/totalLengthFurnace;
+      deltaP = (sqrt(1/invp2_OUT) - sqrt(1/invp2_IN))/totalLengthFurnace;
   }
 
   float sumLijFurnace = 0.;
@@ -1043,7 +1040,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
     if(m_pVoxelMean){
         //std::cout << "\n*** Computing p voxel from IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075 *** " << std::endl;
-        elc.pw = 1/((deltaP * sumLijFurnace + p_in)*(deltaP * sumLijFurnace + p_in))*  $$.nominal_momentum *  $$.nominal_momentum;
+        elc.pw = 1/((deltaP * sumLijFurnace + sqrt(1/invp2_IN))*(deltaP * sumLijFurnace + sqrt(1/invp2_IN)))*  $$.nominal_momentum *  $$.nominal_momentum;
 //        std::cout << "Voxel " <<  *it  << ", pw_hand " << elc.pw << std::endl;
 //                  << ":   pw_file " <<  voxel_1op2
 //                  << " MC voxel value " << imgMC.operator [](*it).Value * (1.e6) << std::endl;
