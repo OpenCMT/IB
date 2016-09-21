@@ -764,7 +764,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //---- Momentum square (the "$$" notation is a bit much...)
     evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
     // SV for Sij studies
-    evc.header.pTrue = muon.GetMomentumPrime();
+    //evc.header.pTrue = muon.GetMomentumPrime();
 
     if(isnan(evc.header.InitialSqrP)){
       std::cout << "AddMuonFullPath: nominalp:" << $$.nominal_momentum
@@ -987,7 +987,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
   //std::cout << "\n\n Mu p_in " << sqrt(1/invp2_IN) << ", p_out " << sqrt(1/invp2_OUT) << ", invp2_IN " << invp2_IN << ", invp2_OUT " << invp2_OUT << std::endl;
 
-  if(m_pVoxelMean){
+//  if(m_pVoxelMean){
       // loop ever voxels to find total length in furnace
       for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
           if( (m_imgMC.operator [](*it).Value * (1.e6)) > 0.01){
@@ -999,7 +999,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
       }
       //std::cout << "totalLength " << totalLength << ", in furnace " << totalLengthFurnace << std::endl;
       deltaP = (sqrt(1/invp2_OUT) - sqrt(1/invp2_IN))/totalLengthFurnace;
-  }
+//  }
+      evc.header.pTrue = totalLengthFurnace;
 
   float sumLijFurnace = 0.;
   //---- Loop over the ordered list of voxels
@@ -1108,7 +1109,7 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
   Vector<Vector<HPoint3f> >::iterator path_itr = muons->FullPath().begin();    
   std::cout << "Adding " << muons->Data().size() << " muons " << std::endl;    
 
-  if(m_pVoxelMean){
+//  if(m_pVoxelMean){
       std::cout << "\n*** Computing p voxel from linear function from <1/p2> mean IN to <1/p2> mean OUT *** " << std::endl;
       /// get MC furnace to locate voxel in furnace
       //const char *mcFurnace =  "/home/sara/workspace/experiments/radmu/mublast/analysis/20150522_imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
@@ -1117,9 +1118,9 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
           std::cout << "ATTENTION : error opening image from file..." << mcFurnace << std::endl;
           return;
       }
-  }
-  else if(m_initialSqrPfromVtk)
-      std::cout << "\n*** Computing p voxel from file vtk*** " << std::endl;
+//  }
+//  else if(m_initialSqrPfromVtk)
+//      std::cout << "\n*** Computing p voxel from file vtk*** " << std::endl;
 
   while(itr != muons->Data().end()){
     //---- If the muon full path has an error, remove the muon
@@ -1349,7 +1350,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
 
         while (itre != evc.elements.end()) {
             Event::Element & elc = *itre;
-            sumLij += elc.Wij(0,0);
+            //sumLij += elc.Wij(0,0);
             float Nij = fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap );
             Si.push_back(Nij);
 
@@ -1364,6 +1365,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         DX = evc.header.Di[1];
         DT = evc.header.Di[2];
         DZ = evc.header.Di[3];
+        sumLij = evc.header.pTrue;
 
         // compute median
         std::sort(Si.begin(),Si.end());
