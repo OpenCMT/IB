@@ -378,10 +378,11 @@ float IBAnalyzerEMPimpl::SijMedian(const Event &evc){
        else
            Smedian = (Si[nS / 2 - 1] + Si[nS / 2]) / 2;
     }
-//       // debug
-//           for(int i=0; i<nS; i++) std::cout << Si[i] << ",";
-//           std::cout << "\n     MEDIAN =" << Smedian << std::endl;
-
+//    /// debug
+//    if(Smedian==0){
+//        for(int i=0; i<nS; i++) std::cout << Si[i] << ",";
+//        std::cout << "\n     MEDIAN =" << Smedian << std::endl;
+//    }
     return Smedian;
 }
 
@@ -526,26 +527,37 @@ void IBAnalyzerEMPimpl::SijGuess(float threshold, float p){
 void IBAnalyzerEMPimpl::SetSijMedianMomentum(){
     Vector< Event >::iterator itr = this->m_Events.begin();
 
+//    std::cout << "SetSijMedianMomentum \n"
+//              << "old invp2 = " << itr->header.InitialSqrP/(m_parent->$$.nominal_momentum * m_parent->$$.nominal_momentum);
+
     while (itr != this->m_Events.end()) {
-        const Event evc = (*itr);
+        Event & evc = (*itr);
         float m = SijMedian(evc);
 
-        std::cout << "SetSijMedianMomentum \n"
-                  << "old p = " << sqrt(m_parent->$$.nominal_momentum * m_parent->$$.nominal_momentum / itr->header.InitialSqrP)
-                  << ", median = " << m;
-
         //fit function for pguess from Sij median
+        /// 20160530 entire furnace
         //1/p2=13.9786 +-47.4669*1/log(x) + 78.2999*1/(x)
-        float pguess = sqrt(1/ (13.9786 - 47.4669*1/log(m) + 78.2999*1/(m)));
-
-        itr->header.InitialSqrP = m_parent->$$.nominal_momentum / pguess;
-        itr->header.InitialSqrP *= itr->header.InitialSqrP;
-
+        //float pguess = sqrt(1/ (13.9786 - 47.4669*1/log(m) + 78.2999*1/(m)));
+        /// 20160926
+        float invp2guess = 0.0375 + (0.0333 *m)-(0.0002 *m*m);
         // cut off if p>50GeV i.e. 1/p2 < 0.0004
-        if(itr->header.InitialSqrP < 0.0004)
-            itr->header.InitialSqrP = 0.0004;
+        if(invp2guess<0.0004)
+            invp2guess = 0.0004;
 
-        std::cout << ", pguess = " <<  sqrt(m_parent->$$.nominal_momentum *m_parent-> $$.nominal_momentum/itr->header.InitialSqrP) << std::endl;
+        /// set InitialSqrP variable
+        itr->header.InitialSqrP = m_parent->$$.nominal_momentum * m_parent->$$.nominal_momentum * invp2guess;
+
+        /// set in addition every voxel pw, since from voxel momentum code it is used in the algorithm
+        Vector< Event::Element >::iterator itre = evc.elements.begin();
+        while (itre != evc.elements.end()) {
+            Event::Element &elc = *itre;
+            elc.pw = m_parent->$$.nominal_momentum * m_parent->$$.nominal_momentum *invp2guess;
+//            std::cout << "Setting voxel pw.... " << elc.pw << std::endl;
+            ++itre;
+        }
+
+//        std::cout  << ", median = " << m << ", invp2guess " << invp2guess
+//                  << ", pguess = " <<  sqrt(m_parent->$$.nominal_momentum *m_parent-> $$.nominal_momentum/itr->header.InitialSqrP) << std::endl;
         itr++;
     }
 }
@@ -764,7 +776,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //---- Momentum square (the "$$" notation is a bit much...)
     evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
     // SV for Sij studies
-    //evc.header.pTrue = muon.GetMomentumPrime();
+    evc.header.pTrue = muon.GetMomentumPrime();
 
     if(isnan(evc.header.InitialSqrP)){
       std::cout << "AddMuonFullPath: nominalp:" << $$.nominal_momentum
@@ -987,7 +999,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
   //std::cout << "\n\n Mu p_in " << sqrt(1/invp2_IN) << ", p_out " << sqrt(1/invp2_OUT) << ", invp2_IN " << invp2_IN << ", invp2_OUT " << invp2_OUT << std::endl;
 
-//  if(m_pVoxelMean){
+  if(m_pVoxelMean){
       // loop ever voxels to find total length in furnace
       for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
           if( (m_imgMC.operator [](*it).Value * (1.e6)) > 0.01){
@@ -999,8 +1011,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
       }
       //std::cout << "totalLength " << totalLength << ", in furnace " << totalLengthFurnace << std::endl;
       deltaP = (sqrt(1/invp2_OUT) - sqrt(1/invp2_IN))/totalLengthFurnace;
-//  }
-      evc.header.pTrue = totalLengthFurnace;
+  }
 
   float sumLijFurnace = 0.;
   //---- Loop over the ordered list of voxels
@@ -1109,7 +1120,7 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
   Vector<Vector<HPoint3f> >::iterator path_itr = muons->FullPath().begin();    
   std::cout << "Adding " << muons->Data().size() << " muons " << std::endl;    
 
-//  if(m_pVoxelMean){
+  if(m_pVoxelMean){
       std::cout << "\n*** Computing p voxel from linear function from <1/p2> mean IN to <1/p2> mean OUT *** " << std::endl;
       /// get MC furnace to locate voxel in furnace
       //const char *mcFurnace =  "/home/sara/workspace/experiments/radmu/mublast/analysis/20150522_imageFromMC/mcFurnace_2016-05-03_vox20_250vox.vtk";
@@ -1118,9 +1129,9 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
           std::cout << "ATTENTION : error opening image from file..." << mcFurnace << std::endl;
           return;
       }
-//  }
-//  else if(m_initialSqrPfromVtk)
-//      std::cout << "\n*** Computing p voxel from file vtk*** " << std::endl;
+  }
+  else if(m_initialSqrPfromVtk)
+      std::cout << "\n*** Computing p voxel from file vtk*** " << std::endl;
 
   while(itr != muons->Data().end()){
     //---- If the muon full path has an error, remove the muon
@@ -1350,7 +1361,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
 
         while (itre != evc.elements.end()) {
             Event::Element & elc = *itre;
-            //sumLij += elc.Wij(0,0);
+            sumLij += elc.Wij(0,0);
             float Nij = fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap );
             Si.push_back(Nij);
 
@@ -1365,7 +1376,6 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         DX = evc.header.Di[1];
         DT = evc.header.Di[2];
         DZ = evc.header.Di[3];
-        sumLij = evc.header.pTrue;
 
         // compute median
         std::sort(Si.begin(),Si.end());
