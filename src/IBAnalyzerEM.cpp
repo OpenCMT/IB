@@ -1170,11 +1170,11 @@ void IBAnalyzerEM::Run(unsigned int iterations, float muons_ratio){
                 (int) m_d->m_Events.size(), it);
         m_d->Evaluate(muons_ratio);          // run single iteration of proback //
         if(!m_UpdateAlgorithm)
-//            this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(10);                // DEFAULT HARDCODE THRESHOLD
-            this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(2);                // HARDCODE THRESHOLD
+            this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(10);                // DEFAULT HARDCODE THRESHOLD
+//            this->GetVoxCollection()->UpdateDensity<UpdateDensitySijCapAlgorithm>(2);                // HARDCODE THRESHOLD
         else
-//            this->m_UpdateAlgorithm->operator()(this->GetVoxCollection(),10);   // DEFAULT HARDCODE THRESHOLD
-            this->m_UpdateAlgorithm->operator()(this->GetVoxCollection(),2);   // HARDCODE THRESHOLD
+            this->m_UpdateAlgorithm->operator()(this->GetVoxCollection(),10);   // DEFAULT HARDCODE THRESHOLD
+//            this->m_UpdateAlgorithm->operator()(this->GetVoxCollection(),2);   // HARDCODE THRESHOLD
     }
     printf("\nEM -> done\n");
 }
