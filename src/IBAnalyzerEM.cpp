@@ -541,7 +541,7 @@ void IBAnalyzerEMPimpl::SetSijMedianMomentum(){
         /// 20160926
         float invp2guess = 0.0375 + (0.0333 *m)-(0.0002 *m*m);
         // cut off if p>50GeV i.e. 1/p2 < 0.0004
-        if(invp2guess<0.0004)
+        if(invp2guess<0.0004 || isnan(invp2guess))
             invp2guess = 0.0004;
 
         /// set InitialSqrP variable
