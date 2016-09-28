@@ -541,13 +541,14 @@ void IBAnalyzerEMPimpl::SetSijMedianMomentum(){
         /// 20160926
         float invp2guess = 0.0375 + (0.0333 *m)-(0.0002 *m*m);
 
-        if(isnan(m))
-            std::cout << "ATTENTION nan m!!" << std::endl;
-        if(isnan(invp2guess))
+        if(isnan(invp2guess)){
             std::cout << "ATTENTION nan invp2!!" << std::endl;
+        invp2guess = 0.0004;
+        }
+
 
         // cut off if p>50GeV i.e. 1/p2 < 0.0004
-        if(invp2guess<0.0004 || isnan(invp2guess))
+        if(invp2guess<0.0004)
             invp2guess = 0.0004;
 
         /// set InitialSqrP variable
