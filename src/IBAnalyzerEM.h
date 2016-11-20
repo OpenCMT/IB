@@ -54,7 +54,7 @@ public:
             Vector4f Di;
             Matrix4f E;
             Scalarf  InitialSqrP;
-            Scalarf  pTrue;
+            Scalarf  pTrue; // SV 20160921 variable to store useful quantities to study....
         } header;
         Vector<Element> elements;
     };
