@@ -107,6 +107,7 @@ public:
 
     void dumpEventsTTree(const char *filename);
     void DumpP(const char *filename, float x0 = 0, float x1 = 10);
+    void DumpEvent(Event *evc);
 
     Vector<Event> & Events();
 

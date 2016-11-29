@@ -112,6 +112,7 @@ void IBAnalyzerEMPimpl::Project(Event *evc){
 
 //________________________
 void IBAnalyzerEMPimpl::BackProject(Event *evc){
+
     IBVoxel *vox;
     // sommatoria della formula 38 //
     for (unsigned int j = 0; j < evc->elements.size(); ++j) {
@@ -138,6 +139,7 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
 {    
     unsigned int start = 0;
     unsigned int end = (unsigned int) (m_Events.size() * muons_ratio);
+    unsigned int ev = start;
 
     if(m_SijAlgorithm) {
       // Projection
@@ -148,9 +150,14 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
       
       // Backprojection
       #pragma omp parallel for
-      for (unsigned int i = start; i < end; ++i)
-	this->BackProject(&m_Events[i]);
+      for (unsigned int i = start; i < end; ++i){
+          //m_parent->DumpEvent(&m_Events[i]);
+          this->BackProject(&m_Events[i]);
+          ev++;
+      }
       #pragma omp barrier
+
+
     }
     else {
         std::cerr << "Error: Lamda ML Algorithm not set\n";
@@ -661,6 +668,23 @@ IBAnalyzerEM::~IBAnalyzerEM(){
 //___________________________
 Vector<IBAnalyzerEM::Event> &IBAnalyzerEM::Events(){
     return m_d->m_Events;
+}
+
+//___________________________
+void IBAnalyzerEM::DumpEvent(Event *evc){
+
+    std::cout << "\nEvent: " << std::endl;
+    std::cout << "InitialSqrP " << evc->header.InitialSqrP <<  ", Di " << evc->header.Di << ", E " << evc->header.E << std::endl;
+
+    Vector< Event::Element >::iterator itre = evc->elements.begin();
+    while (itre != evc->elements.end()) {
+        Event::Element &elc = *itre;
+        std::cout  << "Voxel: value " << elc.voxel->Value << ", SijCap " << elc.voxel->SijCap << ", Count " << elc.voxel->Count << std::endl;
+        std::cout << "Wij " << elc.Wij << ", lambda " << elc.lambda << ", pw " << elc.pw << ", Sij " << elc.Sij << std::endl;
+        ++itre;
+    }
+
+    return;
 }
 
 //___________________________
