@@ -1443,20 +1443,20 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
     IBMuonCollection *muons = this->GetMuonCollection();
     dist = 0;
 
-    for(int i=0; i<muons->size(); ++i){
-        MuonScatterData muon = muons->At(i);
-        if(m_PocaAlgorithm){
-            bool use_poca = m_PocaAlgorithm->evaluate(muon);
-            dist = m_PocaAlgorithm->getDistance();
-            //uncomment to exclude distance when PoCA is outside voxel bounds
-            //if(use_poca)
-            bdist->Fill();
-        }
-    }
+//    for(int i=0; i<muons->size(); ++i){
+//        MuonScatterData muon = muons->At(i);
+//        if(m_PocaAlgorithm){
+//            bool use_poca = m_PocaAlgorithm->evaluate(muon);
+//            dist = m_PocaAlgorithm->getDistance();
+//            //uncomment to exclude distance when PoCA is outside voxel bounds
+//            //if(use_poca)
+//            bdist->Fill();
+//        }
+//    }
 
-    // testing
-    int sizeev = m_d->m_Events.size();
-    int sizemu = muons->size();
+//    // testing
+//    int sizeev = m_d->m_Events.size();
+//    int sizemu = muons->size();
 
     tree->Write("", TObject::kOverwrite);
     delete tree;
