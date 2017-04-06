@@ -21,6 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////*/
 
 #include <stdio.h>
+#include <math.h>
 #include <fstream>
 #include <algorithm>
 
@@ -548,7 +549,7 @@ void IBAnalyzerEMPimpl::SetSijMedianMomentum(){
         /// 20160926
         float invp2guess = 0.0375 + (0.0333 *m)-(0.0002 *m*m);
 
-        if(isnan(invp2guess)){
+        if(std::isnan(invp2guess)){
             std::cout << "ATTENTION nan invp2!!" << std::endl;
         invp2guess = 0.0004;
         }
@@ -695,7 +696,7 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon){
   Event evc;
   
   evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
-  if(isnan(evc.header.InitialSqrP)) std::cout << "sono in AddMuon: nominalp:" << $$.nominal_momentum << " muon.GetMomentum():" << muon.GetMomentum() <<"\n"
+  if(std::isnan(evc.header.InitialSqrP)) std::cout << "sono in AddMuon: nominalp:" << $$.nominal_momentum << " muon.GetMomentum():" << muon.GetMomentum() <<"\n"
 					      << std::flush;
   //    DBG(trd,evc.header.InitialSqrP,"invP2/F");
   if(likely(m_VarAlgorithm->evaluate(muon))) {
@@ -809,7 +810,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     // SV for Sij studies
     evc.header.pTrue = muon.GetMomentumPrime();
 
-    if(isnan(evc.header.InitialSqrP)){
+    if(std::isnan(evc.header.InitialSqrP)){
       std::cout << "AddMuonFullPath: nominalp:" << $$.nominal_momentum
 		<< "muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::endl;
     }

@@ -82,7 +82,7 @@ bool IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
 
     IBVoxRaytracer::RayData ray;
     // ENTRY and EXIT point present
-    if( !isnan(muon.LineOut().origin.prod()) )
+    if( !std::isnan(muon.LineOut().origin.prod()) )
     { // Get RayTrace RayData //
         HPoint3f entry_pt,poca,exit_pt;
         if( !d->m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
