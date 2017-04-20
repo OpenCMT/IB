@@ -38,7 +38,8 @@ public:
 public:
     IBAnalyzerTrackCountPimpl() :
         m_RayAlgorithm(NULL),
-        m_PocaAlgorithm(NULL)
+        m_PocaAlgorithm(NULL),
+        m_detSgnZ(0)
     {}
 
 
@@ -54,6 +55,8 @@ public:
     Vector<Event>    m_Events;
     VoxRaytracer    *m_RayAlgorithm;
     IBPocaEvaluator *m_PocaAlgorithm;
+    //20170420 select detector based on Z coordinate: -1, 1, 0 if not used
+    int m_detSgnZ;
 };
 
 
@@ -80,6 +83,10 @@ bool IBAnalyzerTrackCount::AddMuon(const MuonScatterData &muon)
                 exit_pt;
         if( !d->m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
                 !d->m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
+            return false;
+
+        // 20170420 SV - select only one detector based on Z coordinate
+        if(d->m_detSgnZ  && entry_pt[2]*d->m_detSgnZ < 0)
             return false;
 
         bool test = d->m_PocaAlgorithm->evaluate(muon);
@@ -134,6 +141,11 @@ void IBAnalyzerTrackCount::SetRayAlgorithm(IBVoxRaytracer *raytracer)
 void IBAnalyzerTrackCount::SetPocaAlgorithm(IBPocaEvaluator *evaluator)
 {
     d->m_PocaAlgorithm = evaluator;
+}
+
+void IBAnalyzerTrackCount::SetDetectorZSelection(int selectZ)
+{
+    d->m_detSgnZ = selectZ;
 }
 
 void IBAnalyzerTrackCount::Clear()

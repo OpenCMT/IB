@@ -47,11 +47,15 @@ public:
 
     void SetPocaAlgorithm(IBPocaEvaluator *evaluator);
 
+    void SetDetectorZSelection(int selectZ);
+
     void Clear();
 
     unsigned int Size() const;
 
     void SetMuonCollection(IBMuonCollection *muons);
+
+
 private:
     class IBAnalyzerTrackCountPimpl *d;
 };
