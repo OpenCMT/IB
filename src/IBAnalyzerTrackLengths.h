@@ -49,6 +49,8 @@ public:
 
     void SetMuonCollection(IBMuonCollection *muons);
 
+    void SetDetectorZSelection(int selectZ);
+
 private:
     class IBAnalyzerTrackLengthsPimpl *d;
 };

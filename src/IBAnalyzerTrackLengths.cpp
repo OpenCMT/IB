@@ -45,7 +45,8 @@ public:
 
     IBAnalyzerTrackLengthsPimpl() :
         m_RayAlgorithm(NULL),
-        m_PocaAlgorithm(NULL)
+        m_PocaAlgorithm(NULL),
+        m_detSgnZ(0)
     {}
 
     void Project(Event *evc) {
@@ -61,6 +62,8 @@ public:
     Vector<Event> m_Events;
     VoxRaytracer *m_RayAlgorithm;
     IBPocaEvaluator *m_PocaAlgorithm;
+    //20170420 select detector based on Z coordinate: -1, 1, 0 if not used
+    int m_detSgnZ;
 };
 
 
@@ -88,6 +91,11 @@ bool IBAnalyzerTrackLengths::AddMuon(const MuonScatterData &muon)
         if( !d->m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
                 !d->m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
             return false;
+
+        // 20170420 SV - select only one detector based on Z coordinate
+        if(d->m_detSgnZ  && entry_pt[2]*d->m_detSgnZ < 0)
+            return false;
+
         bool test = d->m_PocaAlgorithm->evaluate(muon);
         poca = d->m_PocaAlgorithm->getPoca();
         if(test && this->GetVoxCollection()->IsInsideBounds(poca)) {
