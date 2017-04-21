@@ -160,3 +160,8 @@ void IBAnalyzerTrackLengths::SetPocaAlgorithm(IBPocaEvaluator *evaluator)
 {
     d->m_PocaAlgorithm = evaluator;
 }
+
+void IBAnalyzerTrackLengths::SetDetectorZSelection(int selectZ)
+{
+    d->m_detSgnZ = selectZ;
+}
