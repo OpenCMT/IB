@@ -624,6 +624,10 @@ public:
 IBNormalPlaneMinimizationVariablesEvaluator::IBNormalPlaneMinimizationVariablesEvaluator() :
     d(new IBNormalPlaneMinimizationVariablesEvaluatorPimpl(this)) {
     this->init_properties();
+
+    m_oneD = false;
+    m_scatterOnly = false;
+    m_displacementOnly = false;
 }
 
 IBNormalPlaneMinimizationVariablesEvaluator::~IBNormalPlaneMinimizationVariablesEvaluator()
