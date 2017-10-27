@@ -19,12 +19,13 @@
 
 //////////////////////////////////////////////////////////////////////////////*/
 
-
+#include <math.h>
+#include <iostream>
+#include <fstream>
 
 #include <TFile.h>
 #include <TTree.h>
 
-#include <math.h>
 #include <Math/Dense.h>
 #include <Math/Utils.h>
 #include "Root/RootMuonScatter.h"
@@ -182,7 +183,7 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
         o << " Muons passed: " << this->size() << "\n";
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 void IBMuonCollection::DumpTTree(const char *filename)
 { 
     std::cout << "\nCHIAMATA A DUMPTREE !!!\n";
@@ -215,7 +216,36 @@ void IBMuonCollection::DumpTTree(const char *filename)
     return;
 }
 
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
+void IBMuonCollection::DumpTxt(const char *filename)
+{
+    std::cout << "\nDUMP on txt file for Calvini 3D reconstruction\n";
+    fstream file;
+    file.open(filename, std::ios::out);
 
+    uLib::MuonScatter mu;
+    // event loop
+    for(int i=0; i < this->size(); ++i )
+    {
+        const MuonScatter &mu = this->At(i);
+
+        HPoint3f inPos = mu.LineIn().origin;
+        HVector3f inDir = mu.LineIn().direction;
+        file << inPos[0] << " " << inPos[1] << " " << inPos[2] << " " << inDir[0]/inDir[1] << " " << inDir[2]/inDir[1] << " ";
+
+        HPoint3f outPos = mu.LineOut().origin;
+        if(!std::isnan(outPos[0]))
+            file << outPos[0] << " " << outPos[1] << " " << outPos[2] << "\n";
+        else
+            file << "\n";
+    }
+
+    file.close();
+    return;
+}
+
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 /**
  * @brief IBMuonCollection::GetAlignment
  *  compute mean of rotation and shift of muon out relative to in
