@@ -220,7 +220,7 @@ void IBMuonCollection::DumpTTree(const char *filename)
 void IBMuonCollection::DumpTxt(const char *filename)
 {
     std::cout << "\nDUMP on txt file for Calvini 3D reconstruction\n";
-    fstream file;
+    std::fstream file;
     file.open(filename, std::ios::out);
 
     uLib::MuonScatter mu;
