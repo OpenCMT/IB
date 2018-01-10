@@ -35,7 +35,7 @@ message(STATUS "Install prefix is ${PWD}")
 
 ## First of all find uLib package to get imported locations ##
 unset(ULIB_CONFIG)
-set(ULIB_DIR /home/$ENV{USER}/MuTom/uLib/build/)
+set(ULIB_DIR ../../uLib/trunk/build/)
 find_package(ULIB 0.2 CONFIG REQUIRED
              NAMES uLib
              PATH_SUFFIXES mutom-0.2
