@@ -39,7 +39,7 @@ class IBAnalyzerEMAlgorithmMGA : public IBAnalyzerEMAlgorithm {
 public:
     void SetGaussians(Vector<Vector2f> &WS);
     void SetGaussians(Scalarf *w, Scalarf *s);
-    void GetNominalMomentum() const { return m_P; }
+    Scalarf GetNominalMomentum() const { return m_P; }
 
 protected:
     virtual ~IBAnalyzerEMAlgorithmMGA() {}
