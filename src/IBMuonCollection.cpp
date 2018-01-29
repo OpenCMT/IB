@@ -186,7 +186,7 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 void IBMuonCollection::DumpTTree(const char *filename)
 { 
-    std::cout << "\nCHIAMATA A DUMPTREE !!!\n";
+    std::cout << "\n\n------------- Dump muon collection on root file " << filename << std::endl;
     static TFile *file = new TFile(filename,"RECREATE");
 
     char name[100];

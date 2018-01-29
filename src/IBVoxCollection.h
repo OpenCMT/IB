@@ -89,6 +89,8 @@ public:
 
     inline void InitCount(unsigned int count);
 
+    inline void resetSijCap();
+
     int CountLambdaOverThreshold(float threshold);
 
     int CountLambdaOverThreshold(float threshold,uLib::Vector3i boxp1, uLib::Vector3i boxp2);
@@ -119,6 +121,8 @@ private:
 inline void IBVoxCollection::InitLambda(const IBVoxel &value)
 {
     BaseClass::InitVoxels(value);
+    InitCount(0);
+    resetSijCap();
 }
 
 
@@ -126,6 +130,13 @@ inline void IBVoxCollection::InitCount(unsigned int count)
 {
     for(unsigned int i=0; i<this->Data().size(); ++i) {
         this->Data().operator [](i).Count = count;
+    }
+}
+
+inline void IBVoxCollection::resetSijCap()
+{
+    for(unsigned int i=0; i<this->Data().size(); ++i) {
+        this->Data().operator [](i).SijCap = 0;
     }
 }
 

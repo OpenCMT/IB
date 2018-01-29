@@ -79,10 +79,11 @@ include(uLibConfigHeader)
 
 
 ## GLOBALS ------------------------------------------------------------------ ##
-
+ message("---------------CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
+ message("---------------CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 include(uLibCommon)
 EXECUTE_PROCESS(COMMAND root-config --cflags OUTPUT_VARIABLE ROOT_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}") ## Add flags here ##
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} -O0 ${ROOT_CXX_FLAGS}") ## Add flags here ##
 SET(CMAKE_EXE_LINKER_FLAGS "${ROOT_LD_FLAGS} ${MUTOMIB_ROOTLINK_DIR}/dict.cxx")
 
 ## FIND PACKAGES ------------------------------------------------------------ ##
