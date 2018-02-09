@@ -181,6 +181,14 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
     o << " Data size: " << d->m_Data.size() << "\n";
     if(this->size()!=0)
         o << " Muons passed: " << this->size() << "\n";
+
+    for(int i=0; i < this->size(); ++i )
+    {
+        const MuonScatter &u_mu = this->At(i);
+        std::cout << u_mu;
+
+    }
+
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
