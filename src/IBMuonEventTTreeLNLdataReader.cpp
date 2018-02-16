@@ -214,9 +214,8 @@ public:
             muon_event->LineOut().direction /= fabs(muon_event->LineOut().direction(1)); // back to slopes //
         }
 
-
-
         muon_event->SetMomentum(m_momentum);
+        muon_event->SetMomentumPrime(m_momentum);
 
         // HardCoded cuts on potition and delta slope
         if (fabs(muon_event->LineIn().origin(0))>154.                                      ||

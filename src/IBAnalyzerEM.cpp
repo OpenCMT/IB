@@ -798,7 +798,10 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   
   //---- Check the ray algo (calculates the ray parameters)
   //---- and the variable algo (calculates the scattering/displacement variables)
-  if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)) return false;
+  if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)){
+      std::cout << "No RayAlgorithm or VarAlgorithm set.... EXITING!" << std::endl;
+      return false;
+  }
 
   Event evc; //<---- The event info
   if(likely(m_VarAlgorithm->evaluate(muon))) {
@@ -815,7 +818,10 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 		<< "muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::endl;
     }
   }
-  else return false;
+  else {
+      std::cout << "Evaluate muon variable failed... EXITING!" << std::endl;
+      return false;
+  }
 
   //-------------------------
   //---- STEP #2: Perform raytracing
@@ -830,8 +836,14 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     
     //---- Require entry and exit points
     HPoint3f entry_pt, exit_pt;
-    if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) return false;
-    if( !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )  return false;
+    if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) {
+        std::cout << "No entry point.... EXITING!" << std::endl;
+        return false;
+    }
+    if( !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) ) {
+        std::cout << "No exit point.... EXITING!" << std::endl;
+        return false;
+    }
     front_pt = entry_pt;
     back_pt = exit_pt;
 
@@ -870,7 +882,10 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   	  double exit_length  = (exit_pt  - exit_poca).norm();
 
 	  //---- Remove points which are unreasonably far away
-  	  if(entry_length > trackLength || exit_length > trackLength) return false;
+      if(entry_length > trackLength || exit_length > trackLength){
+          std::cout << "Track length smaller than entry-exit distance.... EXITING!" << std::endl;
+          return false;
+      }
 	  
   	  //---- Get the inflection points
   	  double normIn  = muon.LineIn().direction.norm(); //<----Recently added
@@ -891,7 +906,10 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   //---- If reconstructing the muon's true path
   else{
     //---- If muonPath is empty, return
-    if(muonPath.size()==0) return false;
+    if(muonPath.size()==0){
+        std::cout << "Empty muon path.... EXITING!" << std::endl;
+        return false;
+    }
     //---- Otherwise append all the points
     for(int i=0; i<muonPath.size(); ++i) pts.push_back(muonPath[i]);
     back_pt  = pts.back();
@@ -1046,6 +1064,11 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   }
 
   float sumLijFurnace = 0.;
+
+  //---- Cut muons crossing one voxel only
+  if(voxelOrder.size()<2)
+    noAddMuon=true;
+
   //---- Loop over the ordered list of voxels
   for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
     const HPoint3f& pt1 = voxelMap[*it][0];
@@ -1127,8 +1150,10 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 //          ++itre;
 //      }
       return true;
-  } else
+  } else{
+      std::cout << "Do not add muon flag.... EXITING!" << std::endl;
       return false;
+  }
 }
 
 
