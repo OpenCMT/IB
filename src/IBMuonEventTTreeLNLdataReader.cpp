@@ -116,7 +116,7 @@ public:
     {
         m_tree = tree;
         m_max_event = m_tree->GetEntries();	
-	std::cout << "Requested event " << m_total_events+m_pos << " from max of " << m_max_event << std::endl;
+        //std::cout << "Requested event " << m_total_events+m_pos << " from max of " << m_max_event << std::endl;
         if (m_total_events == 0.f) m_total_events = m_max_event;
         if(m_total_events+m_pos>m_max_event) {
             printf("Requested time interval rejected at TTree initialization.\nAborting...\n");
@@ -327,13 +327,13 @@ void IBMuonEventTTreeLNLdataReader::setError(IBMuonError &e)
 
 void IBMuonEventTTreeLNLdataReader::setAcquisitionTime(float min)
 {
+    std::cout << "\n---------------" << std::endl;
     d->m_total_events = min * d->events_per_minute();
     if(d->m_total_events+d->m_pos>d->m_max_event) {
-      std::cout << d->m_total_events << " + " << d->m_pos << " > " << d->m_max_event << std::endl;
-      printf("Requested time interval rejected at acquisition time setting.\nAborting...\n");
-      exit(0);
+        printf("ATTENTION : Requested events (%i) from start event (%i) are not available.... processing only %i events\n", d->m_total_events,d->m_pos,d->m_max_event-d->m_pos);
+         d->m_total_events = d->m_max_event-d->m_pos;
     }
-    printf("Processing %.2f minutes (%i events)\n", min, d->m_total_events);
+    std::cout << "Processing " << d->m_total_events << " events from event n. " <<  d->m_pos << " to event n. " << d->m_total_events+d->m_pos << "\n" << std::endl;
 }
 
 unsigned long IBMuonEventTTreeLNLdataReader::getNumberOfEvents()
@@ -356,12 +356,13 @@ bool IBMuonEventTTreeLNLdataReader::readNext(MuonScatter *event)
 
 void IBMuonEventTTreeLNLdataReader::setStartTime(float min)
 {
+    std::cout << "\n---------------" << std::endl;
     d->m_pos = (unsigned long)(min * d->events_per_minute());
-    if (unlikely(d->m_total_events+d->m_pos>d->m_max_event)) {
-        printf("Requested time interval rejected at start time setting\nAborting...\n");
+    if (unlikely(d->m_pos>d->m_max_event)) {
+        printf("\nATTENTION : Requested start time event number %i greater than total events %i.\nAborting...\n",d->m_pos,d->m_max_event);
         exit(0);
     }
-    printf("Starting processing from %.2f minutes (event n. %i)\n", min, d->m_pos);
+    std::cout << "Set start time " << min << " minutes i.e. event n. " <<  d->m_pos << std::endl;
 }
 
 void IBMuonEventTTreeLNLdataReader::setAlignmentFromData(float min)

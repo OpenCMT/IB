@@ -819,7 +819,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     }
   }
   else {
-      std::cout << "Evaluate muon variable failed... EXITING!" << std::endl;
+      //std::cout << "Evaluate muon variable failed... EXITING!" << std::endl;
       return false;
   }
 
@@ -837,11 +837,11 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //---- Require entry and exit points
     HPoint3f entry_pt, exit_pt;
     if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) {
-        std::cout << "No entry point.... EXITING!" << std::endl;
+        //std::cout << "No entry point.... EXITING!" << std::endl;
         return false;
     }
     if( !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) ) {
-        std::cout << "No exit point.... EXITING!" << std::endl;
+        //std::cout << "No exit point.... EXITING!" << std::endl;
         return false;
     }
     front_pt = entry_pt;
@@ -883,7 +883,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
 	  //---- Remove points which are unreasonably far away
       if(entry_length > trackLength || exit_length > trackLength){
-          std::cout << "Track length smaller than entry-exit distance.... EXITING!" << std::endl;
+          //std::cout << "Track length smaller than entry-exit distance.... EXITING!" << std::endl;
           return false;
       }
 	  
@@ -907,7 +907,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   else{
     //---- If muonPath is empty, return
     if(muonPath.size()==0){
-        std::cout << "Empty muon path.... EXITING!" << std::endl;
+        //std::cout << "Empty muon path.... EXITING!" << std::endl;
         return false;
     }
     //---- Otherwise append all the points
