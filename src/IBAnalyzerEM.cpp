@@ -1151,7 +1151,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 //      }
       return true;
   } else{
-      std::cout << "Do not add muon flag.... EXITING!" << std::endl;
+      //std::cout << "Do not add muon flag.... EXITING!" << std::endl;
       return false;
   }
 }
