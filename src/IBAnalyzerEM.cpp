@@ -114,12 +114,14 @@ void IBAnalyzerEMPimpl::Project(Event *evc){
 //________________________
 void IBAnalyzerEMPimpl::BackProject(Event *evc){
 
-    IBVoxel *vox;
+    IBVoxel *vox = NULL;
     // sommatoria della formula 38 //
-    for (unsigned int j = 0; j < evc->elements.size(); ++j) {
+    for (unsigned int j = 0; j < evc->elements.size(); j++) {
       vox = evc->elements[j].voxel;
+      if( vox==NULL || std::isnan(evc->elements[j].Sij) || std::isnan(vox->SijCap))
+        continue;
       #pragma omp atomic
-        vox->SijCap += evc->elements[j].Sij;
+      vox->SijCap += evc->elements[j].Sij;
 //        {
 //            //            IBVoxel *v0 = &(*m_parent->GetVoxCollection()->Data().begin());
 //            //            int id = (vox-v0)/sizeof(IBVoxel);
@@ -145,14 +147,14 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
     if(m_SijAlgorithm) {
       // Projection
       #pragma omp parallel for
-      for (unsigned int i = start; i < end; ++i)
+      for (unsigned int i = start; i < end; ++i){
 	this->Project(&m_Events[i]);
+      }
       #pragma omp barrier
       
       // Backprojection
       #pragma omp parallel for
       for (unsigned int i = start; i < end; ++i){
-          //m_parent->DumpEvent(&m_Events[i]);
           this->BackProject(&m_Events[i]);
           ev++;
       }
@@ -674,15 +676,18 @@ Vector<IBAnalyzerEM::Event> &IBAnalyzerEM::Events(){
 //___________________________
 void IBAnalyzerEM::DumpEvent(Event *evc){
 
-    std::cout << "\nEvent: " << std::endl;
+    std::cout << "\n ----------- Dump Event: " << std::endl;
     std::cout << "InitialSqrP " << evc->header.InitialSqrP <<  ", Di " << evc->header.Di << ", E " << evc->header.E << std::endl;
+    std::cout << "Voxel vector size " << evc->elements.size(); 
 
     Vector< Event::Element >::iterator itre = evc->elements.begin();
+    int ivox=0;
     while (itre != evc->elements.end()) {
         Event::Element &elc = *itre;
-        std::cout  << "Voxel: value " << elc.voxel->Value << ", SijCap " << elc.voxel->SijCap << ", Count " << elc.voxel->Count << std::endl;
-        std::cout << "Wij " << elc.Wij << ", lambda " << elc.lambda << ", pw " << elc.pw << ", Sij " << elc.Sij << std::endl;
+        std::cout  << "Voxel " << ivox << ": value " << elc.voxel->Value << ", SijCap " << elc.voxel->SijCap << ", Count " << elc.voxel->Count;
+        std::cout << ", Wij[0,0] " << elc.Wij(0,0) << ", lambda " << elc.lambda << ", pw " << elc.pw << ", Sij " << elc.Sij << std::endl;
         ++itre;
+        ivox++;
     }
 
     return;
@@ -804,6 +809,14 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   }
 
   Event evc; //<---- The event info
+  evc.header.Di << NAN, NAN, NAN,NAN;
+  evc.header.E << NAN, NAN, NAN,NAN,NAN, NAN, NAN,NAN,NAN, NAN, NAN,NAN,NAN, NAN, NAN,NAN;
+  evc.header.InitialSqrP = NAN;
+  evc.header.pTrue = NAN;
+  Vector<Event::Element> voxVec(0);
+  evc.elements = voxVec;
+  evc.elements.clear();
+
   if(likely(m_VarAlgorithm->evaluate(muon))) {
     //---- Get the Data (Di) and Error (E) matrices
     evc.header.Di = m_VarAlgorithm->getDataVector();
@@ -1067,7 +1080,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
   //---- Cut muons crossing one voxel only
   if(voxelOrder.size()<2)
-    noAddMuon=true;
+    return false;
 
   //---- Loop over the ordered list of voxels
   for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
@@ -1076,9 +1089,16 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
     //---- Now loop over each element in the ray
     Event::Element elc;
+    elc.Wij << NAN, NAN;
+    elc.lambda = NAN;
+    elc.Sij = NAN;
+    elc.pw = NAN;
+    elc.voxel = NULL;
   
     //---- Retrieve the voxel from the voxel collection by the ID (== *it)
     elc.voxel = &this->GetVoxCollection()->operator [](*it);
+    if(elc.voxel->Count != 0 || elc.voxel == NULL || elc.voxel->Value == NAN)
+        continue;
   
     //---- Get length of ray in the voxel
     //---- (NOT == to el.L, due to mid-voxel inflections)
@@ -1122,9 +1142,11 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
             elc.pw = 0.36;
     }
 
+
+/*
     //---- Add both views to E if voxel the is "frozen"
     //---- "Frozen" means the voxel has a constant value of LSD
-    if(elc.voxel->Value <= 0){
+    if(elc.voxel->Value != NAN &&  elc.voxel->Value <= 0){
       //---- Get a 2x2 block in the top left corner of the Error (E) matrix
       evc.header.E.block<2,2>(2,0) += elc.Wij * fabs(elc.voxel->Value) * elc.pw;//evc.header.InitialSqrP;
       //---- Get a 2x2 block in the bottom right corner of the Error (E) matrix
@@ -1132,13 +1154,16 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     }
     //---- If the voxel ISN'T frozen, keep the Element in the Event
     else{
-      evc.elements.push_back(elc);
+      if(elc.voxel != NULL)
     }
+*/
+    if(!std::isnan(elc.voxel->Value))
+      evc.elements.push_back(elc);
   }
   //std::cout << "=== >  Muon in FURNACE  sumLij " << sumLijFurnace << ", totalLenght " << totalLengthFurnace << std::endl;
 
   //---- Keep the event
-  if(!noAddMuon){
+  if(!noAddMuon && evc.elements.size()>1 && evc.header.Di[0]!=NAN){
     m_d->m_Events.push_back(evc);
 
 //      /// cross check
@@ -1190,7 +1215,12 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
   else if(m_initialSqrPfromVtk)
       std::cout << "\n*** Computing p voxel from file vtk*** " << std::endl;
 
+  int countmu = 0; 
   while(itr != muons->Data().end()){
+    countmu++; 
+    if(countmu%100000==0)
+    	std::cout << "Adding muon " << countmu << "...." << std::endl; 
+
     //---- If the muon full path has an error, remove the muon
     if(!AddMuonFullPath(*itr, *path_itr)){
       muons->Data().remove_element(*itr);
