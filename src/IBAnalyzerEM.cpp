@@ -767,7 +767,13 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon){
     {
       // voxel //
       const IBVoxRaytracer::RayData::Element &el = ray.Data().at(i);
+
+      if(el.vox_id >= this->GetVoxCollection()->GetDims().prod()){
+        std::cout << "ATTENTION voxel ID > size collection!! " << std::endl;
+        return false;
+      }
       elc.voxel = &this->GetVoxCollection()->operator [](el.vox_id);
+
       // Wij   //
       Scalarf L = el.L;  T = fabs(T-L);
       elc.Wij << L ,          L*L/2 + L*T,
@@ -944,6 +950,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //---- Get the ray properties between the points
     Scalarf  rayLength = (pt2-pt1).norm();
     HPoint3f rayDir    = (pt2-pt1)/rayLength;
+
     IBVoxRaytracer::RayData ray = m_RayAlgorithm->TraceBetweenPoints(pt1,pt2);
   
     //---- Loop over the voxels in the ray
@@ -1096,7 +1103,12 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     elc.voxel = NULL;
   
     //---- Retrieve the voxel from the voxel collection by the ID (== *it)
+    if( (*it) >= this->GetVoxCollection()->GetDims().prod()){
+      std::cout << "ATTENTION voxel ID > size collection!! " << std::endl;
+      return false;
+    }
     elc.voxel = &this->GetVoxCollection()->operator [](*it);
+
     if(elc.voxel->Count != 0 || elc.voxel == NULL || elc.voxel->Value == NAN)
         continue;
   

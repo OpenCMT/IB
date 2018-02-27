@@ -45,7 +45,10 @@ IBVoxCollection::IBVoxCollection() :
 IBVoxCollection::IBVoxCollection(const Vector3i size) :
     BaseClass(size),
     m_MAPAlgorithm(NULL)
-{}
+{
+    std::cout << "\n  ------ VOXEL COLLECTION INIT ------" << std::endl;
+    std::cout << "Please cross-check that collection_dimension % voxel_dimension=0, otherwise leaks could be generated... " << std::endl;
+ }
 
 IBVoxCollection::IBVoxCollection(const IBVoxCollection &copy) :
     BaseClass(copy),
