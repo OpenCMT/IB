@@ -25,6 +25,8 @@
 
 #include <TFile.h>
 #include <TTree.h>
+#include <TSystem.h>
+#include <TROOT.h>
 
 #include <Math/Dense.h>
 #include <Math/Utils.h>
@@ -182,11 +184,10 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
     if(this->size()!=0)
         o << " Muons passed: " << this->size() << "\n";
 
-    for(int i=0; i < this->size(); ++i )
+    for(int i=0; i < 3; ++i )
     {
         const MuonScatter &u_mu = this->At(i);
         std::cout << u_mu;
-
     }
 
 }
@@ -225,6 +226,67 @@ void IBMuonCollection::DumpTTree(const char *filename)
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
+void IBMuonCollection::DumpSimpleTree(const char *filename)
+{
+
+    std::cout << "\n\n------------- Dump muon collection on root file " << filename << std::endl;
+
+    static TFile *file = new TFile(filename,"RECREATE");
+
+    /// open file, tree
+    gDirectory->cd(file->GetPath());
+    gROOT->ProcessLine("#include<vector>");
+
+    // Define some simple structures
+    typedef struct {Float_t x,y,z;} POINT;
+
+    char name[100];
+    sprintf(name,"muons");
+    TTree *tree = (TTree*)file->Get("muons");
+    if(!tree)
+        tree = new TTree(name,name);
+
+    POINT inOrigin, outOrigin;
+    POINT inDir, outDir;
+
+    tree->Branch("inOrigin",&inOrigin,"x:y:z");
+    tree->Branch("inDir",&inDir,"x:y:z");
+    tree->Branch("outOrigin",&outOrigin,"x:y:z");
+    tree->Branch("outDir",&outDir,"x:y:z");
+
+    /// event loop
+    std::cout << "Reading " << this->size() << " muons " << std::endl;
+
+    for(int i=0; i < this->size(); ++i )
+    {
+        const MuonScatter &u_mu = this->At(i);
+
+        inOrigin.x=u_mu.LineIn().origin[0];
+        inOrigin.y=u_mu.LineIn().origin[1];
+        inOrigin.z=u_mu.LineIn().origin[2];
+
+        inDir.x=u_mu.LineIn().direction[0];
+        inDir.y=u_mu.LineIn().direction[1];
+        inDir.z=u_mu.LineIn().direction[2];
+
+        outOrigin.x=u_mu.LineOut().origin[0];
+        outOrigin.y=u_mu.LineOut().origin[1];
+        outOrigin.z=u_mu.LineOut().origin[2];
+
+        outDir.x=u_mu.LineOut().direction[0];
+        outDir.y=u_mu.LineOut().direction[1];
+        outDir.z=u_mu.LineOut().direction[2];
+
+        tree->Fill();
+    }
+
+    tree->Write();
+    file->Close();
+
+    return;
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 void IBMuonCollection::DumpTxt(const char *filename)
 {
     std::cout << "\nDUMP on txt file for Calvini 3D reconstruction\n";
@@ -253,7 +315,7 @@ void IBMuonCollection::DumpTxt(const char *filename)
 }
 
 
-// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * @brief IBMuonCollection::GetAlignment
  *  compute mean of rotation and shift of muon out relative to in
@@ -280,9 +342,9 @@ std::pair<HVector3f,HVector3f> IBMuonCollection::GetAlignment()
     HVector3f rot;
     rot.head(3) = direction.normalized();
     rot(3) = direction.norm();
-    std::cout << " ---- muons self adjust (use with care!) ----- \n";
-    std::cout << "Rotation : " << rot.transpose() << "\n";
-    std::cout << "Position : " << position.transpose() << "\n\n";
+//    std::cout << " ---- muons self adjust (use with care!) ----- \n";
+//    std::cout << "Rotation : " << rot.transpose() << "\n";
+//    std::cout << "Position : " << position.transpose() << "\n\n";
 
     return std::pair<HVector3f,HVector3f>(pos,rot);
 }
@@ -310,3 +372,69 @@ void IBMuonCollection::SetAlignment(std::pair<HVector3f,HVector3f> align)
     }
 }
 
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void IBMuonCollection::dataRotoTranslation(Eigen::Matrix4f  t)
+{
+    std::cout << "\nMuon collection: apply roto-translation matrix: \n" << t <<  "\n\n";
+
+    for(int i=0; i<this->size(); ++i) {
+        MuonScatter &mu = this->operator [](i);
+
+        // IN muon roto-traslation
+        mu.LineIn().origin = t * mu.LineIn().origin;
+        mu.LineIn().direction = t * mu.LineIn().direction;
+        mu.LineIn().direction /= fabs(mu.LineIn().direction(1)); // back to slopes
+
+        // OUT muon roto-traslation
+        mu.LineOut().origin = t * mu.LineOut().origin;
+        mu.LineOut().direction = t * mu.LineOut().direction;
+        mu.LineOut().direction /= fabs(mu.LineOut().direction(1)); // back to slopes
+
+//        // if resulting muon isn't falling from sky.... reverse!
+//        if(mu.LineIn().direction[1] > 0){
+//            std::swap(mu.LineIn(),mu.LineOut());
+//            mu.LineIn().direction *= -1;
+//            mu.LineOut().direction *= -1;
+//        }
+    }
+
+    return;
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void IBMuonCollection::dataRotoTranslation(Vector3f rot, Vector3f trans)
+{
+    //If a standard right-handed Cartesian coordinate system is used, with the x-axis to the right and the y-axis up, the rotation R(θ) is counterclockwise
+    //If a left-handed Cartesian coordinate system is used (like THIS!) , with x directed to the right but y directed down, R(θ) is clockwise
+
+    rot = rot / 180. * M_PI;
+
+    Eigen::Matrix4f  t = this->createAffineMatrix(rot[0], rot[1], rot[2], trans);
+
+    std::cout << "\nMuon collection: apply roto-translation matrix: \n" << t <<  "\n\n";
+
+    for(int i=0; i<this->size(); ++i) {
+        MuonScatter &mu = this->operator [](i);
+
+        // IN muon roto-traslation
+        mu.LineIn().origin = t * mu.LineIn().origin;
+        mu.LineIn().direction = t * mu.LineIn().direction;
+        mu.LineIn().direction /= fabs(mu.LineIn().direction(1)); // back to slopes
+
+        // OUT muon roto-traslation
+        mu.LineOut().origin = t * mu.LineOut().origin;
+        mu.LineOut().direction = t * mu.LineOut().direction;
+        mu.LineOut().direction /= fabs(mu.LineOut().direction(1)); // back to slopes
+    }
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Eigen::Matrix4f  IBMuonCollection::createAffineMatrix(float a, float b, float c, Vector3f trans)
+{
+    Eigen::Transform<float, 3, Eigen::Affine> t;
+    t = Eigen::AngleAxis<float>(c, Vector3f::UnitZ());
+    t.prerotate(Eigen::AngleAxis<float>(b, Vector3f::UnitY()));
+    t.prerotate(Eigen::AngleAxis<float>(a, Vector3f::UnitX()));
+    t.pretranslate(trans);
+    return t.matrix();
+}

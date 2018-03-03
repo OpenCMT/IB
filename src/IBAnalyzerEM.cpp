@@ -804,6 +804,8 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon){
 //---- 3) Allows one to use any arbitrary path (see 3-path implementation)
 bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath){
 
+  bool debug = false;
+
   //-------------------------
   //---- STEP #1: Fill the event info
   
@@ -838,7 +840,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     }
   }
   else {
-      //std::cout << "Evaluate muon variable failed... EXITING!" << std::endl;
+      if(debug)
+        std::cout << "Evaluate muon variable failed... EXITING!" << std::endl;
       return false;
   }
 
@@ -856,11 +859,13 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     //---- Require entry and exit points
     HPoint3f entry_pt, exit_pt;
     if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) {
-        //std::cout << "No entry point.... EXITING!" << std::endl;
+        if(debug)
+            std::cout << "No entry point.... EXITING!" << std::endl;
         return false;
     }
     if( !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) ) {
-        //std::cout << "No exit point.... EXITING!" << std::endl;
+        if(debug)
+            std::cout << "No exit point.... EXITING!" << std::endl;
         return false;
     }
     front_pt = entry_pt;
@@ -902,7 +907,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
 	  //---- Remove points which are unreasonably far away
       if(entry_length > trackLength || exit_length > trackLength){
-          //std::cout << "Track length smaller than entry-exit distance.... EXITING!" << std::endl;
+          if(debug)
+              std::cout << "Track length smaller than entry-exit distance.... EXITING!" << std::endl;
           return false;
       }
 	  
@@ -926,7 +932,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   else{
     //---- If muonPath is empty, return
     if(muonPath.size()==0){
-        //std::cout << "Empty muon path.... EXITING!" << std::endl;
+        if(debug)
+            std::cout << "Empty muon path.... EXITING!" << std::endl;
         return false;
     }
     //---- Otherwise append all the points
@@ -1178,17 +1185,15 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   if(!noAddMuon && evc.elements.size()>1 && evc.header.Di[0]!=NAN){
     m_d->m_Events.push_back(evc);
 
-//      /// cross check
-//      //std::cout << "\n\n Add Event to collection\n";
-//      Vector< Event::Element >::iterator itre = evc.elements.begin();
-//      while (itre != evc.elements.end()) {
-//          Event::Element & elc = *itre;
-//          std::cout << "Voxel pw " << elc.pw << std::endl;
-//          ++itre;
-//      }
-      return true;
+    //---- cross check
+    if(debug){
+        std::cout << "\n\n Add Event to collection\n";
+        this->DumpEvent(&evc);
+    }
+    return true;
   } else{
-      //std::cout << "Do not add muon flag.... EXITING!" << std::endl;
+      if(debug)
+          std::cout << "Do not add muon flag.... EXITING!" << std::endl;
       return false;
   }
 }
@@ -1245,7 +1250,7 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
     }
   }
   //---- Pass the muons to the base class
-  std::cout << "\nDone, now calling base class..." << std::endl;
+  std::cout << "\nDone, now calling base class... adding muon collection of " << muons->size() << " muons" << std::endl;
   BaseClass::SetMuonCollection(muons);
 
 //  //--- cross check: dump muon collection
@@ -1420,7 +1425,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
 
     /// open file, tree
     std::cout << "\n*** Dump event collection from IBAnalyzer on file " << filename << std::endl;
-    static TFile *file = new TFile(filename,"update");
+    static TFile *file = new TFile(filename,"RECREATE");
     gDirectory->cd(file->GetPath());
     gROOT->ProcessLine("#include<vector>");
 
@@ -1434,16 +1439,17 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
     float mom, sumLij, dist, DP, DX, DT, DZ;
     float Smedian;
     std::vector<float> *vpw = new std::vector<float>();
-    TBranch *bev = tree->Branch("ev",&ev,"ev/I");
-    TBranch *bp = tree->Branch("p",&mom,"p/F");
-    TBranch *bsumLij = tree->Branch("sumLij",&sumLij,"sumLij/F");
-    TBranch *bdist = tree->Branch("dist",&dist,"dist/F");
-    TBranch *bDP = tree->Branch("DP",&DP,"DP/F");
-    TBranch *bDX = tree->Branch("DX",&DX,"DX/F");
-    TBranch *bDT = tree->Branch("DT",&DT,"DT/F");
-    TBranch *bDZ = tree->Branch("DZ",&DZ,"DZ/F");
-    TBranch *bSmedian = tree->Branch("Smedian",&Smedian,"Smedian/F");
-    TBranch *bpw = tree->Branch("pw","vector<float>",&vpw);
+
+    tree->Branch("ev",&ev,"ev/I");
+    tree->Branch("p",&mom,"p/F");
+    tree->Branch("sumLij",&sumLij,"sumLij/F");
+    tree->Branch("dist",&dist,"dist/F");
+    tree->Branch("DP",&DP,"DP/F");
+    tree->Branch("DX",&DX,"DX/F");
+    tree->Branch("DT",&DT,"DT/F");
+    tree->Branch("DZ",&DZ,"DZ/F");
+    tree->Branch("Smedian",&Smedian,"Smedian/F");
+    tree->Branch("pw","vector<float>",&vpw);
 
 
     /// event loop
@@ -1484,33 +1490,17 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
                Smedian = Si[nS / 2];
            else
                Smedian = (Si[nS / 2 - 1] + Si[nS / 2]) / 2;
-
-//           // debug
-//           std::cout << "Event pTrue " << evc.header.pTrue << std::endl;
-//           for(int i=0; i<nS; i++) std::cout << Si[i] << ",";
-//           std::cout << "\n     MEDIAN =" << Smedian << std::endl;
-           bSmedian->Fill();
        }
 
-        bev->Fill();
-        bp->Fill();
-        bsumLij->Fill();
-
-        bDP->Fill();
-        bDX->Fill();
-        bDT->Fill();
-        bDZ->Fill();
-
-        bpw->Fill();
+        tree->Fill();
 
         ev++;
         itr++;
     }
 
-    /// muon loop to add poca information
-    IBMuonCollection *muons = this->GetMuonCollection();
-    dist = 0;
-
+//    /// muon loop to add poca information
+//    IBMuonCollection *muons = this->GetMuonCollection();
+//    dist = 0;
 //    for(int i=0; i<muons->size(); ++i){
 //        MuonScatterData muon = muons->At(i);
 //        if(m_PocaAlgorithm){
@@ -1521,17 +1511,10 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
 //            bdist->Fill();
 //        }
 //    }
+//    tree->Write("", TObject::kOverwrite);
 
-//    // testing
-//    int sizeev = m_d->m_Events.size();
-//    int sizemu = muons->size();
-
-    tree->Write("", TObject::kOverwrite);
-    delete tree;
-
-    file->Write();
+    tree->Write();
     file->Close();
-    delete file;
 
     return;
 }

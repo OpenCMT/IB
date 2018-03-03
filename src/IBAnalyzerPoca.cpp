@@ -43,7 +43,18 @@ public:
     {
         assert(m_PocaAlgorithm);
         if(m_PocaAlgorithm->evaluate(muon)) {
-            m_Data.push_back(m_PocaAlgorithm->getPoca());
+
+            HPoint3f poca = m_PocaAlgorithm->getPoca();
+
+            //---- Check that the POCA is valid
+            HVector3f in, out;
+            in  = poca - muon.LineIn().origin;
+            out = muon.LineOut().origin - poca;
+            float poca_prj = in.transpose() * out;
+            bool validPoca = poca_prj > 0;
+
+            if(validPoca)
+                m_Data.push_back(m_PocaAlgorithm->getPoca());
             return true;
         } else return false;
     }
@@ -87,5 +98,13 @@ void IBAnalyzerPoca::Run(unsigned int iterations, float muons_ratio) {
 void IBAnalyzerPoca::SetPocaAlgorithm(IBPocaEvaluator *poca)
 {   d->m_PocaAlgorithm = poca;  }
 
-
+void IBAnalyzerPoca::SetMuonCollection(IBMuonCollection *muons)
+{
+    uLibAssert(muons);
+    for(int i=0; i<muons->size(); ++i)
+    {
+        this->AddMuon(muons->At(i));
+    }
+    BaseClass::SetMuonCollection(muons);
+}
 

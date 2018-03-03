@@ -65,11 +65,15 @@ public:
 
     void PrintSelf(std::ostream &o);
     void DumpTTree(const char *filename);
+    void DumpSimpleTree(const char *filename);
+
     void DumpTxt(const char *filename);
     std::pair<HVector3f, HVector3f> GetAlignment();
     void SetAlignment(std::pair<HVector3f, HVector3f> align);
 
-
+    void dataRotoTranslation(Eigen::Matrix4f  t);
+    void dataRotoTranslation(Vector3f rot, Vector3f trans);
+    Eigen::Matrix4f createAffineMatrix(float a, float b, float c, Vector3f trans);
 
 private:
     class IBMuonCollectionPimpl *d;

@@ -104,17 +104,19 @@ public:
         m_Data        = this->evaluateVariables(  m_muon.LineIn(), m_muon.LineOut());
 
         if (unlikely((fabs(m_Data(0)) > 1)||(fabs(m_Data(2)) > 1))){ // << HARDCODED!!!
-	  m_integrity = false;
-	}
+              //std::cout << "Rejecting muon..... scattering >1" << std::endl;
+              m_integrity = false;
+        }
         m_ErrorMatrix = this->evaluateErrorMatrix(m_muon.LineIn(), m_muon.LineOut());
 
-// SV 20160930: FIXED!
+        // SV 20160930: FIXED!
         if (unlikely((m_ErrorMatrix(0,0)>0.03 || m_ErrorMatrix(1,1)>1500 ||
                       m_ErrorMatrix(2,2)>0.03 || m_ErrorMatrix(3,3)>1500 ))){ // << HARDCODED
-	  m_integrity = false;
-	}
+            //std::cout << "Rejecting muon..... abnormal error matrix " << std::endl;
+            m_integrity = false;
+        }
 	
-
+        //std::cout << "Muon variables : " << m_Data << "-----------> integrity " << m_integrity << std::endl;
 
 #ifndef NDEBUG
         if (m_integrity) {
@@ -545,7 +547,11 @@ public:
     HPoint3f projectOnContainer(const HLine3f &muon_out_track)
     {
         HPoint3f pt;
-        if (!m_tracer->GetExitPoint(muon_out_track, pt)) m_integrity = false;
+        if (!m_tracer->GetExitPoint(muon_out_track, pt)){
+            //std::cout << "GetExitPoint failure....." << std::endl;
+            m_integrity = false;
+        }
+
         return pt;
     }
 

@@ -42,6 +42,8 @@ public:
 
     void SetPocaAlgorithm(IBPocaEvaluator *poca);
 
+    void SetMuonCollection(IBMuonCollection *muons);
+
 private:
     class IBAnalyzerPocaPimpl *d;
 };
