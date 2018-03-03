@@ -16,12 +16,12 @@ set(SOURCES
 ################################################################################
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")
 
-## MUDULE FIND PCL PACKAGE ------------------------------------------------------ ##
-SET(PCL_DIR "/home/sara/devel/pcl/pcl-pcl-1.8.1/build/PCLConfig.cmake")
-find_package(PCL 1.3 REQUIRED COMPONENTS common io)
-include_directories(${PCL_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+### MUDULE FIND PCL PACKAGE ------------------------------------------------------ ##
+#SET(PCL_DIR "/home/sara/devel/pcl/pcl-pcl-1.8.1/build/PCLConfig.cmake")
+#find_package(PCL 1.3 REQUIRED COMPONENTS common io)
+#include_directories(${PCL_INCLUDE_DIRS})
+#link_directories(${PCL_LIBRARY_DIRS})
+#add_definitions(${PCL_DEFINITIONS})
 
 ################################################################################
 include(uLibDebugMacro)
@@ -82,7 +82,7 @@ if(ULIB_FOUND AND IB_FOUND)
     ############################################################################
          ${MUTOMIB_LIBRARIES}
     ############################################################################
-         ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES}
+     #    ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES}
     ############################################################################
     #    MANUAL INLCLUDE EXTERNAL DEPENDENCIES
     #    ${Boost_SERIALIZATION_LIBRARY}

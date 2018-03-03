@@ -30,16 +30,16 @@
 #include <iostream>
 #include <fstream>
 
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
-#include<pcl/registration/icp.h>
-#include <pcl/common/common.h>
-#include <pcl/common/angles.h>
-#include <pcl/common/transforms.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/registration/transformation_estimation_svd.h>
+//#include <pcl/io/pcd_io.h>
+//#include <pcl/point_types.h>
+//#include<pcl/registration/icp.h>
+//#include <pcl/common/common.h>
+//#include <pcl/common/angles.h>
+//#include <pcl/common/transforms.h>
+//#include <pcl/point_cloud.h>
+//#include <pcl/point_types.h>
+//#include <pcl/io/pcd_io.h>
+//#include <pcl/registration/transformation_estimation_svd.h>
 
 #include <TFile.h>
 #include <TTree.h>
@@ -753,88 +753,88 @@ HPoint3f voxelToCoord(Vector3i vox, Vector3f spacing, HVector3f B_collection){
     return B_vox;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-pcl::PointCloud<pcl::PointXYZ> csvToPCD(std::string filename){
+//////////////////////////////////////////////////////////////////////////////////
+//pcl::PointCloud<pcl::PointXYZ> csvToPCD(std::string filename){
 
-    std::cout << "\nReading file  " << filename << std::endl;
+//    std::cout << "\nReading file  " << filename << std::endl;
 
-    // reference system compatibility from Paolo's to IB
-    // scale factor form m->cm, origin on first voxel B_vertex
-    float scale = 100.;
-    pcl::PointXYZ origin;
-    origin.x = -113.;
-    origin.y = -183.;
-    origin.z = -101.;
+//    // reference system compatibility from Paolo's to IB
+//    // scale factor form m->cm, origin on first voxel B_vertex
+//    float scale = 100.;
+//    pcl::PointXYZ origin;
+//    origin.x = -113.;
+//    origin.y = -183.;
+//    origin.z = -101.;
 
-    std::ifstream file(filename);
-    std::string line;
-    std::string col;
+//    std::ifstream file(filename);
+//    std::string line;
+//    std::string col;
 
-    // header
-    std::getline(file, line, ',');
-    int N = atoi(line.c_str());
-    //std::cout << "N=" << N << std::endl;
+//    // header
+//    std::getline(file, line, ',');
+//    int N = atoi(line.c_str());
+//    //std::cout << "N=" << N << std::endl;
 
-    // spacing
-    float voxSize = 0.;
-    HVector3f B_collection;
-    if(p.detector.voxelReferenceSystem){
-        std::getline(file, line, ',');
-        voxSize = atof(line.c_str());
+//    // spacing
+//    float voxSize = 0.;
+//    HVector3f B_collection;
+//    if(p.detector.voxelReferenceSystem){
+//        std::getline(file, line, ',');
+//        voxSize = atof(line.c_str());
 
-        std::getline(file, line, ',');
-        float Bx = atof(line.c_str());
-        std::getline(file, line, ',');
-        float By = atof(line.c_str());
-        std::getline(file, line, ',');
-        float Bz = atof(line.c_str());
-        B_collection = HVector3f(Bx,By,Bz);
-    }
+//        std::getline(file, line, ',');
+//        float Bx = atof(line.c_str());
+//        std::getline(file, line, ',');
+//        float By = atof(line.c_str());
+//        std::getline(file, line, ',');
+//        float Bz = atof(line.c_str());
+//        B_collection = HVector3f(Bx,By,Bz);
+//    }
 
-    //Fill Point Cloud Data
-    pcl::PointCloud<pcl::PointXYZ> cloud;
-    cloud.width = N;
-    cloud.height = 1;
-    cloud.is_dense = false;
-    cloud.points.resize(cloud.width * cloud.height);
+//    //Fill Point Cloud Data
+//    pcl::PointCloud<pcl::PointXYZ> cloud;
+//    cloud.width = N;
+//    cloud.height = 1;
+//    cloud.is_dense = false;
+//    cloud.points.resize(cloud.width * cloud.height);
 
-    // data set
-    std::getline(file, line);
-    int i=0;
+//    // data set
+//    std::getline(file, line);
+//    int i=0;
 
-    while ( std::getline(file, line) && i<N) {
+//    while ( std::getline(file, line) && i<N) {
 
-        std::istringstream csvStream(line);
+//        std::istringstream csvStream(line);
 
-        std::getline(csvStream, col, ',');
-        float X = atof(col.c_str());
-        std::getline(csvStream, col, ',');
-        float Y = atof(col.c_str());
-        std::getline(csvStream, col, ',');
-        float Z = atof(col.c_str());
+//        std::getline(csvStream, col, ',');
+//        float X = atof(col.c_str());
+//        std::getline(csvStream, col, ',');
+//        float Y = atof(col.c_str());
+//        std::getline(csvStream, col, ',');
+//        float Z = atof(col.c_str());
 
-        if(p.detector.voxelReferenceSystem){
-            Vector3f spacing(voxSize, voxSize, voxSize);
+//        if(p.detector.voxelReferenceSystem){
+//            Vector3f spacing(voxSize, voxSize, voxSize);
 
-            HPoint3f p = voxelToCoord(Vector3i(X,Y,Z),spacing,B_collection);
-            cloud.points[i].x = p[0];
-            cloud.points[i].y = p[1];
-            cloud.points[i].z = p[2];
-        } else {
-            cloud.points[i].x = X * scale + origin.x;
-            cloud.points[i].y = Y * scale + origin.y;
-            cloud.points[i].z = Z * scale + origin.z;
-        }
+//            HPoint3f p = voxelToCoord(Vector3i(X,Y,Z),spacing,B_collection);
+//            cloud.points[i].x = p[0];
+//            cloud.points[i].y = p[1];
+//            cloud.points[i].z = p[2];
+//        } else {
+//            cloud.points[i].x = X * scale + origin.x;
+//            cloud.points[i].y = Y * scale + origin.y;
+//            cloud.points[i].z = Z * scale + origin.z;
+//        }
 
-        //std::cout << "Point " << i << "\t x=" << cloud.points[i].x << ", y=" << cloud.points[i].y << ", z=" << cloud.points[i].z << std::endl;
-        i++;
-    }
+//        //std::cout << "Point " << i << "\t x=" << cloud.points[i].x << ", y=" << cloud.points[i].y << ", z=" << cloud.points[i].z << std::endl;
+//        i++;
+//    }
 
-//    filename += ".pcd";
-//    pcl::io::savePCDFileASCII(filename,cloud);
+////    filename += ".pcd";
+////    pcl::io::savePCDFileASCII(filename,cloud);
 
-    return cloud;
-}
+//    return cloud;
+//}
 
 ////////////////////////////////////////////////////////////////////////////////
 int doIterations(const char *file_in,
@@ -1003,67 +1003,88 @@ int doIterations(const char *file_in,
         std::cout << "\n--------- DETECTOR  ROTO-TRANSLATION: Muons coordinate system transformation ---------\n ";
 
         if(p.detector.findMatrix){
-             // load point sets
-            pcl::PointCloud<pcl::PointXYZ> cloud1 = csvToPCD(p.detector.file1);
-            pcl::PointCloud<pcl::PointXYZ> cloud2 = csvToPCD(p.detector.file2);
+//             // load point sets
+//            pcl::PointCloud<pcl::PointXYZ> cloud1 = csvToPCD(p.detector.file1);
+//            pcl::PointCloud<pcl::PointXYZ> cloud2 = csvToPCD(p.detector.file2);
 
-            // trasformation estimation: find the rigid transformation matrix that can be used to transform one to other
-            pcl::registration::TransformationEstimationSVD<pcl::PointXYZ,pcl::PointXYZ> TESVD;
-            pcl::registration::TransformationEstimationSVD<pcl::PointXYZ,pcl::PointXYZ>::Matrix4 transformation;
-            TESVD.estimateRigidTransformation (cloud1,cloud2,transformation);
+//            // trasformation estimation: find the rigid transformation matrix that can be used to transform one to other
+//            pcl::registration::TransformationEstimationSVD<pcl::PointXYZ,pcl::PointXYZ> TESVD;
+//            pcl::registration::TransformationEstimationSVD<pcl::PointXYZ,pcl::PointXYZ>::Matrix4 transformation;
+//            TESVD.estimateRigidTransformation (cloud1,cloud2,transformation);
 
-            std::cout << "\n\nThe Estimated Rotation-Translation matrix is : \n" << std::endl;
-            printf ("\n");
-            printf ("    | %6.3f %6.3f %6.3f | \n", transformation (0,0), transformation (0,1), transformation (0,2));
-            printf ("R = | %6.3f %6.3f %6.3f | \n", transformation (1,0), transformation (1,1), transformation (1,2));
-            printf ("    | %6.3f %6.3f %6.3f | \n", transformation (2,0), transformation (2,1), transformation (2,2));
-            printf ("\n");
-            printf ("t = < %0.3f, %0.3f, %0.3f >\n", transformation (0,3), transformation (1,3), transformation (2,3));
+//            std::cout << "\n\nThe Estimated Rotation-Translation matrix is : \n" << std::endl;
+//            printf ("\n");
+//            printf ("    | %6.3f %6.3f %6.3f | \n", transformation (0,0), transformation (0,1), transformation (0,2));
+//            printf ("R = | %6.3f %6.3f %6.3f | \n", transformation (1,0), transformation (1,1), transformation (1,2));
+//            printf ("    | %6.3f %6.3f %6.3f | \n", transformation (2,0), transformation (2,1), transformation (2,2));
+//            printf ("\n");
+//            printf ("t = < %0.3f, %0.3f, %0.3f >\n", transformation (0,3), transformation (1,3), transformation (2,3));
 
-            // rotate muon collection reference system
-            Eigen::Matrix4f matrix = Eigen::Matrix4f::Identity();
-            for(int ir=0; ir<3; ir++){
-                matrix(ir,3) = transformation (ir,3);
-                for(int ic=0; ic<3; ic++)
-                    matrix(ir,ic) =  transformation(ir,ic);
-            }
+//            // rotate muon collection reference system
+//            Eigen::Matrix4f matrix = Eigen::Matrix4f::Identity();
+//            for(int ir=0; ir<3; ir++){
+//                matrix(ir,3) = transformation (ir,3);
+//                for(int ic=0; ic<3; ic++)
+//                    matrix(ir,ic) =  transformation(ir,ic);
+//            }
 
-            /// Evaluate transformation "goodness" via Sum(T*point - point) / Npoints
-            // Executing the transformation from cloud 1
-            pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZ> ());
-            pcl::transformPointCloud (cloud1, *transformed_cloud, matrix);
+//            /// Evaluate transformation "goodness" via Sum(T*point - point) / Npoints
+//            // Executing the transformation from cloud 1
+//            pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZ> ());
+//            pcl::transformPointCloud (cloud1, *transformed_cloud, matrix);
 
-            float sumDiscrep = 0.;
-            for(int ip=0; ip< cloud2.size(); ip++){
-                float Dx =  transformed_cloud->points[ip].x-cloud2.points[ip].x;
-                float Dy = transformed_cloud->points[ip].y-cloud2.points[ip].y;
-                float Dz =  transformed_cloud->points[ip].z-cloud2.points[ip].z;
+//            float sumDiscrep = 0.;
+//            for(int ip=0; ip< cloud2.size(); ip++){
+//                float Dx =  transformed_cloud->points[ip].x-cloud2.points[ip].x;
+//                float Dy = transformed_cloud->points[ip].y-cloud2.points[ip].y;
+//                float Dz =  transformed_cloud->points[ip].z-cloud2.points[ip].z;
 
-                Vector3f discrep(Dx,Dy,Dz);
-                float norm = discrep.norm();
-                sumDiscrep += norm;
-                //std::cout << "Point " << ip << "\t Dx=" << Dx << ", Dy=" << Dy << ", Dz=" << Dz << "----> " << norm << " - Sum norm " << sumDiscrep << std::endl;
-            }
-            sumDiscrep /= cloud2.size();
-            std::cout << "\n -----> Mean |T*point - point| = " << sumDiscrep << " [cm]" << std::endl;
+//                Vector3f discrep(Dx,Dy,Dz);
+//                float norm = discrep.norm();
+//                sumDiscrep += norm;
+//                //std::cout << "Point " << ip << "\t Dx=" << Dx << ", Dy=" << Dy << ", Dz=" << Dz << "----> " << norm << " - Sum norm " << sumDiscrep << std::endl;
+//            }
+//            sumDiscrep /= cloud2.size();
+//            std::cout << "\n -----> Mean |T*point - point| = " << sumDiscrep << " [cm]" << std::endl;
 
-            if(p.detector.dump){
-                char file[200];
-                sprintf(file,"%s_transformation_analysis.txt",p.file_out);
-                std::ofstream ofs;
-                ofs.open (file, std::ofstream::out | std::ofstream::app);
+//            if(p.detector.dump){
+//                char file[200];
+//                sprintf(file,"%s_transformation_analysis.txt",p.file_out);
+//                std::ofstream ofs;
+//                ofs.open (file, std::ofstream::out | std::ofstream::app);
 
-                ofs << "\n--------- DETECTOR  ROTO-TRANSLATION: Muons coordinate system transformation --------- ";
-                ofs << "\nComputing transformation " << "\n  * from points in file " << p.detector.file1 << "\n  * to points in file " << p.detector.file2 << std::endl;
-                ofs <<  "\nThe Estimated Rotation-Translation matrix is : \n" << matrix << std::endl;
-                ofs <<  "\n -----> Mean |T*point - point| = " << sumDiscrep << " [cm]" << std::endl;
+//                ofs << "\n--------- DETECTOR  ROTO-TRANSLATION: Muons coordinate system transformation --------- ";
+//                ofs << "\nComputing transformation " << "\n  * from points in file " << p.detector.file1 << "\n  * to points in file " << p.detector.file2 << std::endl;
+//                ofs <<  "\nThe Estimated Rotation-Translation matrix is : \n" << matrix << std::endl;
+//                ofs <<  "\n -----> Mean |T*point - point| = " << sumDiscrep << " [cm]" << std::endl;
 
-                ofs.close();
+//                ofs.close();
 
-                return 0;
-            }
+//                return 0;
+//            }
 
             /// transform muons
+            Eigen::Matrix4f matrix = Eigen::Matrix4f::Identity();
+            matrix(0,0) = -0.0109069;
+            matrix(1,0) = -0.999912;
+            matrix(2,0) = -0.00755119;
+            matrix(3,0) = 0 ;
+
+            matrix(0,1) =  0.999908;
+            matrix(1,1) = -0.0109675;
+            matrix(2,1) =  0.00802733;
+            matrix(3,1) = 0;
+
+            matrix(0,2) = -0.00810945;
+            matrix(1,2) = -0.00746294;
+            matrix(2,2) = 0.999939;
+            matrix(3,2) = 0;
+
+            matrix(0,3) = 103.112;
+            matrix(1,3) = -104.685;
+            matrix(2,3) = 0.5891;
+            matrix(3,3) = 1;
+
             muons.dataRotoTranslation(matrix);
         } else {
             std::cout << "Rotation : " << p.detector.rotation.transpose() << "\n";
