@@ -75,12 +75,6 @@ private:
     IBVoxCollection    *m_VoxCollection;
 };
 
-
-
-
-
-
-
 #endif // IBANALYZER_H
 
 

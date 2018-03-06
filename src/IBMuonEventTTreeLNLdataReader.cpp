@@ -99,10 +99,17 @@ public:
 
     void init(TFile * file)
     {
+        // init variablers
+        m_pos = 0;
+        m_max_event = 0;
+        m_total_events = 0;
+
         if (file->IsZombie()) {
             printf("Requested file not found!\nAborting...\n");
             exit(0);
         }
+
+        // init trees
         TTree* t = (TTree*)file->Get("RADMU");
         if (t) {
             init(t);
@@ -115,7 +122,7 @@ public:
     void init(TTree * tree)
     {
         m_tree = tree;
-        m_max_event = m_tree->GetEntries();	
+        m_max_event = m_tree->GetEntries();
         //std::cout << "Requested event " << m_total_events+m_pos << " from max of " << m_max_event << std::endl;
         if (m_total_events == 0.f) m_total_events = m_max_event;
         if(m_total_events+m_pos>m_max_event) {

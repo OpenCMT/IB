@@ -141,14 +141,18 @@ void IBAnalyzerEMPimpl::BackProject(Event *evc){
 void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
 {    
     unsigned int start = 0;
-    unsigned int end = (unsigned int) (m_Events.size() * muons_ratio);
+    // the following line gives wrong end value in some situations, don't know why......
+    //unsigned int end = (unsigned int) (std::floor(m_Events.size() * muons_ratio));
+    unsigned int end = (unsigned int) (m_Events.size());
     unsigned int ev = start;
+
+    std::cout << "IBAnalyzerEMPimpl::Evaluate form start " << start << " to end " << end << " collection size " << m_Events.size() << " muons ratio " << muons_ratio << std::endl;
 
     if(m_SijAlgorithm) {
       // Projection
       #pragma omp parallel for
       for (unsigned int i = start; i < end; ++i){
-	this->Project(&m_Events[i]);
+    this->Project(&m_Events[i]);
       }
       #pragma omp barrier
       
@@ -159,8 +163,6 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
           ev++;
       }
       #pragma omp barrier
-
-
     }
     else {
         std::cerr << "Error: Lamda ML Algorithm not set\n";
@@ -196,7 +198,7 @@ void IBAnalyzerEMPimpl::Evaluate(float muons_ratio)
     // // 	  int sijPos = 0;
     // // 	  for(; sijPos < v.size() && v[sijPos] != sij; sijPos++);
     // // 	  rankSum += float(sijPos - v.size()/2)/sqrt(float(v.size()));
-    // // 	}
+     // // 	}
     // // 	rankSum = rankSum/sqrt(m_Events[i].elements.size());
     // // 	if(rankSum < m_rankLimit) killList.push_back(&m_Events.at(i));
     // //   }

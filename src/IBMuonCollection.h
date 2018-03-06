@@ -70,10 +70,13 @@ public:
     void DumpTxt(const char *filename);
     std::pair<HVector3f, HVector3f> GetAlignment();
     void SetAlignment(std::pair<HVector3f, HVector3f> align);
+    void PerformMuonSelfAlignment();
 
     void dataRotoTranslation(Eigen::Matrix4f  t);
     void dataRotoTranslation(Vector3f rot, Vector3f trans);
     Eigen::Matrix4f createAffineMatrix(float a, float b, float c, Vector3f trans);
+
+    void AddCollection(IBMuonCollection &muonsColl);
 
 private:
     class IBMuonCollectionPimpl *d;

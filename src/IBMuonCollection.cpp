@@ -184,11 +184,10 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
     if(this->size()!=0)
         o << " Muons passed: " << this->size() << "\n";
 
-    for(int i=0; i < 3; ++i )
-    {
-        const MuonScatter &u_mu = this->At(i);
-        std::cout << u_mu;
-    }
+    o << "\n First muon: \n";
+    o << this->At(0);
+    o << "\n Last muon: \n";
+    o << this->At(this->size() - 1);
 
 }
 
@@ -373,6 +372,42 @@ void IBMuonCollection::SetAlignment(std::pair<HVector3f,HVector3f> align)
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void IBMuonCollection::PerformMuonSelfAlignment(){
+    std::cout << "\n--------- DATA ALIGNMENT.... (muon self adjust)" << std::endl;
+    std::pair<HVector3f,HVector3f> align = GetAlignment();
+    align.first << 0,0,0,0;
+    SetAlignment(align);
+    align = GetAlignment();
+    align.first << 0,0,0,0;
+    SetAlignment(align);
+    align = GetAlignment();
+    align.first << 0,0,0,0;
+    SetAlignment(align);
+    align = GetAlignment();
+    align.first << 0,0,0,0;
+    SetAlignment(align);
+    align = GetAlignment();
+    align.first << 0,0,0,0;
+    SetAlignment(align);
+    align = GetAlignment();
+    SetAlignment(align);
+    align = GetAlignment();
+    SetAlignment(align);
+    align = GetAlignment();
+    SetAlignment(align);
+    align = GetAlignment();
+    SetAlignment(align);
+    align = GetAlignment();
+    SetAlignment(align);
+    align = GetAlignment();
+    SetAlignment(align);
+    align = GetAlignment();
+    SetAlignment(align);
+
+    return;
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void IBMuonCollection::dataRotoTranslation(Eigen::Matrix4f  t)
 {
     std::cout << "\nMuon collection: apply roto-translation matrix: \n" << t <<  "\n\n";
@@ -438,3 +473,15 @@ Eigen::Matrix4f  IBMuonCollection::createAffineMatrix(float a, float b, float c,
     t.pretranslate(trans);
     return t.matrix();
 }
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void IBMuonCollection::AddCollection(IBMuonCollection &muonsColl){
+
+    for(int i=0; i < muonsColl.size(); ++i ){
+                MuonScatter mu = muonsColl.At(i);
+                this->AddMuon(mu);
+    }
+
+    return;
+}
+
