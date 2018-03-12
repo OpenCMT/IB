@@ -247,11 +247,14 @@ void IBMuonCollection::DumpSimpleTree(const char *filename)
 
     POINT inOrigin, outOrigin;
     POINT inDir, outDir;
+    float inP, outP;
 
     tree->Branch("inOrigin",&inOrigin,"x:y:z");
     tree->Branch("inDir",&inDir,"x:y:z");
+    tree->Branch("inP",&inP,"inP/F");
     tree->Branch("outOrigin",&outOrigin,"x:y:z");
     tree->Branch("outDir",&outDir,"x:y:z");
+    tree->Branch("outP",&outP,"outP/F");
 
     /// event loop
     std::cout << "Reading " << this->size() << " muons " << std::endl;
@@ -268,6 +271,8 @@ void IBMuonCollection::DumpSimpleTree(const char *filename)
         inDir.y=u_mu.LineIn().direction[1];
         inDir.z=u_mu.LineIn().direction[2];
 
+        inP=u_mu.GetMomentum();
+
         outOrigin.x=u_mu.LineOut().origin[0];
         outOrigin.y=u_mu.LineOut().origin[1];
         outOrigin.z=u_mu.LineOut().origin[2];
@@ -275,6 +280,8 @@ void IBMuonCollection::DumpSimpleTree(const char *filename)
         outDir.x=u_mu.LineOut().direction[0];
         outDir.y=u_mu.LineOut().direction[1];
         outDir.z=u_mu.LineOut().direction[2];
+
+        outP=u_mu.GetMomentumPrime();
 
         tree->Fill();
     }
