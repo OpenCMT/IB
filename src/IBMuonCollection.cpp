@@ -200,6 +200,7 @@ void IBMuonCollection::DumpTTree(const char *filename)
     char name[100];
     sprintf(name,"muons");
     gDirectory->cd(file->GetPath());
+
     TTree *tree = new TTree(name,name);
 
     uLib::MuonScatter u_mu;
