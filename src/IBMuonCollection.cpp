@@ -311,8 +311,10 @@ void IBMuonCollection::DumpTxt(const char *filename)
         file << inPos[0] << " " << inPos[1] << " " << inPos[2] << " " << inDir[0]/inDir[1] << " " << inDir[2]/inDir[1] << " ";
 
         HPoint3f outPos = mu.LineOut().origin;
+        HPoint3f outDir = mu.LineOut().direction;
+
         if(!std::isnan(outPos[0]))
-            file << outPos[0] << " " << outPos[1] << " " << outPos[2] << "\n";
+            file << outPos[0] << " " << outPos[1] << " " << outPos[2] << " " << outDir[0]/outDir[1] << " " << outDir[2]/outDir[1] << "\n";
         else
             file << "\n";
     }
