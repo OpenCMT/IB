@@ -32,7 +32,7 @@
 
 struct IBVoxel {    
     uLib::Scalarf Value;
-    uLib::Scalarf SijCap;
+    uLib::Scalard SijCap;
     unsigned int  Count;
 };
 
