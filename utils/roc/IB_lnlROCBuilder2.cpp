@@ -60,8 +60,8 @@ struct Parameters {
 
 
 
-HPoint3f  img_center(-5,-95,-5);
-HVector3f img_hsize(55,70,50);
+Vector4f  img_center(-5,-95,-5);
+Vector4f img_hsize(55,70,50);
 
 
 

@@ -30,6 +30,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "IB.h"
+
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include<pcl/registration/icp.h>
@@ -64,7 +66,6 @@
 #include "IBMuonError.h"
 #include "Detectors/MuonScatter.h"
 #include "IBMuonEventTTreeReader.h"
-#include "IBMuonEventTTreeR3DmcReader.h"
 #include "IBMuonEventTTreeLNLdataReader.h"
 #include "IBVoxFilters.h"
 #include "IBAnalyzerWPoca.h"
@@ -79,7 +80,6 @@
 #include <Math/Transform.h>
 
 #include "IBMuonCollection.h"
-#include "IB.h"
 
 using namespace uLib;
 
@@ -124,15 +124,15 @@ static struct Parameters : Options
         bool axis;
         int sliceAxis;
         bool reweight;
-        HPoint3f B_block;
-        HPoint3f E_block;
+        Vector4f B_block;
+        Vector4f E_block;
     } image;
 
     struct analysisOptions {
         int sets;
         int nslices;
         float sliceThickness;
-        HVector3f sliceTolerance;
+        Vector4f sliceTolerance;
         float sliceBegin;
     } analysis;
 
@@ -230,7 +230,7 @@ std::string getFileName(std::string name)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-float getDensitySubImg(const IBVoxCollection &img, HPoint3f B, HPoint3f E) {
+float getDensitySubImg(const IBVoxCollection &img, Vector4f B, Vector4f E) {
     float density = 0;
 
     for(int i=0; i< img.GetDims().prod(); ++i) {
@@ -256,7 +256,7 @@ float getDensitySubImg(const IBVoxCollection &img, HPoint3f B, HPoint3f E) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void clipObject(const char *file, HPoint3f B, HPoint3f E, float thr, HPoint3f& B_obj, HPoint3f& E_obj, const char * vtkname){
+void clipObject(const char *file, Vector4f B, Vector4f E, float thr, Vector4f& B_obj, Vector4f& E_obj, const char * vtkname){
 
     IBVoxCollection img;
     if( !img.ImportFromVtk(file) ){
@@ -274,7 +274,7 @@ void clipObject(const char *file, HPoint3f B, HPoint3f E, float thr, HPoint3f& B
 
     B_obj = img.GetPosition().homogeneous();
     Vector3f v = Vector3f(img.GetDims().cast<float>().cwiseProduct(img.GetSpacing()));
-    HVector3f vp = HVector3f(v);
+    Vector4f vp = HVector3f(v.homogeneous());
     E_obj = B_obj + vp;
 
     std::cout << "Object clip position: " << B_obj.transpose() << "\n";
@@ -296,7 +296,7 @@ float getTotDensityImg(const IBVoxCollection &img) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-float objectDensity(const char *file_in, HPoint3f B, HPoint3f E) {
+float objectDensity(const char *file_in, Vector4f B, Vector4f E) {
 
   std::cout << "calculating object density " << std::endl;
 
@@ -308,11 +308,11 @@ float objectDensity(const char *file_in, HPoint3f B, HPoint3f E) {
     // returns in 1/m units
     img = img.LambdaToInvLrad(3.);
 
-    HVector3f slice_tolerance = HVector3f(0.,0.,0.);
+    Vector4f slice_tolerance = HVector3f(0.,0.,0.);
 
-    IBVoxCollection slice;
-    HPoint3f p1 = HPoint3f(B - slice_tolerance);
-    HPoint3f p2 = HPoint3f(E + slice_tolerance);
+    IBVoxCollection slice;    
+    Vector4f p1 = HPoint3f(B - slice_tolerance);    
+    Vector4f p2 = HPoint3f(E + slice_tolerance);
     //std::cout << "\nobjectDensity : Object B " << p1 << ", E " << p2 << std::endl;
 
     std::cout << "In bounds?" << std::endl;
@@ -354,7 +354,7 @@ float objectDensity(const char *file_in, HPoint3f B, HPoint3f E) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Vector<Vector2f> objectVarSliceDensities(const char *file_in, HPoint3f B, HPoint3f E, int nslices) {
+Vector<Vector2f> objectVarSliceDensities(const char *file_in, Vector4f B, Vector4f E, int nslices) {
 
     /// clip object
     IBVoxCollection img;
@@ -377,7 +377,7 @@ Vector<Vector2f> objectVarSliceDensities(const char *file_in, HPoint3f B, HPoint
     int ixz = p.image.sliceAxis;
     // slice
     float slice_thickness = p.analysis.sliceThickness;
-    HVector3f slice_tolerance = p.analysis.sliceTolerance;
+    Vector4f slice_tolerance = p.analysis.sliceTolerance;
     if(p.image.axis)
       slice_tolerance(ixz) = 0;
 
@@ -392,8 +392,8 @@ Vector<Vector2f> objectVarSliceDensities(const char *file_in, HPoint3f B, HPoint
     IBVoxCollection slice;
     for(int i=0; i<nslices; ++i) {
         //std::cout << "\n slice " << i << " B " << B << ", E " << E << std::endl;
-        HPoint3f p1 = HPoint3f(B - slice_tolerance);
-        HPoint3f p2 = HPoint3f(E + slice_tolerance);
+        Vector4f p1 = HPoint3f(B - slice_tolerance);
+        Vector4f p2 = HPoint3f(E + slice_tolerance);
         //std::cout << "with tolerance: B " << p1 << ", E " << p2 << std::endl;
 
         if(!(img.IsInsideBounds(p1)) ||!(img.IsInsideBounds(p2)) ){
@@ -434,7 +434,7 @@ Vector<Vector2f> objectVarSliceDensities(const char *file_in, HPoint3f B, HPoint
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Vector<Vector2f> objectSliceDensities(const char *file_in, HPoint3f B, HPoint3f E, int nslices) {
+Vector<Vector2f> objectSliceDensities(const char *file_in, Vector4f B, Vector4f E, int nslices) {
 
     /// this function computes density running over voxels, voxel dim=slice thickness
   std::cout << "Importing from vtk" << std::endl;
@@ -462,16 +462,16 @@ Vector<Vector2f> objectSliceDensities(const char *file_in, HPoint3f B, HPoint3f 
     float tol = 2.5 + 0.1;
     float start = B(2) + p.analysis.sliceBegin + 12.5;
     // region 1
-    HPoint3f Br1 = HPoint3f(B(0),B(1),start + tol);
-    HPoint3f Er1 = HPoint3f(E(0),E(1),start + 20 - tol);
+    Vector4f Br1 = HPoint3f(B(0),B(1),start + tol);
+    Vector4f Er1 = HPoint3f(E(0),E(1),start + 20 - tol);
     float IregionDensity = objectDensity(file_in, Br1, Er1);
     // region 2
-    HPoint3f Br2 = HPoint3f(B(0),B(1),start + 20 + tol);
-    HPoint3f Er2 = HPoint3f(E(0),E(1),start + 30 - tol);
+    Vector4f Br2 = HPoint3f(B(0),B(1),start + 20 + tol);
+    Vector4f Er2 = HPoint3f(E(0),E(1),start + 30 - tol);
     float IIregionDensity = objectDensity(file_in, Br2, Er2);
     // region 3
-    HPoint3f Br3 = HPoint3f(B(0),B(1),start + 30 + tol);
-    HPoint3f Er3 = HPoint3f(E(0),E(1),start + 47.5 - tol);
+    Vector4f Br3 = HPoint3f(B(0),B(1),start + 30 + tol);
+    Vector4f Er3 = HPoint3f(E(0),E(1),start + 47.5 - tol);
     float IIIregionDensity = objectDensity(file_in, Br3, Er3);
 
     std::cout << "Done" << std::endl;
@@ -481,12 +481,12 @@ Vector<Vector2f> objectSliceDensities(const char *file_in, HPoint3f B, HPoint3f 
     int ixz = p.image.sliceAxis;
     // slice
     float slice_thickness = p.analysis.sliceThickness;
-    HVector3f slice_tolerance = p.analysis.sliceTolerance;
+    Vector4f slice_tolerance = p.analysis.sliceTolerance;
     if(p.image.axis)
       slice_tolerance(ixz) = 0;
 
     // compute carota center
-    HPoint3f C = HPoint3f((B+E)*0.5);
+    Vector4f C = HPoint3f((B+E)*0.5);
     std::cout << "\n carota " << " B " << B << ", E " << E << ", C " << C << std::endl;
 
     // begin end point with tolerance
@@ -497,8 +497,8 @@ Vector<Vector2f> objectSliceDensities(const char *file_in, HPoint3f B, HPoint3f 
     IBVoxCollection slice;
     for(int i=0; i<nslices; ++i) {
         std::cout << "\n slice " << i << " B " << B << ", E " << E << std::endl;
-        HPoint3f p1 = HPoint3f(B - slice_tolerance);
-        HPoint3f p2 = HPoint3f(E + slice_tolerance);
+        Vector4f p1 = HPoint3f(B - slice_tolerance);
+        Vector4f p2 = HPoint3f(E + slice_tolerance);
         std::cout << "with tolerance: B " << p1 << ", E " << p2 << std::endl;
 
         if(!(img.IsInsideBounds(p1)) ||!(img.IsInsideBounds(p2)) ){
@@ -560,7 +560,7 @@ void goClips(const char *file){
     /// clip block
     std::cout << "Block clip:" << std::endl;
     const char * nameout = "Block_clip.vtk";
-    clipObject(file,HPoint3f(-120,-177,-90),HPoint3f(-70,-135,30),p.image.lambda_air,p.image.B_block,p.image.E_block,nameout);
+    clipObject(file,Vector4f(-120,-177,-90,1),Vector4f(-70,-135,30,1),p.image.lambda_air,p.image.B_block,p.image.E_block,nameout);
 
     std::string filename = "init_image_" + getFileName(file) + ".config";
     std::ofstream of(filename);
@@ -658,8 +658,8 @@ void objectSliceAnalisis(int argc, char **argv, TGraph *&gr_mean){
       }
 
       /// define begin end point of object
-      HPoint3f B = p.image.B_block;
-      HPoint3f E = p.image.E_block;
+      Vector4f B = p.image.B_block;
+      Vector4f E = p.image.E_block;
 
       std::cout << "Begin = " << B << std::endl;
       std::cout << "End = " << E << std::endl;
@@ -750,11 +750,11 @@ bool find_analyzer(IBAnalyzer *an) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-HPoint3f voxelToCoord(Vector3i vox, Vector3f spacing, HVector3f B_collection){
+Vector4f voxelToCoord(Vector3i vox, Vector3f spacing, Vector4f B_collection){
 
     Vector3f v = Vector3f(vox.cast<float>().cwiseProduct(spacing));
-    HVector3f vp = HVector3f(v);
-    HPoint3f B_vox = HPoint3f(B_collection + vp);
+    Vector4f vp = v.homogeneous();
+    Vector4f B_vox = HPoint3f(B_collection + vp);
 
     std::cout << "Voxel " << vox << "-------> " << B_vox << std::endl;
 
@@ -785,7 +785,7 @@ pcl::PointCloud<pcl::PointXYZ> csvToPCD(std::string filename){
 
     // spacing
     float voxSize = 0.;
-    HVector3f B_collection;
+    Vector4f B_collection;
     if(p.detector.voxelReferenceSystem){
         std::getline(file, line, ',');
         voxSize = atof(line.c_str());
@@ -824,7 +824,7 @@ pcl::PointCloud<pcl::PointXYZ> csvToPCD(std::string filename){
         if(p.detector.voxelReferenceSystem){
             Vector3f spacing(voxSize, voxSize, voxSize);
 
-            HPoint3f p = voxelToCoord(Vector3i(X,Y,Z),spacing,B_collection);
+            Vector4f p = voxelToCoord(Vector3i(X,Y,Z),spacing,B_collection);
             cloud.points[i].x = p[0];
             cloud.points[i].y = p[1];
             cloud.points[i].z = p[2];
@@ -1047,10 +1047,10 @@ int doIterations(const char *file_in,
                                 vox_size));
     voxels.SetPosition(vox_pos);
 
-    HPoint3f B_vox = HPoint3f(voxels.GetPosition().homogeneous());
+    Vector4f B_vox = HPoint3f(voxels.GetPosition().homogeneous());
     Vector3f v = Vector3f(voxels.GetDims().cast<float>().cwiseProduct(voxels.GetSpacing()));
-    HVector3f vp = HVector3f(v);
-    HPoint3f E_vox = HPoint3f(B_vox + vp);
+    Vector4f vp = v.homogeneous();
+    Vector4f E_vox = HPoint3f(B_vox + vp);
 
     std::cout << "Voxel collection boundaries " << B_vox << ", " << E_vox << std::endl;
 
@@ -1150,13 +1150,13 @@ int doIterations(const char *file_in,
             std::cout << "Create voxel mask with density threshold " << p.image.maskThreshold << std::endl;
 
             /// mask the voxels between the bottom layer and the upper chmaber
-            HPoint3f B_mask_up = HPoint3f(-113,-60,-101);
-            HPoint3f E_mask_up = HPoint3f(113,-3,101);
+            Vector4f B_mask_up = HPoint3f(-113,-60,-101);
+            Vector4f E_mask_up = HPoint3f(113,-3,101);
             voxels = voxels.maskImage(B_mask_up,E_mask_up,-0.07);
 
             /// mask the voxels between the lower chamber and the reference blocks
-            HPoint3f B_mask_dw = HPoint3f(-113,-180.5,-101);
-            HPoint3f E_mask_dw = HPoint3f(113,-163,101);
+            Vector4f B_mask_dw = HPoint3f(-113,-180.5,-101);
+            Vector4f E_mask_dw = HPoint3f(113,-163,101);
             voxels = voxels.maskImage(B_mask_dw,E_mask_dw,-0.07);
 
             /// testing.... export image

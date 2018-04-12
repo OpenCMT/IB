@@ -123,7 +123,7 @@ public:
             EV.mx_in = m_muon.LineIn().direction(0);
             EV.my_in = m_muon.LineIn().direction(1);
             EV.mz_in = m_muon.LineIn().direction(2);
-            Matrix4f m = this->getRotationMatrix(muon.LineIn().direction);
+            Matrix4f m = this->getRotationMatrix(muon.LineIn().direction());
 
             // pxtz
             Matrix4f e4_inv = Matrix4f::Zero();
@@ -184,11 +184,11 @@ public:
             chi2.xz = data.transpose() * e2_inv * data;
 
             DT.displNorm = sqrt(m_Data(1)*m_Data(1)+m_Data(3)*m_Data(3));
-            HVector3f n = getDirectorCosines(m_muon.LineIn().direction);
-            HPoint3f projected  = projectOnContainer(m_muon.LineOut());
-            HVector3f diff = m_muon.LineIn().origin-projected;
+            Vector4f n = getDirectorCosines(m_muon.LineIn().direction());
+            Vector4f projected  = projectOnContainer(m_muon.LineOut());
+            Vector4f diff = m_muon.LineIn().origin()-projected;
             float scal = diff.transpose()*n;
-            HVector3f b = diff-scal*n;
+            Vector4f b = diff-scal*n;
             DT.poutLinNorm = b.head(3).norm();
 
             m_tree->Fill();
@@ -211,13 +211,13 @@ public:
 	//---- {Ingoing} = A, {Outgoing} = B, {Line normal to A which intersects B} = C
 	//---- pX = direction vector at point X
 	
-	Vector3f pA = ingoing_track.direction.block<3,1>(0,0);
+    Vector3f pA = ingoing_track.direction().block<3,1>(0,0);
 	pA.normalize();
 	
-	Vector3f pB = outgoing_track.direction.block<3,1>(0,0);
+    Vector3f pB = outgoing_track.direction().block<3,1>(0,0);
 	pB.normalize();
 	
-	Vector3f BA = (outgoing_track.origin - ingoing_track.origin).block<3,1>(0,0);      
+    Vector3f BA = (outgoing_track.origin() - ingoing_track.origin()).block<3,1>(0,0);
 	float alpha = pA.dot(BA);
 	Vector3f BC = (BA - alpha*pA);
 	float disp = BC.norm();
@@ -225,9 +225,9 @@ public:
 	float scat = acos(pA.dot(pB));
 	if(fabs(1.-cosTheta) < 1e-6) scat = 0.;
 	if(scat!=scat){
-	  Matrix4f  rotation_matrix = this->getRotationMatrix(ingoing_track.direction);
-	  HPoint3f  prj  = this->projectOnContainer(outgoing_track);
-	  HVector3f scat1 = rotation_matrix * outgoing_track.direction; //this->getDirectorCosines(outgoing_track.direction);
+      Matrix4f  rotation_matrix = this->getRotationMatrix(ingoing_track.direction());
+	  Vector4f  prj  = this->projectOnContainer(outgoing_track);
+      Vector4f scat1 = rotation_matrix * outgoing_track.direction(); //this->getDirectorCosines(outgoing_track.direction);
 	  Scalarf scat_x = atan2(scat1(0),scat1(1));
 	  Scalarf scat_z = atan2(scat1(2),scat1(1));
 	  std::cout << "\t===> (" << scat_x << "), (" << scat_z << ")" << std::endl;
@@ -238,10 +238,10 @@ public:
       }
       else{
 	//----> OLD     
-	Matrix4f  rotation_matrix = this->getRotationMatrix(ingoing_track.direction);
-	HPoint3f  prj  = this->projectOnContainer(outgoing_track);
-	HVector3f disp = rotation_matrix * (prj - ingoing_track.origin);
-	HVector3f scat = rotation_matrix * outgoing_track.direction; //this->getDirectorCosines(outgoing_track.direction);
+    Matrix4f  rotation_matrix = this->getRotationMatrix(ingoing_track.direction());
+	Vector4f  prj  = this->projectOnContainer(outgoing_track);
+    Vector4f disp = rotation_matrix * (prj - ingoing_track.origin());
+    Vector4f scat = rotation_matrix * outgoing_track.direction(); //this->getDirectorCosines(outgoing_track.direction);
 	
 	Scalarf scat_x = atan2(scat(0),scat(1));
 	Scalarf scat_z = atan2(scat(2),scat(1));
@@ -278,24 +278,24 @@ public:
         //  in  //
         //////////
         for (int i=0; i<3; ++i) {
-            if (m_muon.ErrorIn().direction_error(i)==0.f) {
+            if (m_muon.ErrorIn().direction(i)==0.f) {
                 plus[i] = m_Data;
                 continue;
             }
             HLine3f in_variations = ingoing_track;
-            in_variations.direction(i) += m_muon.ErrorIn().direction_error(i);
+            in_variations.direction(i) += m_muon.ErrorIn().direction(i);
             plus[i] = evaluateVariables(in_variations, outgoing_track);
         }
         /////////
         // out //
         /////////
         for (int i=0; i<3; ++i) {
-            if (m_muon.ErrorOut().direction_error(i)==0.f) {
+            if (m_muon.ErrorOut().direction(i)==0.f) {
                 plus[i+3] = m_Data;
                 continue;
             }
             HLine3f out_variations = outgoing_track;
-            out_variations.direction(i) += m_muon.ErrorOut().direction_error(i);
+            out_variations.direction(i) += m_muon.ErrorOut().direction(i);
             plus[i+3] = evaluateVariables(ingoing_track, out_variations);
         }
         Vector4f d_plus[6]; // Vector4f indexes run over j, array elements over i
@@ -319,24 +319,24 @@ public:
         //  in  //
         //////////
         for (int i=0; i<3; ++i) {
-            if (m_muon.ErrorIn().direction_error(i)==0.f) {
+            if (m_muon.ErrorIn().direction(i)==0.f) {
                 minus[i] = m_Data;
                 continue;
             }
             HLine3f in_variations = ingoing_track;
-            in_variations.direction(i) -= m_muon.ErrorIn().direction_error(i);
+            in_variations.direction(i) -= m_muon.ErrorIn().direction(i);
             minus[i] = evaluateVariables(in_variations, outgoing_track);
         }
         /////////
         // out //
         /////////
         for (int i=0; i<3; ++i) {
-            if (m_muon.ErrorOut().direction_error(i)==0.f) {
+            if (m_muon.ErrorOut().direction(i)==0.f) {
                 minus[i+3] = m_Data;
                 continue;
             }
             HLine3f out_variations = outgoing_track;
-            out_variations.direction(i) -= m_muon.ErrorOut().direction_error(i);
+            out_variations.direction(i) -= m_muon.ErrorOut().direction(i);
             minus[i+3] = evaluateVariables(ingoing_track, out_variations);
         }
         Vector4f d_minus[6]; // Vector4f indexes run over j, array elements over i
@@ -362,14 +362,14 @@ public:
         return covariance;
     }
 
-    static inline HVector3f getDirectorCosines(const HVector3f &track_direction)
+    static inline Vector4f getDirectorCosines(const Vector4f &track_direction)
     {
-        HVector3f v = track_direction;
+        Vector4f v = track_direction;
         v.head<3>().normalize();
         return v;
     }
 
-    Matrix4f getRotationMatrix(const HVector3f &track_direction)
+    Matrix4f getRotationMatrix(const Vector4f &track_direction)
     {
 
         // directors cosines
@@ -544,9 +544,9 @@ public:
         return out;
     }
 
-    HPoint3f projectOnContainer(const HLine3f &muon_out_track)
+    Vector4f projectOnContainer(const HLine3f &muon_out_track)
     {
-        HPoint3f pt;
+        Vector4f pt;
         if (!m_tracer->GetExitPoint(muon_out_track, pt)){
             //std::cout << "GetExitPoint failure....." << std::endl;
             m_integrity = false;

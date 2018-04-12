@@ -25,21 +25,24 @@
 #define IBNORMALPLANEMINIMIZATIONVARIABLESEVALUATOR_H
 
 #include "Core/Object.h"
+#include "Core/ObjectProps.h"
+
 #include "IBMinimizationVariablesEvaluator.h"
 
 using namespace uLib;
 
+
 class IBNormalPlaneMinimizationVariablesEvaluator : public IBMinimizationVariablesEvaluator
 {
-    uLibTypeMacro(IBNormalPlaneMinimizationVariablesEvaluator,IBMinimizationVariablesEvaluator)
 public:
-    properties() {
+    uLibTypeMacro(IBNormalPlaneMinimizationVariablesEvaluator,IBMinimizationVariablesEvaluator)
+
+    ULIB_props() {
         bool    use_free_rotation;
         Scalarf alphaXZ;
     };
 
     bool m_scatterOnly, m_displacementOnly, m_oneD;
-
     
     IBNormalPlaneMinimizationVariablesEvaluator();
     ~IBNormalPlaneMinimizationVariablesEvaluator();

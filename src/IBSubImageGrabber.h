@@ -48,7 +48,7 @@ public:
     K GrabRegion(Vector3i start, Vector3i stop);
 
     template<class K>
-    K GrabRegion(HPoint3f center, HVector3f size);
+    K GrabRegion(Vector4f center, Vector4f size);
 
     template<class K>
     K GrabRegion(Box& voxBox);
@@ -101,7 +101,7 @@ K IBSubImageGrabber<T>::GrabRegion(Vector3i start, Vector3i stop)
 
 template<class T>
 template<class K>
-K IBSubImageGrabber<T>::GrabRegion(HPoint3f center, HVector3f size)
+K IBSubImageGrabber<T>::GrabRegion(Vector4f center, Vector4f size)
 {
     Box box;
     box.Begins = this->m_Image->Find(center-size);

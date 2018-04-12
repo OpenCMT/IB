@@ -24,8 +24,6 @@
 
 #include <string>
 
-#include <TFile.h>
-#include <TH1F.h>
 #include <IBVoxFilters.h>
 #include "IBVoxCollection.h"
 #include <Vtk/vtkVoxImage.h>

@@ -1,7 +1,0 @@
-
-CC=g++
-PKG=`pkg-config --cflags --libs libmutomIB-0.1`
-
-
-all:
-        ${CC} IBAnalyzerEMTest.cpp -fopenmp -o %ProjectName% ${PKG}

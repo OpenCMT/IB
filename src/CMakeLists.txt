@@ -3,8 +3,6 @@ set(HEADERS
                           IBAbstractReader.h
                           IBAnalyzer.h
                           IBAnalyzerEM.h
-                          IBAnalyzerCT.h
-                          IBAnalyzerCTAlgorithm.h
                           IBAnalyzerEM3p.h
                           IBAnalyzerEMTrim.h
                           IBAnalyzerEMAlgorithm.h
@@ -22,11 +20,6 @@ set(HEADERS
                           IBMuonCollection.h
                           IBMuonError.h
                           IBMuonEventTTreeLNLdataReader.h
-                          IBMuonEventTTreeLNLmcReader.h
-                          IBMuonEventTTreeR2DmcReader.h
-                          IBMuonEventTTreeR3DmcReader.h
-                          IBMuonEventTTreeMUBLASTmcReader.h
-                          IBMuonEventCASTORmcReader.h
                           IBMuonEventTTreeReader.h
                           IBNormalPlaneMinimizationVariablesEvaluator.h
                           IBSimpleTwoViewsMinimizationVariablesEvaluator.h
@@ -57,17 +50,10 @@ SET(SOURCES
                 IBLineDistancePocaEvaluator.cpp
                 IBAnalyzerPoca.cpp
                 IBAnalyzerEM.cpp
-                IBAnalyzerCT.cpp
-                IBAnalyzerCTAlgorithm.cpp
                 IBAnalyzerEM3p.cpp
                 IBAnalyzerEMTrim.cpp
                 IBMuonEventTTreeReader.cpp
-                IBMuonEventTTreeR3DmcReader.cpp
-                IBMuonEventTTreeR2DmcReader.cpp
-                IBMuonEventTTreeLNLmcReader.cpp
                 IBMuonEventTTreeLNLdataReader.cpp
-                IBMuonEventTTreeMUBLASTmcReader.cpp
-                IBMuonEventCASTORmcReader.cpp
                 IBAnalyzerWPoca.cpp
                 IBVoxCollection.cpp
                 IBVoxFilters.cpp

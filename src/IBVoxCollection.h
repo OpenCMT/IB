@@ -95,7 +95,7 @@ public:
 
     int CountLambdaOverThreshold(float threshold,uLib::Vector3i boxp1, uLib::Vector3i boxp2);
 
-    int CountLambdaOverThreshold(float threshold,uLib::HPoint3f center, uLib::HVector3f size);    
+    int CountLambdaOverThreshold(float threshold,uLib::Vector4f center, uLib::Vector4f size);
 
     inline IBVoxCollection LambdaToInvLrad(float p0) { IBVoxCollection out = *this;
                                                        out*=((p0/15)*(p0/15)); // 1/cm
@@ -109,7 +109,7 @@ public:
                                                        return out;
                                                      }
     IBVoxCollection getMCImage(const char* file, int nsamples);
-    float getVoxelMCDensity(const char* file, uLib::HPoint3f c1, uLib::HPoint3f c2, int nrandom=1000);
+    float getVoxelMCDensity(const char* file, uLib::Vector4f c1, uLib::Vector4f c2, int nrandom=1000);
 
 private:
     IBAbstract::IBVoxCollectionMAPAlgorithm *m_MAPAlgorithm;

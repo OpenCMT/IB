@@ -22,6 +22,9 @@
 #define IBMINIMIZATIONVARIABLESEVALUATOR_H
 
 #include "Core/Macros.h"
+#include "Core/Object.h"
+#include "Core/ObjectProps.h"
+
 #include "Math/Dense.h"
 #include "Detectors/MuonScatter.h"
 #include "IBVoxRaytracer.h"

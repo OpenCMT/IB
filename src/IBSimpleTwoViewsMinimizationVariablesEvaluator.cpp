@@ -162,10 +162,10 @@ public:
             chi2.xz = data.transpose() * e2_inv * data;
 
             DT.displNorm = sqrt(m_Data(1)*m_Data(1)+m_Data(3)*m_Data(3));
-            HVector3f n = getDirectorCosines(m_muon.LineIn().direction);
-            HVector3f diff = m_muon.LineIn().origin-m_muon.LineOut().origin;
+            Vector4f n = getDirectorCosines(m_muon.LineIn().direction());
+            Vector4f diff = m_muon.LineIn().origin()-m_muon.LineOut().origin();
             float scal = diff.transpose()*n;
-            HVector3f b = diff-scal*n;
+            Vector4f b = diff-scal*n;
             DT.poutLinNorm = b.head(3).norm();
             m_tree->Fill();
         }
@@ -176,17 +176,17 @@ public:
 
     Vector4f evaluateVariables()
     {
-        HVector3f disp;
-        HVector3f dc  = getDirectorCosines(m_muon.LineIn().direction);
-        HVector3f dco = getDirectorCosines(m_muon.LineOut().direction);
+        Vector4f disp;
+        Vector4f dc  = getDirectorCosines(m_muon.LineIn().direction());
+        Vector4f dco = getDirectorCosines(m_muon.LineOut().direction());
         float mx = (atan2(dc(0),-dc(1)));
         float mz = (atan2(dc(2),-dc(1)));
         float mxo = (atan2(dco(0),-dco(1)));
         float mzo = (atan2(dco(2),-dco(1)));
-        float Lxy = m_muon.LineIn().direction.head(3).norm();
-        HPoint3f in, out;
+        float Lxy = m_muon.LineIn().direction().head(3).norm();
+        Vector4f in, out;
         projectionOnContainer(in, out);
-        HVector3f oi = out-in;
+        Vector4f oi = out-in;
         float dx = oi(0) + tan(mx)*oi(1);
         float dz = oi(2) + tan(mz)*oi(1);
         float dx_corr = cos(mx)*Lxy*(cos(mxo)/cos(mxo-mx));
@@ -198,20 +198,19 @@ public:
         return res;
     }
 
-
     Matrix4f evaluateErrorMatrix()
     {
         Matrix4f covariance;
         float dy = m_muon.LineIn().origin(1) - m_muon.LineOut().origin(1);
-        HVector3f dc   = getDirectorCosines(m_muon.LineIn().direction);
+        Vector4f dc   = getDirectorCosines(m_muon.LineIn().direction());
         float cosphi   = cos(atan2(dc(0),dc(1)));
         float costheta = cos(atan2(dc(2),dc(1)));
         float csx =  dy/cosphi;
         float csz =  dy/costheta;
-        float s2x =  m_muon.ErrorIn().direction_error(0);
-        float s2z = (m_muon.ErrorIn().direction_error(1)==0.f) ?
-                     m_muon.ErrorIn().direction_error(2)       :
-                     m_muon.ErrorIn().direction_error(1);
+        float s2x =  m_muon.ErrorIn().direction(0);
+        float s2z = (m_muon.ErrorIn().direction(1)==0.f) ?
+                     m_muon.ErrorIn().direction(2)       :
+                     m_muon.ErrorIn().direction(1);
         s2x *= s2x;
         s2z *= s2z;
         covariance << 2*s2x,  -csx*s2x,    0,  0,
@@ -221,12 +220,12 @@ public:
         return covariance;
     }
 
-    HVector3f getDirectorCosines(const HVector3f &track_direction)
+    Vector4f getDirectorCosines(const Vector4f &track_direction)
     {
         return track_direction / track_direction.head(3).norm();
     }
 
-    void projectionOnContainer(HPoint3f &in, HPoint3f &out)
+    void projectionOnContainer(Vector4f &in, Vector4f &out)
     {
         if (!m_tracer->GetEntryPoint(m_muon.LineIn(),in) ||
             !m_tracer->GetExitPoint(m_muon.LineOut(),out))

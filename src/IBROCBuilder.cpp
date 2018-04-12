@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include <fstream>
 
+#include <Math/VectorSpace.h>
+
 #include "IBVoxCollectionCap.h"
 #include "IBVoxFilters.h"
 #include "IBSubImageGrabber.h"
@@ -222,8 +224,8 @@ template < class RecipeT >
 IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> Awo)
 {
     typedef Vector<IBVoxCollection> ImgSequence;
-    static const HPoint3f  img_center(-5,-95,-5);
-    static const HVector3f img_hsize(55,70,50);
+    static const Vector4f  img_center = HPoint3f(-5,-95,-5);
+    static const Vector4f img_hsize = HVector3f(55,70,50);
 
 
     std::cout << "Initializing containers..." << std::flush;

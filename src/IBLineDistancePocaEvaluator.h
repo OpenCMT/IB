@@ -33,9 +33,9 @@ public:
     ~IBLineDistancePocaEvaluator();
 
     bool evaluate(MuonScatterData muon);
-    HPoint3f getPoca();
-    HPoint3f getOutTrackPoca();
-    HPoint3f getInTrackPoca();
+    Vector4f getPoca();
+    Vector4f getOutTrackPoca();
+    Vector4f getInTrackPoca();
     void setDistanceCut(Scalarf length);
     Scalarf getDistance();
 

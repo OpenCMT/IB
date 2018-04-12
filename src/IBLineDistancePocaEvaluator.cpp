@@ -39,10 +39,10 @@ public:
     {
         m_dist = NAN;
 
-        HPoint3f p    = m_muon.LineIn().origin;
-        HPoint3f q    = m_muon.LineOut().origin;
-        Vector4f v    = getDirectorCosines(m_muon.LineIn().direction);
-        Vector4f w    = getDirectorCosines(m_muon.LineOut().direction);
+        Vector4f p    = m_muon.LineIn().origin();
+        Vector4f q    = m_muon.LineOut().origin();
+        Vector4f v    = getDirectorCosines(m_muon.LineIn().direction());
+        Vector4f w    = getDirectorCosines(m_muon.LineOut().direction());
         Vector4f diff = q - p;
         Scalarf  prod = v.transpose() * w;
         Scalarf  den  = 1./(1. - prod*prod);
@@ -92,7 +92,7 @@ public:
         }
     }
 
-    HVector3f getDirectorCosines(const HVector3f &track_direction)
+    Vector4f getDirectorCosines(const Vector4f &track_direction)
     {
         return track_direction / track_direction.head(3).norm();
     }
@@ -102,9 +102,9 @@ public:
     Scalarf m_cutlength;
     Scalarf m_dist;
     MuonScatterData m_muon;
-    HPoint3f m_poca;
-    HPoint3f m_inPoca;
-    HPoint3f m_outPoca;
+    Vector4f m_poca;
+    Vector4f m_inPoca;
+    Vector4f m_outPoca;
 };
 
 
@@ -126,12 +126,12 @@ bool IBLineDistancePocaEvaluator::evaluate(MuonScatterData muon)
     return d->m_integrity;
 }
 
-HPoint3f IBLineDistancePocaEvaluator::getPoca()
+Vector4f IBLineDistancePocaEvaluator::getPoca()
 {
     return d->m_poca;
 }
 
-HPoint3f IBLineDistancePocaEvaluator::getInTrackPoca()
+Vector4f IBLineDistancePocaEvaluator::getInTrackPoca()
 {
     return d->m_inPoca;
 }
@@ -146,7 +146,7 @@ Scalarf IBLineDistancePocaEvaluator::getDistance()
     return d->m_dist;
 }
 
-HPoint3f IBLineDistancePocaEvaluator::getOutTrackPoca()
+Vector4f IBLineDistancePocaEvaluator::getOutTrackPoca()
 {
     return d->m_outPoca;
 }

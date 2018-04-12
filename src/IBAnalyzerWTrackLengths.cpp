@@ -41,7 +41,7 @@ public:
             Matrix4f Wij;
             IBVoxel *voxel;
         };
-        HPoint3f PoCa;
+        Vector4f PoCa;
         Vector4f Variables;
         Scalarf  Length;
         Scalarf  Momentum;
@@ -114,8 +114,8 @@ bool IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
     }
     else {
         Vector3f in, out;
-        in  = muon.LineIn().direction.head(3);
-        out = muon.LineOut().direction.head(3);
+        in  = muon.LineIn().direction().head(3);
+        out = muon.LineOut().direction().head(3);
         float a = in.transpose() * out;
         a = acos(a / (in.norm() * out.norm()) );
         if(uLib::isFinite(a)) evc.Variables(0) = pow(a,2);
@@ -125,7 +125,7 @@ bool IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
     // RAY //
     IBVoxRaytracer::RayData ray;
     { // Get RayTrace RayData //
-        HPoint3f entry_pt,poca,exit_pt;
+        Vector4f entry_pt,poca,exit_pt;
         if( !d->m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
                 !d->m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
             return false;

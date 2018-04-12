@@ -57,8 +57,8 @@ class IBMuonCollectionPimpl {
     };
 
     static float MuonScatterAngle(const MuonScatter &mu) {
-        Vector3f in = mu.LineIn().direction.head(3);
-        Vector3f out = mu.LineOut().direction.head(3);
+        Vector3f in = mu.LineIn().direction().head(3);
+        Vector3f out = mu.LineOut().direction().head(3);
         float a = in.transpose() * out;
         a = fabs( acos(a / (in.norm() * out.norm())) );
         if(uLib::isFinite(a)) return a;
@@ -74,7 +74,7 @@ public:
     bool m_HiPass;
     unsigned int m_SliceIndex;
     Vector<MuonScatter> m_Data;
-  Vector<Vector<HPoint3f> > m_FullPathData;
+  Vector<Vector<Vector4f> > m_FullPathData;
 };
 
 
@@ -94,7 +94,7 @@ void IBMuonCollection::AddMuon(MuonScatter &mu)
     // FINIRE o PENSARE perche non si puo' fare add muon dopo set Hi/LowPass //
 }
 
-void IBMuonCollection::AddMuonFullPath(Vector<HPoint3f> fullPath)
+void IBMuonCollection::AddMuonFullPath(Vector<Vector4f> fullPath)
 {
     d->m_FullPathData.push_back(fullPath);
 }
@@ -104,7 +104,7 @@ Vector<MuonScatter> &IBMuonCollection::Data()
     return d->m_Data;
 }
 
-Vector<Vector<HPoint3f> > &IBMuonCollection::FullPath()
+Vector<Vector<Vector4f> > &IBMuonCollection::FullPath()
 {
     return d->m_FullPathData;
 }
@@ -264,23 +264,23 @@ void IBMuonCollection::DumpSimpleTree(const char *filename)
     {
         const MuonScatter &u_mu = this->At(i);
 
-        inOrigin.x=u_mu.LineIn().origin[0];
-        inOrigin.y=u_mu.LineIn().origin[1];
-        inOrigin.z=u_mu.LineIn().origin[2];
+        inOrigin.x=u_mu.LineIn().origin()[0];
+        inOrigin.y=u_mu.LineIn().origin()[1];
+        inOrigin.z=u_mu.LineIn().origin()[2];
 
-        inDir.x=u_mu.LineIn().direction[0];
-        inDir.y=u_mu.LineIn().direction[1];
-        inDir.z=u_mu.LineIn().direction[2];
+        inDir.x=u_mu.LineIn().direction()[0];
+        inDir.y=u_mu.LineIn().direction()[1];
+        inDir.z=u_mu.LineIn().direction()[2];
 
         inP=u_mu.GetMomentum();
 
-        outOrigin.x=u_mu.LineOut().origin[0];
-        outOrigin.y=u_mu.LineOut().origin[1];
-        outOrigin.z=u_mu.LineOut().origin[2];
+        outOrigin.x=u_mu.LineOut().origin()[0];
+        outOrigin.y=u_mu.LineOut().origin()[1];
+        outOrigin.z=u_mu.LineOut().origin()[2];
 
-        outDir.x=u_mu.LineOut().direction[0];
-        outDir.y=u_mu.LineOut().direction[1];
-        outDir.z=u_mu.LineOut().direction[2];
+        outDir.x=u_mu.LineOut().direction()[0];
+        outDir.y=u_mu.LineOut().direction()[1];
+        outDir.z=u_mu.LineOut().direction()[2];
 
         outP=u_mu.GetMomentumPrime();
 
@@ -306,12 +306,12 @@ void IBMuonCollection::DumpTxt(const char *filename)
     {
         const MuonScatter &mu = this->At(i);
 
-        HPoint3f inPos = mu.LineIn().origin;
-        HVector3f inDir = mu.LineIn().direction;
+        Vector4f inPos = mu.LineIn().origin();
+        Vector4f inDir = mu.LineIn().direction();
         file << inPos[0] << " " << inPos[1] << " " << inPos[2] << " " << inDir[0]/inDir[1] << " " << inDir[2]/inDir[1] << " ";
 
-        HPoint3f outPos = mu.LineOut().origin;
-        HPoint3f outDir = mu.LineOut().direction;
+        Vector4f outPos = mu.LineOut().origin();
+        Vector4f outDir = mu.LineOut().direction();
 
         if(!std::isnan(outPos[0]))
             file << outPos[0] << " " << outPos[1] << " " << outPos[2] << " " << outDir[0]/outDir[1] << " " << outDir[2]/outDir[1] << "\n";
@@ -330,38 +330,38 @@ void IBMuonCollection::DumpTxt(const char *filename)
  *  compute mean of rotation and shift of muon out relative to in
  * @return Vector4f ( phi x theta z )
  */
-std::pair<HVector3f,HVector3f> IBMuonCollection::GetAlignment()
+std::pair<Vector4f,Vector4f> IBMuonCollection::GetAlignment()
 {
     Vector3f direction(0,0,0);
     Vector3f position(0,0,0);
     for(int i=0; i<this->size(); ++i) {
         const MuonScatter &mu = this->At(i);
-        Vector3f dir_in  = mu.LineIn().direction.head(3).normalized();
-        Vector3f dir_out = mu.LineOut().direction.head(3).normalized();
+        Vector3f dir_in  = mu.LineIn().direction().head(3).normalized();
+        Vector3f dir_out = mu.LineOut().direction().head(3).normalized();
         direction += dir_in.cross(dir_out);
 
         float y = mu.LineOut().origin(1) - mu.LineIn().origin(1);
-        Vector3f shift = mu.LineOut().origin.head(3) - dir_in*(y/dir_in(1));
-        position += mu.LineIn().origin.head(3) - shift;
+        Vector3f shift = mu.LineOut().origin().head(3) - dir_in*(y/dir_in(1));
+        position += mu.LineIn().origin().head(3) - shift;
     }
     direction /= this->size();
     position  /= this->size();
-    HVector3f  pos;
+    Vector4f  pos;
     pos.head(3) = position;
-    HVector3f rot;
+    Vector4f rot;
     rot.head(3) = direction.normalized();
     rot(3) = direction.norm();
 //    std::cout << " ---- muons self adjust (use with care!) ----- \n";
 //    std::cout << "Rotation : " << rot.transpose() << "\n";
 //    std::cout << "Position : " << position.transpose() << "\n\n";
 
-    return std::pair<HVector3f,HVector3f>(pos,rot);
+    return std::pair<Vector4f,Vector4f>(pos,rot);
 }
 
-void IBMuonCollection::SetAlignment(std::pair<HVector3f,HVector3f> align)
+void IBMuonCollection::SetAlignment(std::pair<Vector4f,Vector4f> align)
 {
-    const HVector3f &pos = align.first;
-    const HVector3f &rot = align.second;
+    const Vector4f &pos = align.first;
+    const Vector4f &rot = align.second;
 
     Eigen::Quaternion<float> q(Eigen::AngleAxis<float>(-asin(rot(3)), rot.head(3)));
 //    Eigen::Affine3f tr(Eigen::AngleAxis<float>(-rot(3), rot.head(3)));
@@ -375,16 +375,16 @@ void IBMuonCollection::SetAlignment(std::pair<HVector3f,HVector3f> align)
 //            std::cout << "dif: " << v1.transpose() << " vs " << v2.transpose() << "\n";
 //        }
 //        mu.LineOut().direction = tr * mu.LineOut().direction;
-        mu.LineOut().direction.head<3>() = q * mu.LineOut().direction.head<3>();
-        mu.LineOut().direction /= fabs(mu.LineOut().direction(1)); // back to slopes
-        mu.LineOut().origin += pos;
+        mu.LineOut().direction().head<3>() = q * mu.LineOut().direction().head<3>();
+        mu.LineOut().direction() /= fabs(mu.LineOut().direction(1)); // back to slopes
+        mu.LineOut().origin() += pos;
     }
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void IBMuonCollection::PerformMuonSelfAlignment(){
     std::cout << "\n--------- DATA ALIGNMENT.... (muon self adjust)" << std::endl;
-    std::pair<HVector3f,HVector3f> align = GetAlignment();
+    std::pair<Vector4f,Vector4f> align = GetAlignment();
     align.first << 0,0,0,0;
     SetAlignment(align);
     align = GetAlignment();
@@ -426,14 +426,14 @@ void IBMuonCollection::dataRotoTranslation(Eigen::Matrix4f  t)
         MuonScatter &mu = this->operator [](i);
 
         // IN muon roto-traslation
-        mu.LineIn().origin = t * mu.LineIn().origin;
-        mu.LineIn().direction = t * mu.LineIn().direction;
-        mu.LineIn().direction /= fabs(mu.LineIn().direction(1)); // back to slopes
+        mu.LineIn().origin() = t * mu.LineIn().origin();
+        mu.LineIn().direction() = t * mu.LineIn().direction();
+        mu.LineIn().direction() /= fabs(mu.LineIn().direction(1)); // back to slopes
 
         // OUT muon roto-traslation
-        mu.LineOut().origin = t * mu.LineOut().origin;
-        mu.LineOut().direction = t * mu.LineOut().direction;
-        mu.LineOut().direction /= fabs(mu.LineOut().direction(1)); // back to slopes
+        mu.LineOut().origin() = t * mu.LineOut().origin();
+        mu.LineOut().direction() = t * mu.LineOut().direction();
+        mu.LineOut().direction() /= fabs(mu.LineOut().direction(1)); // back to slopes
 
 //        // if resulting muon isn't falling from sky.... reverse!
 //        if(mu.LineIn().direction[1] > 0){
@@ -462,14 +462,14 @@ void IBMuonCollection::dataRotoTranslation(Vector3f rot, Vector3f trans)
         MuonScatter &mu = this->operator [](i);
 
         // IN muon roto-traslation
-        mu.LineIn().origin = t * mu.LineIn().origin;
-        mu.LineIn().direction = t * mu.LineIn().direction;
-        mu.LineIn().direction /= fabs(mu.LineIn().direction(1)); // back to slopes
+        mu.LineIn().origin() = t * mu.LineIn().origin();
+        mu.LineIn().direction() = t * mu.LineIn().direction();
+        mu.LineIn().direction() /= fabs(mu.LineIn().direction()(1)); // back to slopes
 
         // OUT muon roto-traslation
-        mu.LineOut().origin = t * mu.LineOut().origin;
-        mu.LineOut().direction = t * mu.LineOut().direction;
-        mu.LineOut().direction /= fabs(mu.LineOut().direction(1)); // back to slopes
+        mu.LineOut().origin() = t * mu.LineOut().origin();
+        mu.LineOut().direction() = t * mu.LineOut().direction();
+        mu.LineOut().direction() /= fabs(mu.LineOut().direction(1)); // back to slopes
     }
 }
 

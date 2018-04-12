@@ -20,6 +20,10 @@
 //////////////////////////////////////////////////////////////////////////////*/
 
 #include "Core/StaticInterface.h"
+#include "Math/Dense.h"
+#include "Math/VectorSpace.h"
+
+
 #include "IBVoxCollection.h"
 
 #include <TGeoNode.h>
@@ -93,8 +97,8 @@ int IBVoxCollection::CountLambdaOverThreshold(float threshold,
 }
 
 int IBVoxCollection::CountLambdaOverThreshold(float threshold,
-                                              HPoint3f center,
-                                              HVector3f size)
+                                              Vector4f center,
+                                              Vector4f size)
 {
     Vector3i start = this->Find(center-size);
     Vector3i end = this->Find(center+size);
@@ -117,7 +121,7 @@ IBVoxCollection IBVoxCollection::getMCImage(const char* file, int nsamples)
     TGeoMaterial *material;
 
     IBVoxCollection out = *this;
-    HPoint3f B = this->GetPosition().homogeneous();
+    Vector4f B = this->GetPosition().homogeneous();
 
     //loop over voxel collection
     Vector3i dim = this->GetDims();
@@ -131,8 +135,9 @@ IBVoxCollection IBVoxCollection::getMCImage(const char* file, int nsamples)
                 // voxel position
                 Vector3i iv(ix,iy,iz);
                 Vector3f v = Vector3f(iv.cast<float>().cwiseProduct(this->GetSpacing()));
-                HPoint3f Bvox = B + HPoint3f(v);
-                HPoint3f Evox = Bvox + this->GetSpacing().homogeneous();
+                Vector4f v4 = Vector4f(v(0),v(1),v(2),1);
+                Vector4f Bvox = B + v4;
+                Vector4f Evox = Bvox + this->GetSpacing().homogeneous();
 
                 // Calculating average values for different variables
                 Double_t RadLen  = 0.;     // Radiation length
@@ -188,7 +193,7 @@ IBVoxCollection IBVoxCollection::getMCImage(const char* file, int nsamples)
 }
 
 /// SV 20150520 rielaborazione della funzione calculate_voxel_means.C di Gemano
-float IBVoxCollection::getVoxelMCDensity(const char* file, HPoint3f c1, HPoint3f c2, int nrandom)
+float IBVoxCollection::getVoxelMCDensity(const char* file, Vector4f c1, Vector4f c2, int nrandom)
 {
     if(nrandom<=0) {
         return -1;

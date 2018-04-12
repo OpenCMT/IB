@@ -195,8 +195,8 @@ public:
             return;
         }
 
-        muon_event->LineIn().origin     <<  m_track.phi_up.position,            0,       m_track.theta_up.position,           1;  // HARDCODED
-        muon_event->LineIn().direction  << -m_track.phi_up.slope,              -1,       -m_track.theta_up.slope,              0;
+        muon_event->LineIn().origin()     <<  m_track.phi_up.position,            0,       m_track.theta_up.position,           1;  // HARDCODED
+        muon_event->LineIn().direction()  << -m_track.phi_up.slope,              -1,       -m_track.theta_up.slope,              0;
 
 //        muon_event->LineOut().origin    <<  m_track.phi_down.position, -183.43,  m_track.theta_down.position, 1; // NO SHIFT
 //        muon_event->LineOut().direction << -m_track.phi_down.slope,   -1,       -m_track.theta_down.slope,   0;
@@ -210,15 +210,15 @@ public:
 //        muon_event->LineOut().origin    <<  m_track.phi_down.position  -0.95744, -183.43,  m_track.theta_down.position  -0.31360, 1; // FIX 2014
 //        muon_event->LineOut().direction << -m_track.phi_down.slope,   -1,       -m_track.theta_down.slope + 0.0029,   0;
 
-        muon_event->LineOut().origin    <<  m_track.phi_down.position, 0,  m_track.theta_down.position, 1; // AUTO
-        muon_event->LineOut().direction << -m_track.phi_down.slope,   -1, -m_track.theta_down.slope,    0;
+        muon_event->LineOut().origin()    <<  m_track.phi_down.position, 0,  m_track.theta_down.position, 1; // AUTO
+        muon_event->LineOut().direction() << -m_track.phi_down.slope,   -1, -m_track.theta_down.slope,    0;
 
 
         { // ALIGNMENT //
             const Eigen::Affine3f &tr = m_align;
-            muon_event->LineOut().origin = tr * muon_event->LineOut().origin;
-            muon_event->LineOut().direction = tr * muon_event->LineOut().direction;
-            muon_event->LineOut().direction /= fabs(muon_event->LineOut().direction(1)); // back to slopes //
+            muon_event->LineOut().origin() = tr * muon_event->LineOut().origin();
+            muon_event->LineOut().direction() = tr * muon_event->LineOut().direction();
+            muon_event->LineOut().direction() /= fabs(muon_event->LineOut().direction(1)); // back to slopes //
         }
 
         muon_event->SetMomentum(m_momentum);
@@ -237,8 +237,8 @@ public:
             m_integrity = false;
         }
 
-        muon_event->ErrorIn().direction_error  = Vector4f::Zero();
-        muon_event->ErrorOut().direction_error = Vector4f::Zero();
+        muon_event->ErrorIn().direction()  = Vector4f::Zero();
+        muon_event->ErrorOut().direction() = Vector4f::Zero();
 
         m_error->evaluate(*muon_event, 2, 2);
 

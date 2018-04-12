@@ -42,10 +42,10 @@ public:
     ~IBMuonCollection();
 
     void AddMuon(MuonScatter &mu);
-    void AddMuonFullPath(Vector<HPoint3f> fullPath);
+    void AddMuonFullPath(Vector<Vector4f> fullPath);
       
     Vector<MuonScatter> &Data();
-    Vector<Vector<HPoint3f> > &FullPath();
+    Vector<Vector<Vector4f> > &FullPath();
 
     const MuonScatter &At(int i) const;
 
@@ -68,8 +68,8 @@ public:
     void DumpSimpleTree(const char *filename);
 
     void DumpTxt(const char *filename);
-    std::pair<HVector3f, HVector3f> GetAlignment();
-    void SetAlignment(std::pair<HVector3f, HVector3f> align);
+    std::pair<Vector4f, Vector4f> GetAlignment();
+    void SetAlignment(std::pair<Vector4f, Vector4f> align);
     void PerformMuonSelfAlignment();
 
     void dataRotoTranslation(Eigen::Matrix4f  t);

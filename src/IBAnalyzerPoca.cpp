@@ -44,12 +44,12 @@ public:
         assert(m_PocaAlgorithm);
         if(m_PocaAlgorithm->evaluate(muon)) {
 
-            HPoint3f poca = m_PocaAlgorithm->getPoca();
+            Vector4f poca = m_PocaAlgorithm->getPoca();
 
             //---- Check that the POCA is valid
-            HVector3f in, out;
-            in  = poca - muon.LineIn().origin;
-            out = muon.LineOut().origin - poca;
+            Vector4f in, out;
+            in  = poca - muon.LineIn().origin();
+            out = muon.LineOut().origin() - poca;
             float poca_prj = in.transpose() * out;
             bool validPoca = poca_prj > 0;
 
@@ -71,7 +71,7 @@ public:
     // members //
     IBAnalyzerPoca  *m_pt;
     IBPocaEvaluator *m_PocaAlgorithm;
-    Vector<HPoint3f> m_Data;
+    Vector<Vector4f> m_Data;
 };
 
 

@@ -35,7 +35,7 @@ message(STATUS "Install prefix is ${PWD}")
 
 ## First of all find uLib package to get imported locations ##
 unset(ULIB_CONFIG)
-set(ULIB_DIR ../../uLib/trunk/build/)
+set(ULIB_DIR ../uLib/ CACHE DIRPATH "ulib build directory")
 find_package(ULIB 0.2 CONFIG REQUIRED
              NAMES uLib
              PATH_SUFFIXES mutom-0.2
@@ -46,7 +46,6 @@ message("ULIB_CONFIG=${ULIB_CONFIG}")
 
 #----
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMake")
-FIND_PACKAGE(MUTOMIB REQUIRED)
 FIND_PACKAGE(ROOT REQUIRED)
 #INSTALL(MUTOMIB)
 
@@ -103,7 +102,7 @@ if(ULIB_CONFIG)
  include_directories(${ULIB_INCLUDE_DIRS})
 endif()
 
-INCLUDE_DIRECTORIES(${MUTOMIB_INCLUDE_DIR} ${MUTOMIB_ROOTLINK_DIR} ${ROOT_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${ROOT_INCLUDE_DIR})
 
 ## ADD LIBRARIES SUBDIRECTORIES --------------------------------------------- ##
 
@@ -113,8 +112,7 @@ add_subdirectory(${SRC_DIR})
 
 #add_subdirectory(${PROJECT_SOURCE_DIR}/utils/filters)
 #add_subdirectory(${PROJECT_SOURCE_DIR}/utils/roc)
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/examples EXCLUDE_FROM_ALL)
+#add_subdirectory(${PROJECT_SOURCE_DIR}/examples EXCLUDE_FROM_ALL)
 
 
 

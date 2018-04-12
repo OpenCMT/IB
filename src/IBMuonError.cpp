@@ -126,16 +126,16 @@ bool IBMuonError::IBMESimpler::evaluate(MuonScatter &event, int i, int j)
         event.SetMomentum(event.GetMomentumPrime()*d->m_pratio);
     }
     if(d->m_squareError){
-        event.ErrorIn().direction_error(0)  = d->mpdSquareEval(d->m_Ax, d->m_Bx, event.GetMomentum(), event.LineIn().direction(0));
-        event.ErrorIn().direction_error(i)  = d->mpdSquareEval(d->m_Az, d->m_Bx, event.GetMomentum(), event.LineIn().direction(i));
-        event.ErrorOut().direction_error(0) = d->mpdSquareEval(d->m_Ax, d->m_Bx, event.GetMomentumPrime(), event.LineOut().direction(0));
-        event.ErrorOut().direction_error(j) = d->mpdSquareEval(d->m_Az, d->m_Bx, event.GetMomentumPrime(), event.LineOut().direction(j));
+        event.ErrorIn().direction(0)  = d->mpdSquareEval(d->m_Ax, d->m_Bx, event.GetMomentum(), event.LineIn().direction(0));
+        event.ErrorIn().direction(i)  = d->mpdSquareEval(d->m_Az, d->m_Bx, event.GetMomentum(), event.LineIn().direction(i));
+        event.ErrorOut().direction(0) = d->mpdSquareEval(d->m_Ax, d->m_Bx, event.GetMomentumPrime(), event.LineOut().direction(0));
+        event.ErrorOut().direction(j) = d->mpdSquareEval(d->m_Az, d->m_Bx, event.GetMomentumPrime(), event.LineOut().direction(j));
     }
     else{
-        event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Ax, event.GetMomentum(), event.LineIn().direction(0));
-        event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Az, event.GetMomentum(), event.LineIn().direction(i));
-        event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Ax, event.GetMomentumPrime(), event.LineOut().direction(0));
-        event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Az, event.GetMomentumPrime(), event.LineOut().direction(j));
+        event.ErrorIn().direction(0)  = d->mpdEval(d->m_Ax, event.GetMomentum(), event.LineIn().direction(0));
+        event.ErrorIn().direction(i)  = d->mpdEval(d->m_Az, event.GetMomentum(), event.LineIn().direction(i));
+        event.ErrorOut().direction(0) = d->mpdEval(d->m_Ax, event.GetMomentumPrime(), event.LineOut().direction(0));
+        event.ErrorOut().direction(j) = d->mpdEval(d->m_Az, event.GetMomentumPrime(), event.LineOut().direction(j));
     }
 
     if (d->m_averPcorr)
@@ -159,7 +159,7 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
     float tiltC  = pow(0.00247*azAngl_deg,3)+0.00468;
     IBVoxRaytracer::RayData ray;
     {
-        HPoint3f entry_pt, poca, exit_pt;
+        Vector4f entry_pt, poca, exit_pt;
         if (!m_tracer->GetEntryPoint(event.LineIn(),entry_pt) ||
                 !m_tracer->GetExitPoint(event.LineOut(),exit_pt)) {
             return false;
@@ -201,10 +201,10 @@ bool IBMuonError::IBMEShader::evaluate(MuonScatter &event, int i, int j)
         float Pin  = sqrt(P2out+kL);
         event.SetMomentum(Pin);
     }
-    event.ErrorIn().direction_error(0)  = d->mpdEval(d->m_Ax, event.GetMomentum(), event.LineIn().direction(0));
-    event.ErrorIn().direction_error(i)  = d->mpdEval(d->m_Az, event.GetMomentum(), event.LineIn().direction(i));
-    event.ErrorOut().direction_error(0) = d->mpdEval(d->m_Ax, event.GetMomentumPrime(), event.LineOut().direction(0));
-    event.ErrorOut().direction_error(j) = d->mpdEval(d->m_Az, event.GetMomentumPrime(), event.LineOut().direction(j));
+    event.ErrorIn().direction(0)  = d->mpdEval(d->m_Ax, event.GetMomentum(), event.LineIn().direction(0));
+    event.ErrorIn().direction(i)  = d->mpdEval(d->m_Az, event.GetMomentum(), event.LineIn().direction(i));
+    event.ErrorOut().direction(0) = d->mpdEval(d->m_Ax, event.GetMomentumPrime(), event.LineOut().direction(0));
+    event.ErrorOut().direction(j) = d->mpdEval(d->m_Az, event.GetMomentumPrime(), event.LineOut().direction(j));
     if (d->m_averPcorr)
         event.SetMomentum((event.GetMomentum()+event.GetMomentumPrime())/2.);
     if (d->m_usePout)

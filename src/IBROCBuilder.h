@@ -40,7 +40,7 @@ class ROCBuilder : public Object
 {
     uLibTypeMacro(ROCBuilder,Object)
 public:
-    properties()
+    ULIB_props()
     {
         float start; // actually not used
         float stop;  // actually not used

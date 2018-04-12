@@ -60,7 +60,7 @@ public:
     };
 
 
-    properties()
+    ULIB_props()
     {
         Scalarf nominal_momentum;
         Scalarf SijCutEM;
@@ -72,7 +72,7 @@ public:
     ~IBAnalyzerEM();
 
     bool AddMuon(const MuonScatterData &muon);//{ return false;}
-    bool AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath);
+    bool AddMuonFullPath(const MuonScatterData &muon, Vector<Vector4f>& muonPath);
 
     void SetMuonCollection(IBMuonCollection *muons);
 

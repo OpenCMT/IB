@@ -34,9 +34,9 @@ public:
     ~IBTiltedAxisPocaEvaluator();
 
     bool     evaluate(MuonScatterData muon);
-    HPoint3f getPoca();
-    HPoint3f getInTrackPoca(){ return HPoint3f();}
-    HPoint3f getOutTrackPoca(){ return HPoint3f();}
+    Vector4f getPoca();
+    Vector4f getInTrackPoca(){ return HPoint3f();}
+    Vector4f getOutTrackPoca(){ return HPoint3f();}
 
     // dummy functions for the moment... to be implemented
     inline Scalarf getDistance() {return 0;}

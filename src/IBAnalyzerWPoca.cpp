@@ -31,7 +31,7 @@
 
 class IBAnalyzerWPocaPimpl {
     struct Data {
-        HPoint3f poca;
+        Vector4f poca;
         Scalarf  weight;
     };
 
@@ -63,8 +63,8 @@ public:
             else {
                 // weight with angle in 3D space
                 Vector3f in, out;
-                in  = muon.LineIn().direction.head(3);
-                out = muon.LineOut().direction.head(3);
+                in  = muon.LineIn().direction().head(3);
+                out = muon.LineOut().direction().head(3);
                 float a = in.transpose() * out;
                 a = fabs( acos(a / (in.norm() * out.norm())) );
                 if(uLib::isFinite(a))

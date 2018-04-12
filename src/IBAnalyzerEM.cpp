@@ -735,7 +735,7 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon){
   
   IBVoxRaytracer::RayData ray;
   { // Get RayTrace RayData //
-    HPoint3f entry_pt,poca,exit_pt;
+    Vector4f entry_pt,poca,exit_pt;
     if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
 	!m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
       return false;
@@ -746,9 +746,9 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon){
       poca = m_PocaAlgorithm->getPoca();
       //            DBG(trd,poca,"x/F:y/F:z/F:h/F");
 
-      HVector3f in, out;
-      in  = poca - muon.LineIn().origin;
-      out = muon.LineOut().origin - poca;
+      Vector4f in, out;
+      in  = poca - muon.LineIn().origin();
+      out = muon.LineOut().origin() - poca;
       float poca_prj = in.transpose() * out;
       //            DBG(trd,poca_prj);
       use_poca &= ( poca_prj > 0 );
@@ -804,7 +804,7 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon){
 //---- 1) Fixes bugs in L and T
 //---- 2) Allows one to use the true muon path (provided by the argument muonPath)
 //---- 3) Allows one to use any arbitrary path (see 3-path implementation)
-bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath){
+bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<Vector4f>& muonPath){
 
   bool debug = false;
 
@@ -852,14 +852,14 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
   //---------
   //---- STEP #2.1: Get all of the path points  
-  Vector<HPoint3f> pts;       //<---- A vector of the muon path points
-  HPoint3f front_pt, back_pt; //<---- The first and last point
+  Vector<Vector4f> pts;       //<---- A vector of the muon path points
+  Vector4f front_pt, back_pt; //<---- The first and last point
   
   //---- If reconstructing the muon's path (i.e. NOT the true path)
   if(m_useRecoPath){
     
     //---- Require entry and exit points
-    HPoint3f entry_pt, exit_pt;
+    Vector4f entry_pt, exit_pt;
     if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ) {
         if(debug)
             std::cout << "No entry point.... EXITING!" << std::endl;
@@ -884,12 +884,12 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
       
       //---- Evaluate the POCA and check that it is valid
       if(m_PocaAlgorithm && m_PocaAlgorithm->evaluate(muon)){;	  
-  	HPoint3f poca = m_PocaAlgorithm->getPoca();	
+  	Vector4f poca = m_PocaAlgorithm->getPoca();	
 
   	//---- Check that the POCA is valid
-  	HVector3f in, out;
-  	in  = poca - muon.LineIn().origin;
-  	out = muon.LineOut().origin - poca;
+  	Vector4f in, out;
+  	in  = poca - muon.LineIn().origin();
+  	out = muon.LineOut().origin() - poca;
   	float poca_prj = in.transpose() * out;
   	bool validPoca = poca_prj > 0 && GetVoxCollection()->IsInsideBounds(poca);
 
@@ -900,8 +900,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   	//---- If using the three-line path
   	else if(m_nPath == 3){
   	  //---- Get the poca on the entry/exit tracks
-  	  HPoint3f entry_poca = m_PocaAlgorithm->getInTrackPoca();
-  	  HPoint3f exit_poca  = m_PocaAlgorithm->getOutTrackPoca();
+  	  Vector4f entry_poca = m_PocaAlgorithm->getInTrackPoca();
+  	  Vector4f exit_poca  = m_PocaAlgorithm->getOutTrackPoca();
 	  
   	  //---- Get the distance along the tracks to the inflection points
   	  double entry_length = (entry_pt - entry_poca).norm();
@@ -915,10 +915,10 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
       }
 	  
   	  //---- Get the inflection points
-  	  double normIn  = muon.LineIn().direction.norm(); //<----Recently added
-  	  double normOut = muon.LineOut().direction.norm();
-  	  HVector3f point1 = entry_pt + m_alpha*(entry_length/normIn)*muon.LineIn().direction;
-  	  HVector3f point2 = exit_pt  - m_alpha*(exit_length/normOut)*muon.LineOut().direction;	  
+  	  double normIn  = muon.LineIn().direction().norm(); //<----Recently added
+  	  double normOut = muon.LineOut().direction().norm();
+  	  Vector4f point1 = entry_pt + m_alpha*(entry_length/normIn)*muon.LineIn().direction();
+  	  Vector4f point2 = exit_pt  - m_alpha*(exit_length/normOut)*muon.LineOut().direction();	  
 
   	  //---- Add the points to the collection
   	  pts.push_back(point1);
@@ -946,19 +946,19 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
   //---------
   //---- STEP #2.2: Remove mid-voxel inflections
-  std::map<int,std::vector<HPoint3f> > voxelMap; //<---- Map of voxel number to points in the voxel
+  std::map<int,std::vector<Vector4f> > voxelMap; //<---- Map of voxel number to points in the voxel
   std::vector<int> voxelOrder; //<---- An ordered list of the voxels
   Scalarf totalLength = 0.;    //<---- Total length of the muon path
 
   //---- Loop over the points
   for(int i=0; i<pts.size()-1; ++i){
     //---- Get the points
-    HPoint3f& pt1 = pts[i];
-    HPoint3f& pt2 = pts[i+1];
+    Vector4f& pt1 = pts[i];
+    Vector4f& pt2 = pts[i+1];
   
     //---- Get the ray properties between the points
     Scalarf  rayLength = (pt2-pt1).norm();
-    HPoint3f rayDir    = (pt2-pt1)/rayLength;
+    Vector4f rayDir    = (pt2-pt1)/rayLength;
 
     IBVoxRaytracer::RayData ray = m_RayAlgorithm->TraceBetweenPoints(pt1,pt2);
   
@@ -967,16 +967,16 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     foreach(const IBVoxRaytracer::RayData::Element &el, ray.Data()){
 
       //---- Project the muon track to the current position
-      HPoint3f pti = pt1 + cumulativeLength*rayDir;
+      Vector4f pti = pt1 + cumulativeLength*rayDir;
 
       //---- Project the muon track to the next position 
       cumulativeLength += el.L; //<---- Length of the muon track in the voxel
-      HPoint3f ptj = pt1 + cumulativeLength*rayDir;
+      Vector4f ptj = pt1 + cumulativeLength*rayDir;
       
       //---- If this muon HAS NOT crossed this voxel before
       if(voxelMap.find(el.vox_id) == voxelMap.end()){
 	//---- Add the voxel and points to the map
-	voxelMap[el.vox_id] = std::vector<HPoint3f>();
+	voxelMap[el.vox_id] = std::vector<Vector4f>();
 	voxelMap[el.vox_id].push_back(pti);
 	voxelMap[el.vox_id].push_back(ptj);
 	//---- Add the voxel to the ordered list
@@ -993,8 +993,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   //---- STEP #2.3: Remove mid-voxel inflections
   
   //---- Now trace between points and calculate length parameters
-  Scalarf H = muon.LineIn().direction.transpose() * (back_pt - front_pt);
-  Scalarf normIn = muon.LineIn().direction.norm();
+  Scalarf H = muon.LineIn().direction().transpose() * (back_pt - front_pt);
+  Scalarf normIn = muon.LineIn().direction().norm();
   
   if(!m_oldTCalculation) H = H/normIn;  //<---- The old (buggy) calculation of T needs this value of H
   Scalarf T = totalLength; //<---- Needed if using the old (buggy) calculation of T
@@ -1023,7 +1023,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     invp2_OUT = 0.197075;
   } else if (m_pVoxelMean==2){
     // compute p_in and p_out with a angle-dependent function
-    float a = fabs((3.14159265359 - acos(muon.LineIn().direction[1]/normIn))/3.14159265359*180);
+    float a = fabs((3.14159265359 - acos(muon.LineIn().direction()[1]/normIn))/3.14159265359*180);
     invp2_IN = -0.1054 + (0.003615*a) - (0.0000269*a*a);
     invp2_OUT = -0.5815 + (0.0309*a) - (0.0002711*a*a);
     if(invp2_IN<0 || invp2_OUT<0)
@@ -1082,8 +1082,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
       // loop ever voxels to find total length in furnace
       for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
           if( (m_imgMC.operator [](*it).Value * (1.e6)) > 0.01){
-            const HPoint3f& pt1 = voxelMap[*it][0];
-            const HPoint3f& pt2 = voxelMap[*it][1];
+            const Vector4f& pt1 = voxelMap[*it][0];
+            const Vector4f& pt2 = voxelMap[*it][1];
             Scalarf L = (pt2-pt1).norm();
             totalLengthFurnace += L;
         }
@@ -1100,8 +1100,8 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
   //---- Loop over the ordered list of voxels
   for(std::vector<int>::const_iterator it=voxelOrder.begin(); it!=voxelOrder.end(); it++){
-    const HPoint3f& pt1 = voxelMap[*it][0];
-    const HPoint3f& pt2 = voxelMap[*it][1];    
+    const Vector4f& pt1 = voxelMap[*it][0];
+    const Vector4f& pt2 = voxelMap[*it][1];    
 
     //---- Now loop over each element in the ray
     Event::Element elc;
@@ -1134,7 +1134,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     if(m_oldTCalculation) T = fabs(T-L);
     //----> New calculation of T
     else{
-      Scalarf h = (muon.LineIn().direction.transpose()*(pt2-front_pt));
+      Scalarf h = (muon.LineIn().direction().transpose()*(pt2-front_pt));
       T = H - h/normIn;
     }
 
@@ -1218,7 +1218,7 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
 
   //---- Iterate over the muon data, and collec the muon data, and the muon path
   Vector<MuonScatterData>::iterator itr = muons->Data().begin();
-  Vector<Vector<HPoint3f> >::iterator path_itr = muons->FullPath().begin();    
+  Vector<Vector<Vector4f> >::iterator path_itr = muons->FullPath().begin();    
   std::cout << "Adding " << muons->Data().size() << " muons " << std::endl;    
 
   if(m_pVoxelMean){

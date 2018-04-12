@@ -36,7 +36,7 @@ protected:
     typedef struct IBAnalyzerEM::Event Event;
     uLibTypeMacro(IBAnalyzerEMAlgorithm, uLib::Object)
 public:
-    properties() {
+    ULIB_props() {
         Scalarf inertia;
     };
 

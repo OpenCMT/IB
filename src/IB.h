@@ -28,12 +28,17 @@
  * Created on June 8, 2011, 3:13 PM
  */
 
+#ifndef IB_H
+#define IB_H
 
 // list of IB Headers for fast inclusion //
 
 #include <Core/Macros.h>
 #include <Core/Object.h>
 #include <Detectors/MuonScatter.h>
+
+// just to fix string_view
+#include <Root/TestTObject.h>
 
 
 namespace IB {
@@ -66,3 +71,7 @@ public:
 
 
 }
+
+
+#endif // IB_H
+

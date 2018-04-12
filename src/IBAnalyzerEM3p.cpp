@@ -83,7 +83,7 @@ bool IBAnalyzerEM3p::AddMuon(const MuonScatterData &muon)
         Event evcc = evc;
         IBVoxRaytracer::RayData ray;
         { // Get RayTrace RayData //
-            HPoint3f entry_pt,poca,exit_pt;
+            Vector4f entry_pt,poca,exit_pt;
             if( !GetRayAlgorithm()->GetEntryPoint(muon.LineIn(),entry_pt) ||
                     !GetRayAlgorithm()->GetExitPoint(muon.LineOut(),exit_pt) )
                 return false;

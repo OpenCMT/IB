@@ -35,18 +35,18 @@ public:
 
     void evaluatePoCA()
     {
-        Vector4f  diff = m_muon.LineIn().origin -
-                         m_muon.LineOut().origin;
-        HVector3f new_axis_direction(diff(0)/diff(1), 1, diff(2)/diff(1));
+        Vector4f  diff = m_muon.LineIn().origin() -
+                         m_muon.LineOut().origin();
+        Vector4f  new_axis_direction = HVector3f(diff(0)/diff(1), 1, diff(2)/diff(1));
         Matrix4f  rotation = getRotationMatrix(new_axis_direction);
 
         Scalarf   dtphi, dttheta, distance, yp, yt, np, nt, s2yp, s2yt;
-        Scalarf   e2pi = m_muon.ErrorIn().direction_error(0),
-                  e2po = m_muon.ErrorOut().direction_error(0),
-                  e2ti = (m_muon.ErrorIn().direction_error(2) ==0.f) ? m_muon.ErrorIn().direction_error(1)
-                                                                     : m_muon.ErrorIn().direction_error(2),
-                  e2to = (m_muon.ErrorOut().direction_error(2)==0.f) ? m_muon.ErrorOut().direction_error(1)
-                                                                     : m_muon.ErrorOut().direction_error(2);
+        Scalarf   e2pi = m_muon.ErrorIn().direction(0),
+                  e2po = m_muon.ErrorOut().direction(0),
+                  e2ti = (m_muon.ErrorIn().direction(2) ==0.f) ? m_muon.ErrorIn().direction(1)
+                                                                     : m_muon.ErrorIn().direction(2),
+                  e2to = (m_muon.ErrorOut().direction(2)==0.f) ? m_muon.ErrorOut().direction(1)
+                                                                     : m_muon.ErrorOut().direction(2);
         e2pi *= e2pi;
         e2po *= e2po;
         e2ti *= e2ti;
@@ -54,8 +54,8 @@ public:
 
         Scalarf   poca_x=0, poca_y=0, poca_z=0;
 
-        HVector3f new_in_direction  = rotation * this->getDirectorCosines(m_muon.LineIn().direction);
-        HVector3f new_out_direction = rotation * this->getDirectorCosines(m_muon.LineOut().direction);
+        Vector4f new_in_direction  = rotation * this->getDirectorCosines(m_muon.LineIn().direction());
+        Vector4f new_out_direction = rotation * this->getDirectorCosines(m_muon.LineOut().direction());
         new_in_direction(0)  /= new_in_direction(1);
         new_in_direction(2)  /= new_in_direction(1);
         new_out_direction(0) /= new_out_direction(1);
@@ -93,7 +93,7 @@ public:
                   pow(cos(atan(new_out_direction(2))),2) * (new_out_direction(2)*(poca_y)))        /
                  (pow(cos(atan(new_in_direction(2))),2)  + pow(cos(atan(new_out_direction(2))),2));
 
-        HVector3f poca(poca_x, poca_y, poca_z);
+        Vector4f poca = HPoint3f(poca_x, poca_y, poca_z);
         Matrix4f inverse;
         bool invertible = false;
         rotation.computeInverseWithCheck(inverse, invertible); // let it transpose it!
@@ -101,7 +101,7 @@ public:
             m_integrity = false;
         }
         poca = inverse * poca;
-        poca += m_muon.LineOut().origin;
+        poca += m_muon.LineOut().origin();
         m_poca(0) = poca(0);
         m_poca(1) = poca(1);
         m_poca(2) = poca(2);
@@ -110,9 +110,9 @@ public:
         }
     }
 
-    Matrix4f getRotationMatrix(const HVector3f &track_direction)
+    Matrix4f getRotationMatrix(const Vector4f &track_direction)
     {
-        HVector3f dc = this->getDirectorCosines(track_direction);
+        Vector4f dc = this->getDirectorCosines(track_direction);
 
         Scalarf theta = acos(dc(1));
         Scalarf phi = atan2(dc(2),dc(0));
@@ -143,7 +143,7 @@ public:
         return out;
     }
 
-    HVector3f getDirectorCosines(const HVector3f &track_direction)
+    Vector4f getDirectorCosines(const Vector4f &track_direction)
     {
         return track_direction / track_direction.head(3).norm();
     }
@@ -151,7 +151,7 @@ public:
 public:
 
     MuonScatterData m_muon;
-    HPoint3f        m_poca;
+    Vector4f        m_poca;
     bool            m_integrity;
 
 };
@@ -173,7 +173,7 @@ bool IBTiltedAxisPocaEvaluator::evaluate(MuonScatterData muon)
     return d->m_integrity;
 }
 
-HPoint3f IBTiltedAxisPocaEvaluator::getPoca()
+Vector4f IBTiltedAxisPocaEvaluator::getPoca()
 {
     return d->m_poca;
 }
