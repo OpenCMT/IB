@@ -1,24 +1,20 @@
-/*//////////////////////////////////////////////////////////////////////////////
-// CMT Cosmic Muon Tomography project //////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/*////////////////////////////////////////////////////////////////////////////
+ Copyright 2018 Istituto Nazionale di Fisica Nucleare
 
-  Copyright (c) 2014, Universita' degli Studi di Padova, INFN sez. di Padova
+ Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
+ the European Commission - subsequent versions of the EUPL (the "Licence").
+ You may not use this work except in compliance with the Licence.
 
-  Coordinators: Prof. Gianni Zumerle < gianni.zumerle@pd.infn.it >
-                Paolo Checchia       < paolo.checchia@pd.infn.it >
+ You may obtain a copy of the Licence at:
 
-  Authors: Andrea Rigoni Garola < andrea.rigoni@pd.infn.it >
-           Matteo Furlan        < nuright@gmail.com >
-           Sara Vanini          < sara.vanini@pd.infn.it >
+ https://joinup.ec.europa.eu/software/page/eupl
 
-  All rights reserved
-  ------------------------------------------------------------------
-
-  This file can not be copied and/or distributed without the express
-  permission of  Prof. Gianni Zumerle  < gianni.zumerle@pd.infn.it >
-
-//////////////////////////////////////////////////////////////////////////////*/
-
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the Licence is distributed on an "AS IS" basis, WITHOUT
+ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ Licence for the specific language governing permissions and limitations under
+ the Licence.
+////////////////////////////////////////////////////////////////////////////*/
 
 
 #ifndef IBROC_H
