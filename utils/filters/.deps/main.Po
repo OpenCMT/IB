@@ -1,0 +1,1157 @@
+main.o: abtrim/main.cpp /usr/include/c++/4.7/string \
+ /usr/include/c++/4.7/x86_64-linux-gnu/bits/c++config.h \
+ /usr/include/c++/4.7/x86_64-linux-gnu/bits/os_defines.h \
+ /usr/include/features.h /usr/include/x86_64-linux-gnu/bits/predefs.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
+ /usr/include/c++/4.7/x86_64-linux-gnu/bits/cpu_defines.h \
+ /usr/include/c++/4.7/bits/stringfwd.h \
+ /usr/include/c++/4.7/bits/char_traits.h \
+ /usr/include/c++/4.7/bits/stl_algobase.h \
+ /usr/include/c++/4.7/bits/functexcept.h \
+ /usr/include/c++/4.7/bits/exception_defines.h \
+ /usr/include/c++/4.7/bits/cpp_type_traits.h \
+ /usr/include/c++/4.7/ext/type_traits.h \
+ /usr/include/c++/4.7/ext/numeric_traits.h \
+ /usr/include/c++/4.7/bits/stl_pair.h /usr/include/c++/4.7/bits/move.h \
+ /usr/include/c++/4.7/bits/concept_check.h \
+ /usr/include/c++/4.7/bits/stl_iterator_base_types.h \
+ /usr/include/c++/4.7/bits/stl_iterator_base_funcs.h \
+ /usr/include/c++/4.7/bits/stl_iterator.h \
+ /usr/include/c++/4.7/debug/debug.h /usr/include/c++/4.7/bits/postypes.h \
+ /usr/include/c++/4.7/cwchar /usr/include/wchar.h /usr/include/stdio.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include/stdarg.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include/stddef.h \
+ /usr/include/xlocale.h /usr/include/c++/4.7/bits/allocator.h \
+ /usr/include/c++/4.7/x86_64-linux-gnu/bits/c++allocator.h \
+ /usr/include/c++/4.7/ext/new_allocator.h /usr/include/c++/4.7/new \
+ /usr/include/c++/4.7/exception \
+ /usr/include/c++/4.7/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/4.7/bits/localefwd.h \
+ /usr/include/c++/4.7/x86_64-linux-gnu/bits/c++locale.h \
+ /usr/include/c++/4.7/clocale /usr/include/locale.h \
+ /usr/include/x86_64-linux-gnu/bits/locale.h /usr/include/c++/4.7/iosfwd \
+ /usr/include/c++/4.7/cctype /usr/include/ctype.h \
+ /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/typesizes.h /usr/include/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/byteswap.h \
+ /usr/include/c++/4.7/bits/ostream_insert.h \
+ /usr/include/c++/4.7/bits/cxxabi_forced.h \
+ /usr/include/c++/4.7/bits/stl_function.h \
+ /usr/include/c++/4.7/backward/binders.h \
+ /usr/include/c++/4.7/bits/range_access.h \
+ /usr/include/c++/4.7/bits/basic_string.h \
+ /usr/include/c++/4.7/ext/atomicity.h \
+ /usr/include/c++/4.7/x86_64-linux-gnu/bits/gthr.h \
+ /usr/include/c++/4.7/x86_64-linux-gnu/bits/gthr-default.h \
+ /usr/include/pthread.h /usr/include/sched.h /usr/include/time.h \
+ /usr/include/x86_64-linux-gnu/bits/sched.h \
+ /usr/include/x86_64-linux-gnu/bits/time.h \
+ /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
+ /usr/include/x86_64-linux-gnu/bits/setjmp.h \
+ /usr/include/c++/4.7/x86_64-linux-gnu/bits/atomic_word.h \
+ /usr/include/c++/4.7/bits/basic_string.tcc \
+ /usr/local/include/root/TFile.h /usr/local/include/root/TDirectoryFile.h \
+ /usr/local/include/root/TDirectory.h /usr/local/include/root/TNamed.h \
+ /usr/local/include/root/TObject.h /usr/local/include/root/Rtypes.h \
+ /usr/local/include/root/RConfig.h /usr/local/include/root/RVersion.h \
+ /usr/local/include/root/DllImport.h /usr/local/include/root/Rtypeinfo.h \
+ /usr/include/c++/4.7/typeinfo /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/sys_errlist.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio.h /usr/include/string.h \
+ /usr/local/include/root/snprintf.h /usr/local/include/root/strlcpy.h \
+ /usr/include/unistd.h /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ /usr/include/x86_64-linux-gnu/bits/environments.h \
+ /usr/include/x86_64-linux-gnu/bits/confname.h /usr/include/getopt.h \
+ /usr/local/include/root/TGenericClassInfo.h /usr/include/c++/4.7/vector \
+ /usr/include/c++/4.7/bits/stl_construct.h \
+ /usr/include/c++/4.7/ext/alloc_traits.h \
+ /usr/include/c++/4.7/bits/stl_uninitialized.h \
+ /usr/include/c++/4.7/bits/stl_vector.h \
+ /usr/include/c++/4.7/bits/stl_bvector.h \
+ /usr/include/c++/4.7/bits/vector.tcc \
+ /usr/local/include/root/TSchemaHelper.h \
+ /usr/local/include/root/TStorage.h \
+ /usr/local/include/root/TVersionCheck.h \
+ /usr/local/include/root/Riosfwd.h /usr/local/include/root/TBuffer.h \
+ /usr/local/include/root/TString.h /usr/local/include/root/TMathBase.h \
+ /usr/local/include/root/TList.h /usr/local/include/root/TSeqCollection.h \
+ /usr/local/include/root/TCollection.h \
+ /usr/local/include/root/TIterator.h /usr/include/c++/4.7/iterator \
+ /usr/include/c++/4.7/ostream /usr/include/c++/4.7/ios \
+ /usr/include/c++/4.7/bits/ios_base.h \
+ /usr/include/c++/4.7/bits/locale_classes.h \
+ /usr/include/c++/4.7/bits/locale_classes.tcc \
+ /usr/include/c++/4.7/streambuf /usr/include/c++/4.7/bits/streambuf.tcc \
+ /usr/include/c++/4.7/bits/basic_ios.h \
+ /usr/include/c++/4.7/bits/locale_facets.h /usr/include/c++/4.7/cwctype \
+ /usr/include/wctype.h \
+ /usr/include/c++/4.7/x86_64-linux-gnu/bits/ctype_base.h \
+ /usr/include/c++/4.7/bits/streambuf_iterator.h \
+ /usr/include/c++/4.7/x86_64-linux-gnu/bits/ctype_inline.h \
+ /usr/include/c++/4.7/bits/locale_facets.tcc \
+ /usr/include/c++/4.7/bits/basic_ios.tcc \
+ /usr/include/c++/4.7/bits/ostream.tcc /usr/include/c++/4.7/istream \
+ /usr/include/c++/4.7/bits/istream.tcc \
+ /usr/include/c++/4.7/bits/stream_iterator.h \
+ /usr/local/include/root/TDatime.h /usr/local/include/root/TUUID.h \
+ /usr/local/include/root/TUrl.h /usr/local/include/root/TMap.h \
+ /usr/local/include/root/THashTable.h /usr/local/include/root/TH1F.h \
+ /usr/local/include/root/TH1.h /usr/local/include/root/TAxis.h \
+ /usr/local/include/root/TAttAxis.h /usr/local/include/root/TArrayD.h \
+ /usr/local/include/root/TArray.h /usr/local/include/root/TAttLine.h \
+ /usr/local/include/root/TAttFill.h /usr/local/include/root/TAttMarker.h \
+ /usr/local/include/root/TArrayC.h /usr/local/include/root/TArrayS.h \
+ /usr/local/include/root/TArrayI.h /usr/local/include/root/TArrayF.h \
+ /usr/local/include/root/Foption.h /usr/local/include/root/TVectorFfwd.h \
+ /usr/local/include/root/TVectorDfwd.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include/float.h \
+ /usr/local/include/root/TFitResultPtr.h ../../src/IBVoxFilters.h \
+ /usr/local/include/libmutom-0.1/Core/Object.h \
+ /usr/include/c++/4.7/iostream \
+ /usr/local/include/libmutom-0.1/Core/Types.h \
+ /usr/local/include/libmutom-0.1/ltk/ltktypes.h /usr/include/assert.h \
+ /usr/include/x86_64-linux-gnu/sys/types.h \
+ /usr/include/x86_64-linux-gnu/sys/select.h \
+ /usr/include/x86_64-linux-gnu/bits/select.h \
+ /usr/include/x86_64-linux-gnu/bits/sigset.h \
+ /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
+ /usr/local/include/libmutom-0.1/ltk/ltkmacros.h \
+ /usr/local/include/libmutom-0.1/Core/Macros.h \
+ /usr/local/include/libmutom-0.1/Core/StaticInterface.h \
+ /usr/local/include/libmutom-0.1/Math/VoxImageFilter.h \
+ /usr/local/include/libmutom-0.1/Math/Dense.h /usr/include/stdlib.h \
+ /usr/include/x86_64-linux-gnu/bits/waitflags.h \
+ /usr/include/x86_64-linux-gnu/bits/waitstatus.h /usr/include/alloca.h \
+ /usr/local/include/eigen3/Eigen/Dense \
+ /usr/local/include/eigen3/Eigen/Core \
+ /usr/local/include/eigen3/Eigen/src/Core/util/DisableStupidWarnings.h \
+ /usr/local/include/eigen3/Eigen/src/Core/util/Macros.h \
+ /usr/include/c++/4.7/complex /usr/include/c++/4.7/cmath \
+ /usr/include/math.h /usr/include/x86_64-linux-gnu/bits/huge_val.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_valf.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_vall.h \
+ /usr/include/x86_64-linux-gnu/bits/inf.h \
+ /usr/include/x86_64-linux-gnu/bits/nan.h \
+ /usr/include/x86_64-linux-gnu/bits/mathdef.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+ /usr/include/x86_64-linux-gnu/bits/mathinline.h \
+ /usr/include/c++/4.7/sstream /usr/include/c++/4.7/bits/sstream.tcc \
+ /usr/local/include/eigen3/Eigen/src/Core/util/MKL_support.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include/emmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include/xmmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include/mmintrin.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include/mm_malloc.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include/omp.h \
+ /usr/include/c++/4.7/cerrno /usr/include/errno.h \
+ /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
+ /usr/include/x86_64-linux-gnu/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/c++/4.7/cstddef /usr/include/c++/4.7/cstdlib \
+ /usr/include/c++/4.7/cassert /usr/include/c++/4.7/functional \
+ /usr/include/c++/4.7/cstring /usr/include/c++/4.7/limits \
+ /usr/include/c++/4.7/climits \
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed/limits.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed/syslimits.h \
+ /usr/include/limits.h /usr/include/x86_64-linux-gnu/bits/posix1_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/local_lim.h \
+ /usr/include/linux/limits.h \
+ /usr/include/x86_64-linux-gnu/bits/posix2_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
+ /usr/include/c++/4.7/algorithm /usr/include/c++/4.7/utility \
+ /usr/include/c++/4.7/bits/stl_relops.h \
+ /usr/include/c++/4.7/bits/stl_algo.h \
+ /usr/include/c++/4.7/bits/algorithmfwd.h \
+ /usr/include/c++/4.7/bits/stl_heap.h \
+ /usr/include/c++/4.7/bits/stl_tempbuf.h \
+ /usr/local/include/eigen3/Eigen/src/Core/util/Constants.h \
+ /usr/local/include/eigen3/Eigen/src/Core/util/ForwardDeclarations.h \
+ /usr/local/include/eigen3/Eigen/src/Core/util/Meta.h \
+ /usr/local/include/eigen3/Eigen/src/Core/util/XprHelper.h \
+ /usr/local/include/eigen3/Eigen/src/Core/util/StaticAssert.h \
+ /usr/local/include/eigen3/Eigen/src/Core/util/Memory.h \
+ /usr/local/include/eigen3/Eigen/src/Core/NumTraits.h \
+ /usr/local/include/eigen3/Eigen/src/Core/MathFunctions.h \
+ /usr/local/include/eigen3/Eigen/src/Core/GenericPacketMath.h \
+ /usr/local/include/eigen3/Eigen/src/Core/arch/SSE/PacketMath.h \
+ /usr/local/include/eigen3/Eigen/src/Core/arch/SSE/MathFunctions.h \
+ /usr/local/include/eigen3/Eigen/src/Core/arch/SSE/Complex.h \
+ /usr/local/include/eigen3/Eigen/src/Core/arch/Default/Settings.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Functors.h \
+ /usr/local/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h \
+ /usr/local/include/eigen3/Eigen/src/Core/DenseBase.h \
+ /usr/local/include/eigen3/Eigen/src/Core/../plugins/BlockMethods.h \
+ /usr/local/include/eigen3/Eigen/src/Core/MatrixBase.h \
+ /usr/local/include/eigen3/Eigen/src/Core/../plugins/CommonCwiseUnaryOps.h \
+ /usr/local/include/eigen3/Eigen/src/Core/../plugins/CommonCwiseBinaryOps.h \
+ /usr/local/include/eigen3/Eigen/src/Core/../plugins/MatrixCwiseUnaryOps.h \
+ /usr/local/include/eigen3/Eigen/src/Core/../plugins/MatrixCwiseBinaryOps.h \
+ /usr/local/include/eigen3/Eigen/src/Core/EigenBase.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Assign.h \
+ /usr/local/include/eigen3/Eigen/src/Core/util/BlasUtil.h \
+ /usr/local/include/eigen3/Eigen/src/Core/DenseStorage.h \
+ /usr/local/include/eigen3/Eigen/src/Core/NestByValue.h \
+ /usr/local/include/eigen3/Eigen/src/Core/ForceAlignedAccess.h \
+ /usr/local/include/eigen3/Eigen/src/Core/ReturnByValue.h \
+ /usr/local/include/eigen3/Eigen/src/Core/NoAlias.h \
+ /usr/local/include/eigen3/Eigen/src/Core/PlainObjectBase.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Matrix.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Array.h \
+ /usr/local/include/eigen3/Eigen/src/Core/CwiseBinaryOp.h \
+ /usr/local/include/eigen3/Eigen/src/Core/CwiseUnaryOp.h \
+ /usr/local/include/eigen3/Eigen/src/Core/CwiseNullaryOp.h \
+ /usr/local/include/eigen3/Eigen/src/Core/CwiseUnaryView.h \
+ /usr/local/include/eigen3/Eigen/src/Core/SelfCwiseBinaryOp.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Dot.h \
+ /usr/local/include/eigen3/Eigen/src/Core/StableNorm.h \
+ /usr/local/include/eigen3/Eigen/src/Core/MapBase.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Stride.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Map.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Block.h \
+ /usr/local/include/eigen3/Eigen/src/Core/VectorBlock.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Transpose.h \
+ /usr/local/include/eigen3/Eigen/src/Core/DiagonalMatrix.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Diagonal.h \
+ /usr/local/include/eigen3/Eigen/src/Core/DiagonalProduct.h \
+ /usr/local/include/eigen3/Eigen/src/Core/PermutationMatrix.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Transpositions.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Redux.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Visitor.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Fuzzy.h \
+ /usr/local/include/eigen3/Eigen/src/Core/IO.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Swap.h \
+ /usr/local/include/eigen3/Eigen/src/Core/CommaInitializer.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Flagged.h \
+ /usr/local/include/eigen3/Eigen/src/Core/ProductBase.h \
+ /usr/local/include/eigen3/Eigen/src/Core/GeneralProduct.h \
+ /usr/local/include/eigen3/Eigen/src/Core/TriangularMatrix.h \
+ /usr/local/include/eigen3/Eigen/src/Core/SelfAdjointView.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/GeneralBlockPanelKernel.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/Parallelizer.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/CoeffBasedProduct.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/GeneralMatrixVector.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h \
+ /usr/local/include/eigen3/Eigen/src/Core/SolveTriangular.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrixTriangular.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixMatrix.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/SelfadjointProduct.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/SelfadjointRank2Update.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/TriangularMatrixMatrix.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/TriangularSolverMatrix.h \
+ /usr/local/include/eigen3/Eigen/src/Core/products/TriangularSolverVector.h \
+ /usr/local/include/eigen3/Eigen/src/Core/BandMatrix.h \
+ /usr/local/include/eigen3/Eigen/src/Core/BooleanRedux.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Select.h \
+ /usr/local/include/eigen3/Eigen/src/Core/VectorwiseOp.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Random.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Replicate.h \
+ /usr/local/include/eigen3/Eigen/src/Core/Reverse.h \
+ /usr/local/include/eigen3/Eigen/src/Core/ArrayBase.h \
+ /usr/local/include/eigen3/Eigen/src/Core/../plugins/ArrayCwiseUnaryOps.h \
+ /usr/local/include/eigen3/Eigen/src/Core/../plugins/ArrayCwiseBinaryOps.h \
+ /usr/local/include/eigen3/Eigen/src/Core/ArrayWrapper.h \
+ /usr/local/include/eigen3/Eigen/src/Core/GlobalFunctions.h \
+ /usr/local/include/eigen3/Eigen/src/Core/util/ReenableStupidWarnings.h \
+ /usr/local/include/eigen3/Eigen/LU \
+ /usr/local/include/eigen3/Eigen/src/misc/Solve.h \
+ /usr/local/include/eigen3/Eigen/src/misc/Kernel.h \
+ /usr/local/include/eigen3/Eigen/src/misc/Image.h \
+ /usr/local/include/eigen3/Eigen/src/LU/FullPivLU.h \
+ /usr/local/include/eigen3/Eigen/src/LU/PartialPivLU.h \
+ /usr/local/include/eigen3/Eigen/src/LU/Determinant.h \
+ /usr/local/include/eigen3/Eigen/src/LU/Inverse.h \
+ /usr/local/include/eigen3/Eigen/src/LU/arch/Inverse_SSE.h \
+ /usr/local/include/eigen3/Eigen/Cholesky \
+ /usr/local/include/eigen3/Eigen/src/Cholesky/LLT.h \
+ /usr/local/include/eigen3/Eigen/src/Cholesky/LDLT.h \
+ /usr/local/include/eigen3/Eigen/QR \
+ /usr/local/include/eigen3/Eigen/Jacobi \
+ /usr/local/include/eigen3/Eigen/src/Jacobi/Jacobi.h \
+ /usr/local/include/eigen3/Eigen/Householder \
+ /usr/local/include/eigen3/Eigen/src/Householder/Householder.h \
+ /usr/local/include/eigen3/Eigen/src/Householder/HouseholderSequence.h \
+ /usr/local/include/eigen3/Eigen/src/Householder/BlockHouseholder.h \
+ /usr/local/include/eigen3/Eigen/src/QR/HouseholderQR.h \
+ /usr/local/include/eigen3/Eigen/src/QR/FullPivHouseholderQR.h \
+ /usr/local/include/eigen3/Eigen/src/QR/ColPivHouseholderQR.h \
+ /usr/local/include/eigen3/Eigen/SVD \
+ /usr/local/include/eigen3/Eigen/src/SVD/JacobiSVD.h \
+ /usr/local/include/eigen3/Eigen/src/SVD/UpperBidiagonalization.h \
+ /usr/local/include/eigen3/Eigen/Geometry \
+ /usr/local/include/eigen3/Eigen/src/Geometry/OrthoMethods.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/EulerAngles.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/Homogeneous.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/RotationBase.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/Rotation2D.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/Quaternion.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/AngleAxis.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/Transform.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/Translation.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/Scaling.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/Hyperplane.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/ParametrizedLine.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/AlignedBox.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/Umeyama.h \
+ /usr/local/include/eigen3/Eigen/src/Geometry/arch/Geometry_SSE.h \
+ /usr/local/include/eigen3/Eigen/Eigenvalues \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/Tridiagonalization.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/RealSchur.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/./HessenbergDecomposition.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/EigenSolver.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/./RealSchur.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/SelfAdjointEigenSolver.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/./Tridiagonalization.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/GeneralizedSelfAdjointEigenSolver.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/HessenbergDecomposition.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/ComplexSchur.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/ComplexEigenSolver.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/./ComplexSchur.h \
+ /usr/local/include/eigen3/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h \
+ /usr/local/include/libmutom-0.1/Core/Types.h \
+ /usr/local/include/libmutom-0.1/Math/VoxImage.h \
+ /usr/local/include/libmutom-0.1/Core/Vector.h \
+ /usr/local/include/libmutom-0.1/Core/StaticInterface.h \
+ /usr/local/include/libmutom-0.1/Core/SmartPointer.h \
+ /usr/local/include/libmutom-0.1/Core/Debug.h \
+ /usr/local/include/libmutom-0.1/ltk/ltkdebug.h \
+ /usr/local/include/libmutom-0.1/ltk/ltktypes.h \
+ /usr/local/include/libmutom-0.1/Core/Macros.h \
+ /usr/local/include/libmutom-0.1/Math/StructuredGrid.h \
+ /usr/local/include/libmutom-0.1/Math/ContainerBox.h \
+ /usr/local/include/libmutom-0.1/Math/Geometry.h \
+ /usr/local/include/libmutom-0.1/Math/Transform.h \
+ /usr/local/include/eigen3/Eigen/Geometry \
+ /usr/local/include/libmutom-0.1/Math/StructuredData.h \
+ /usr/local/include/libmutom-0.1/Math/VoxImageFilter.hpp \
+ /usr/local/include/libmutom-0.1/Math/VoxImageFilter.h \
+ /usr/local/include/libmutom-0.1/Math/VoxImageFilterLinear.hpp \
+ /usr/local/include/libmutom-0.1/Math/VoxImageFilterThreshold.hpp \
+ /usr/local/include/libmutom-0.1/Math/VoxImageFilterMedian.hpp \
+ /usr/local/include/libmutom-0.1/Math/VoxImageFilterABTrim.hpp \
+ /usr/local/include/libmutom-0.1/Math/VoxImageFilter2ndStat.hpp \
+ ../../src/IBVoxImageFilterPlasmon.hpp /usr/local/include/root/TH2F.h \
+ /usr/local/include/root/TH2.h /usr/local/include/root/TMatrixFBasefwd.h \
+ /usr/local/include/root/TMatrixDBasefwd.h ../../src/IBVoxel.h \
+ ../../src/IBVoxCollection.h \
+ /usr/local/include/libmutom-0.1/Vtk/vtkVoxImage.h \
+ /usr/local/include/libmutom-0.1/Vtk/uLibVtkInterface.h \
+ /usr/include/c++/4.7/iomanip
+
+/usr/include/c++/4.7/string:
+
+/usr/include/c++/4.7/x86_64-linux-gnu/bits/c++config.h:
+
+/usr/include/c++/4.7/x86_64-linux-gnu/bits/os_defines.h:
+
+/usr/include/features.h:
+
+/usr/include/x86_64-linux-gnu/bits/predefs.h:
+
+/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
+
+/usr/include/c++/4.7/x86_64-linux-gnu/bits/cpu_defines.h:
+
+/usr/include/c++/4.7/bits/stringfwd.h:
+
+/usr/include/c++/4.7/bits/char_traits.h:
+
+/usr/include/c++/4.7/bits/stl_algobase.h:
+
+/usr/include/c++/4.7/bits/functexcept.h:
+
+/usr/include/c++/4.7/bits/exception_defines.h:
+
+/usr/include/c++/4.7/bits/cpp_type_traits.h:
+
+/usr/include/c++/4.7/ext/type_traits.h:
+
+/usr/include/c++/4.7/ext/numeric_traits.h:
+
+/usr/include/c++/4.7/bits/stl_pair.h:
+
+/usr/include/c++/4.7/bits/move.h:
+
+/usr/include/c++/4.7/bits/concept_check.h:
+
+/usr/include/c++/4.7/bits/stl_iterator_base_types.h:
+
+/usr/include/c++/4.7/bits/stl_iterator_base_funcs.h:
+
+/usr/include/c++/4.7/bits/stl_iterator.h:
+
+/usr/include/c++/4.7/debug/debug.h:
+
+/usr/include/c++/4.7/bits/postypes.h:
+
+/usr/include/c++/4.7/cwchar:
+
+/usr/include/wchar.h:
+
+/usr/include/stdio.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include/stdarg.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include/stddef.h:
+
+/usr/include/xlocale.h:
+
+/usr/include/c++/4.7/bits/allocator.h:
+
+/usr/include/c++/4.7/x86_64-linux-gnu/bits/c++allocator.h:
+
+/usr/include/c++/4.7/ext/new_allocator.h:
+
+/usr/include/c++/4.7/new:
+
+/usr/include/c++/4.7/exception:
+
+/usr/include/c++/4.7/bits/atomic_lockfree_defines.h:
+
+/usr/include/c++/4.7/bits/localefwd.h:
+
+/usr/include/c++/4.7/x86_64-linux-gnu/bits/c++locale.h:
+
+/usr/include/c++/4.7/clocale:
+
+/usr/include/locale.h:
+
+/usr/include/x86_64-linux-gnu/bits/locale.h:
+
+/usr/include/c++/4.7/iosfwd:
+
+/usr/include/c++/4.7/cctype:
+
+/usr/include/ctype.h:
+
+/usr/include/x86_64-linux-gnu/bits/types.h:
+
+/usr/include/x86_64-linux-gnu/bits/typesizes.h:
+
+/usr/include/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap.h:
+
+/usr/include/c++/4.7/bits/ostream_insert.h:
+
+/usr/include/c++/4.7/bits/cxxabi_forced.h:
+
+/usr/include/c++/4.7/bits/stl_function.h:
+
+/usr/include/c++/4.7/backward/binders.h:
+
+/usr/include/c++/4.7/bits/range_access.h:
+
+/usr/include/c++/4.7/bits/basic_string.h:
+
+/usr/include/c++/4.7/ext/atomicity.h:
+
+/usr/include/c++/4.7/x86_64-linux-gnu/bits/gthr.h:
+
+/usr/include/c++/4.7/x86_64-linux-gnu/bits/gthr-default.h:
+
+/usr/include/pthread.h:
+
+/usr/include/sched.h:
+
+/usr/include/time.h:
+
+/usr/include/x86_64-linux-gnu/bits/sched.h:
+
+/usr/include/x86_64-linux-gnu/bits/time.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
+
+/usr/include/x86_64-linux-gnu/bits/setjmp.h:
+
+/usr/include/c++/4.7/x86_64-linux-gnu/bits/atomic_word.h:
+
+/usr/include/c++/4.7/bits/basic_string.tcc:
+
+/usr/local/include/root/TFile.h:
+
+/usr/local/include/root/TDirectoryFile.h:
+
+/usr/local/include/root/TDirectory.h:
+
+/usr/local/include/root/TNamed.h:
+
+/usr/local/include/root/TObject.h:
+
+/usr/local/include/root/Rtypes.h:
+
+/usr/local/include/root/RConfig.h:
+
+/usr/local/include/root/RVersion.h:
+
+/usr/local/include/root/DllImport.h:
+
+/usr/local/include/root/Rtypeinfo.h:
+
+/usr/include/c++/4.7/typeinfo:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/sys_errlist.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio.h:
+
+/usr/include/string.h:
+
+/usr/local/include/root/snprintf.h:
+
+/usr/local/include/root/strlcpy.h:
+
+/usr/include/unistd.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
+
+/usr/include/x86_64-linux-gnu/bits/environments.h:
+
+/usr/include/x86_64-linux-gnu/bits/confname.h:
+
+/usr/include/getopt.h:
+
+/usr/local/include/root/TGenericClassInfo.h:
+
+/usr/include/c++/4.7/vector:
+
+/usr/include/c++/4.7/bits/stl_construct.h:
+
+/usr/include/c++/4.7/ext/alloc_traits.h:
+
+/usr/include/c++/4.7/bits/stl_uninitialized.h:
+
+/usr/include/c++/4.7/bits/stl_vector.h:
+
+/usr/include/c++/4.7/bits/stl_bvector.h:
+
+/usr/include/c++/4.7/bits/vector.tcc:
+
+/usr/local/include/root/TSchemaHelper.h:
+
+/usr/local/include/root/TStorage.h:
+
+/usr/local/include/root/TVersionCheck.h:
+
+/usr/local/include/root/Riosfwd.h:
+
+/usr/local/include/root/TBuffer.h:
+
+/usr/local/include/root/TString.h:
+
+/usr/local/include/root/TMathBase.h:
+
+/usr/local/include/root/TList.h:
+
+/usr/local/include/root/TSeqCollection.h:
+
+/usr/local/include/root/TCollection.h:
+
+/usr/local/include/root/TIterator.h:
+
+/usr/include/c++/4.7/iterator:
+
+/usr/include/c++/4.7/ostream:
+
+/usr/include/c++/4.7/ios:
+
+/usr/include/c++/4.7/bits/ios_base.h:
+
+/usr/include/c++/4.7/bits/locale_classes.h:
+
+/usr/include/c++/4.7/bits/locale_classes.tcc:
+
+/usr/include/c++/4.7/streambuf:
+
+/usr/include/c++/4.7/bits/streambuf.tcc:
+
+/usr/include/c++/4.7/bits/basic_ios.h:
+
+/usr/include/c++/4.7/bits/locale_facets.h:
+
+/usr/include/c++/4.7/cwctype:
+
+/usr/include/wctype.h:
+
+/usr/include/c++/4.7/x86_64-linux-gnu/bits/ctype_base.h:
+
+/usr/include/c++/4.7/bits/streambuf_iterator.h:
+
+/usr/include/c++/4.7/x86_64-linux-gnu/bits/ctype_inline.h:
+
+/usr/include/c++/4.7/bits/locale_facets.tcc:
+
+/usr/include/c++/4.7/bits/basic_ios.tcc:
+
+/usr/include/c++/4.7/bits/ostream.tcc:
+
+/usr/include/c++/4.7/istream:
+
+/usr/include/c++/4.7/bits/istream.tcc:
+
+/usr/include/c++/4.7/bits/stream_iterator.h:
+
+/usr/local/include/root/TDatime.h:
+
+/usr/local/include/root/TUUID.h:
+
+/usr/local/include/root/TUrl.h:
+
+/usr/local/include/root/TMap.h:
+
+/usr/local/include/root/THashTable.h:
+
+/usr/local/include/root/TH1F.h:
+
+/usr/local/include/root/TH1.h:
+
+/usr/local/include/root/TAxis.h:
+
+/usr/local/include/root/TAttAxis.h:
+
+/usr/local/include/root/TArrayD.h:
+
+/usr/local/include/root/TArray.h:
+
+/usr/local/include/root/TAttLine.h:
+
+/usr/local/include/root/TAttFill.h:
+
+/usr/local/include/root/TAttMarker.h:
+
+/usr/local/include/root/TArrayC.h:
+
+/usr/local/include/root/TArrayS.h:
+
+/usr/local/include/root/TArrayI.h:
+
+/usr/local/include/root/TArrayF.h:
+
+/usr/local/include/root/Foption.h:
+
+/usr/local/include/root/TVectorFfwd.h:
+
+/usr/local/include/root/TVectorDfwd.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include/float.h:
+
+/usr/local/include/root/TFitResultPtr.h:
+
+../../src/IBVoxFilters.h:
+
+/usr/local/include/libmutom-0.1/Core/Object.h:
+
+/usr/include/c++/4.7/iostream:
+
+/usr/local/include/libmutom-0.1/Core/Types.h:
+
+/usr/local/include/libmutom-0.1/ltk/ltktypes.h:
+
+/usr/include/assert.h:
+
+/usr/include/x86_64-linux-gnu/sys/types.h:
+
+/usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/sigset.h:
+
+/usr/include/x86_64-linux-gnu/sys/sysmacros.h:
+
+/usr/local/include/libmutom-0.1/ltk/ltkmacros.h:
+
+/usr/local/include/libmutom-0.1/Core/Macros.h:
+
+/usr/local/include/libmutom-0.1/Core/StaticInterface.h:
+
+/usr/local/include/libmutom-0.1/Math/VoxImageFilter.h:
+
+/usr/local/include/libmutom-0.1/Math/Dense.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
+
+/usr/include/alloca.h:
+
+/usr/local/include/eigen3/Eigen/Dense:
+
+/usr/local/include/eigen3/Eigen/Core:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/DisableStupidWarnings.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/Macros.h:
+
+/usr/include/c++/4.7/complex:
+
+/usr/include/c++/4.7/cmath:
+
+/usr/include/math.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_val.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_valf.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_vall.h:
+
+/usr/include/x86_64-linux-gnu/bits/inf.h:
+
+/usr/include/x86_64-linux-gnu/bits/nan.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathdef.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathinline.h:
+
+/usr/include/c++/4.7/sstream:
+
+/usr/include/c++/4.7/bits/sstream.tcc:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/MKL_support.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include/emmintrin.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include/xmmintrin.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include/mmintrin.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include/mm_malloc.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include/omp.h:
+
+/usr/include/c++/4.7/cerrno:
+
+/usr/include/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/errno.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/x86_64-linux-gnu/asm/errno.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/usr/include/c++/4.7/cstddef:
+
+/usr/include/c++/4.7/cstdlib:
+
+/usr/include/c++/4.7/cassert:
+
+/usr/include/c++/4.7/functional:
+
+/usr/include/c++/4.7/cstring:
+
+/usr/include/c++/4.7/limits:
+
+/usr/include/c++/4.7/climits:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed/limits.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix2_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/xopen_lim.h:
+
+/usr/include/c++/4.7/algorithm:
+
+/usr/include/c++/4.7/utility:
+
+/usr/include/c++/4.7/bits/stl_relops.h:
+
+/usr/include/c++/4.7/bits/stl_algo.h:
+
+/usr/include/c++/4.7/bits/algorithmfwd.h:
+
+/usr/include/c++/4.7/bits/stl_heap.h:
+
+/usr/include/c++/4.7/bits/stl_tempbuf.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/Constants.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/ForwardDeclarations.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/Meta.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/XprHelper.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/StaticAssert.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/Memory.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/NumTraits.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/MathFunctions.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/GenericPacketMath.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/arch/SSE/PacketMath.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/arch/SSE/MathFunctions.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/arch/SSE/Complex.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/arch/Default/Settings.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Functors.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/DenseBase.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/../plugins/BlockMethods.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/MatrixBase.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/../plugins/CommonCwiseUnaryOps.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/../plugins/CommonCwiseBinaryOps.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/../plugins/MatrixCwiseUnaryOps.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/../plugins/MatrixCwiseBinaryOps.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/EigenBase.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Assign.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/BlasUtil.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/DenseStorage.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/NestByValue.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/ForceAlignedAccess.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/ReturnByValue.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/NoAlias.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/PlainObjectBase.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Matrix.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Array.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/CwiseBinaryOp.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/CwiseUnaryOp.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/CwiseNullaryOp.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/CwiseUnaryView.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/SelfCwiseBinaryOp.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Dot.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/StableNorm.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/MapBase.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Stride.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Map.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Block.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/VectorBlock.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Transpose.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/DiagonalMatrix.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Diagonal.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/DiagonalProduct.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/PermutationMatrix.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Transpositions.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Redux.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Visitor.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Fuzzy.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/IO.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Swap.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/CommaInitializer.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Flagged.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/ProductBase.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/GeneralProduct.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/TriangularMatrix.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/SelfAdjointView.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/GeneralBlockPanelKernel.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/Parallelizer.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/CoeffBasedProduct.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/GeneralMatrixVector.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/SolveTriangular.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrixTriangular.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixMatrix.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/SelfadjointProduct.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/SelfadjointRank2Update.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/TriangularMatrixMatrix.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/TriangularSolverMatrix.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/products/TriangularSolverVector.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/BandMatrix.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/BooleanRedux.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Select.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/VectorwiseOp.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Random.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Replicate.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/Reverse.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/ArrayBase.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/../plugins/ArrayCwiseUnaryOps.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/../plugins/ArrayCwiseBinaryOps.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/ArrayWrapper.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/GlobalFunctions.h:
+
+/usr/local/include/eigen3/Eigen/src/Core/util/ReenableStupidWarnings.h:
+
+/usr/local/include/eigen3/Eigen/LU:
+
+/usr/local/include/eigen3/Eigen/src/misc/Solve.h:
+
+/usr/local/include/eigen3/Eigen/src/misc/Kernel.h:
+
+/usr/local/include/eigen3/Eigen/src/misc/Image.h:
+
+/usr/local/include/eigen3/Eigen/src/LU/FullPivLU.h:
+
+/usr/local/include/eigen3/Eigen/src/LU/PartialPivLU.h:
+
+/usr/local/include/eigen3/Eigen/src/LU/Determinant.h:
+
+/usr/local/include/eigen3/Eigen/src/LU/Inverse.h:
+
+/usr/local/include/eigen3/Eigen/src/LU/arch/Inverse_SSE.h:
+
+/usr/local/include/eigen3/Eigen/Cholesky:
+
+/usr/local/include/eigen3/Eigen/src/Cholesky/LLT.h:
+
+/usr/local/include/eigen3/Eigen/src/Cholesky/LDLT.h:
+
+/usr/local/include/eigen3/Eigen/QR:
+
+/usr/local/include/eigen3/Eigen/Jacobi:
+
+/usr/local/include/eigen3/Eigen/src/Jacobi/Jacobi.h:
+
+/usr/local/include/eigen3/Eigen/Householder:
+
+/usr/local/include/eigen3/Eigen/src/Householder/Householder.h:
+
+/usr/local/include/eigen3/Eigen/src/Householder/HouseholderSequence.h:
+
+/usr/local/include/eigen3/Eigen/src/Householder/BlockHouseholder.h:
+
+/usr/local/include/eigen3/Eigen/src/QR/HouseholderQR.h:
+
+/usr/local/include/eigen3/Eigen/src/QR/FullPivHouseholderQR.h:
+
+/usr/local/include/eigen3/Eigen/src/QR/ColPivHouseholderQR.h:
+
+/usr/local/include/eigen3/Eigen/SVD:
+
+/usr/local/include/eigen3/Eigen/src/SVD/JacobiSVD.h:
+
+/usr/local/include/eigen3/Eigen/src/SVD/UpperBidiagonalization.h:
+
+/usr/local/include/eigen3/Eigen/Geometry:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/OrthoMethods.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/EulerAngles.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/Homogeneous.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/RotationBase.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/Rotation2D.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/Quaternion.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/AngleAxis.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/Transform.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/Translation.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/Scaling.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/Hyperplane.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/ParametrizedLine.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/AlignedBox.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/Umeyama.h:
+
+/usr/local/include/eigen3/Eigen/src/Geometry/arch/Geometry_SSE.h:
+
+/usr/local/include/eigen3/Eigen/Eigenvalues:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/Tridiagonalization.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/RealSchur.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/./HessenbergDecomposition.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/EigenSolver.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/./RealSchur.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/SelfAdjointEigenSolver.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/./Tridiagonalization.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/GeneralizedSelfAdjointEigenSolver.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/HessenbergDecomposition.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/ComplexSchur.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/ComplexEigenSolver.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/./ComplexSchur.h:
+
+/usr/local/include/eigen3/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h:
+
+/usr/local/include/libmutom-0.1/Core/Types.h:
+
+/usr/local/include/libmutom-0.1/Math/VoxImage.h:
+
+/usr/local/include/libmutom-0.1/Core/Vector.h:
+
+/usr/local/include/libmutom-0.1/Core/StaticInterface.h:
+
+/usr/local/include/libmutom-0.1/Core/SmartPointer.h:
+
+/usr/local/include/libmutom-0.1/Core/Debug.h:
+
+/usr/local/include/libmutom-0.1/ltk/ltkdebug.h:
+
+/usr/local/include/libmutom-0.1/ltk/ltktypes.h:
+
+/usr/local/include/libmutom-0.1/Core/Macros.h:
+
+/usr/local/include/libmutom-0.1/Math/StructuredGrid.h:
+
+/usr/local/include/libmutom-0.1/Math/ContainerBox.h:
+
+/usr/local/include/libmutom-0.1/Math/Geometry.h:
+
+/usr/local/include/libmutom-0.1/Math/Transform.h:
+
+/usr/local/include/eigen3/Eigen/Geometry:
+
+/usr/local/include/libmutom-0.1/Math/StructuredData.h:
+
+/usr/local/include/libmutom-0.1/Math/VoxImageFilter.hpp:
+
+/usr/local/include/libmutom-0.1/Math/VoxImageFilter.h:
+
+/usr/local/include/libmutom-0.1/Math/VoxImageFilterLinear.hpp:
+
+/usr/local/include/libmutom-0.1/Math/VoxImageFilterThreshold.hpp:
+
+/usr/local/include/libmutom-0.1/Math/VoxImageFilterMedian.hpp:
+
+/usr/local/include/libmutom-0.1/Math/VoxImageFilterABTrim.hpp:
+
+/usr/local/include/libmutom-0.1/Math/VoxImageFilter2ndStat.hpp:
+
+../../src/IBVoxImageFilterPlasmon.hpp:
+
+/usr/local/include/root/TH2F.h:
+
+/usr/local/include/root/TH2.h:
+
+/usr/local/include/root/TMatrixFBasefwd.h:
+
+/usr/local/include/root/TMatrixDBasefwd.h:
+
+../../src/IBVoxel.h:
+
+../../src/IBVoxCollection.h:
+
+/usr/local/include/libmutom-0.1/Vtk/vtkVoxImage.h:
+
+/usr/local/include/libmutom-0.1/Vtk/uLibVtkInterface.h:
+
+/usr/include/c++/4.7/iomanip:
