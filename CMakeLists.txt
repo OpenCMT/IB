@@ -34,10 +34,11 @@ set(PACKAGE_AUTHOR "Andrea Rigoni Garola <andrea.rigoni@pd.infn.it>")
 message(STATUS "Install prefix is ${PWD}")
 
 ## First of all find uLib package to get imported locations ##
-unset(ULIB_CONFIG)
-set(ULIB_DIR ../../uLib/trunk/build/)
+#unset(ULIB_CONFIG)
+#set(ULIB_DIR ../../uLib/trunk/build/)
 find_package(ULIB 0.2 CONFIG REQUIRED
              NAMES uLib
+             PATHS /usr/lib64/cmake /usr/lib/cmake
              PATH_SUFFIXES mutom-0.2
 )
 message("ULIB_CONFIG=${ULIB_CONFIG}")
@@ -70,7 +71,7 @@ include(uLibMacros)
 include(uLibDebugMacro)
 include(uLibTargetMacros)
 include(uLibGenerateRMake)
-
+include(IBGenerateRPMS)
 
 ## CONFIG ------------------------------------------------------------------- ##
 
