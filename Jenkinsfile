@@ -7,16 +7,18 @@ pipeline {
         }
     }
 
+    parameters {
+        string(name: 'repourl', defaultValue: 'http://artifacts.pd.infn.it/packages/MUOTOM/rpms/centos7/x86_64/base', description: 'Repository URL')
+        string(name: 'ulibver', defaultValue: '0.2-1', description: 'uLib version')
+    }
+
     stages {
 
         stage('Build') {
 
             steps {
-                sh "echo \"192.84.143.1 artifacts.pd.infn.it\" >> /etc/hosts"
-                sh "mkdir packages"
-                sh "cd packages && wget http://artifacts.pd.infn.it/packages/MUOTOM/rpms/centos7/x86_64/base/cmt-ulib-0.2-1.el7.centos.x86_64.rpm"
-                sh "cd packages && wget http://artifacts.pd.infn.it/packages/MUOTOM/rpms/centos7/x86_64/base/cmt-ulib-devel-0.2-1.el7.centos.x86_64.rpm"
-                sh "cd packages && rpm -i *.rpm"
+                sh "yum -y localinstall ${params.repourl}/cmt-ulib-${params.ulibver}.el7.centos.x86_64.rpm"
+                sh "yum -y localinstall ${params.repourl}/cmt-ulib-devel-${params.ulibver}.el7.centos.x86_64.rpm"
                 sh "mkdir build && cd build && cmake -D ULIB_USE_QT5:BOOL=OFF .. && make"
             }
 
