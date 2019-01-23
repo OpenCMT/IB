@@ -72,6 +72,7 @@ include(uLibDebugMacro)
 include(uLibTargetMacros)
 include(uLibGenerateRMake)
 include(IBGenerateRPMS)
+include(IBGenerateDoc)
 
 ## CONFIG ------------------------------------------------------------------- ##
 
