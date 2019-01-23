@@ -45,7 +45,7 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/doxygen.cfg
      "WARN_IF_DOC_ERROR=YES\n"
      "WARN_FORMAT=\"$file:$line: $text\"\n"
      "INPUT=${CMAKE_CURRENT_SOURCE_DIR}/src\n"
-     "FILE_PATTERNS=*.cpp *.h\n"
+     "FILE_PATTERNS=*.cpp *.c *.h *.hpp\n"
      "RECURSIVE=YES\n"
      "EXCLUDE_SYMLINKS=NO\n"
      "FILTER_SOURCE_FILES=NO\n"
@@ -74,10 +74,7 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/doxygen.cfg
      "GENERATE_AUTOGEN_DEF=NO\n"
      "GENERATE_PERLMOD=NO\n")
 
-file(GLOB HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h)
-
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/index.html
-                   DEPENDS ${HEADER_FILES}
                    COMMAND doxygen ${CMAKE_CURRENT_BINARY_DIR}/doxygen.cfg)
 
 add_custom_target(doxygen ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
