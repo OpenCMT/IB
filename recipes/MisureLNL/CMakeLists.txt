@@ -37,8 +37,9 @@ include(uLibGenerateRMake)
 #set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/lib/cmake")
 unset(ULIB_CONFIG)
 unset(ULIB_INCLUDE_DIRS)
-find_package(ULIB 0.2 CONFIG
+find_package(ULIB 0.2 CONFIG REQUIRED
              NAMES uLib
+             PATHS /usr/lib64/cmake /usr/lib/cmake
              PATH_SUFFIXES mutom-0.2
 )
 if(ULIB_CONFIG)
@@ -46,7 +47,8 @@ if(ULIB_CONFIG)
 endif()
 
 unset(IB_CONFIG)
-find_package(IB 0.2 CONFIG
+find_package(IB 0.2 CONFIG REQUIRED
+             PATHS /usr/lib64/cmake /usr/lib/cmake
              PATH_SUFFIXES mutom-0.2
 )
 if(IB_CONFIG)
