@@ -62,6 +62,34 @@ analysis and imaging software Developed by University of Padova and INFN Sezione
 /usr/include/mutom-0.2/IB/*.h
 /usr/include/mutom-0.2/IB/*.hpp
 
+%package doc
+Summary: Cosmic Muon Tomography analysis libraries, document files
+
+%description doc
+This package contains the analysis toolkit library for Cosmic Muon Tomography reconstruction,
+analysis and imaging software Developed by University of Padova and INFN Sezione di Padova  Italy
+
+%files doc
+%defattr(-,root,root)
+%dir /usr/usr/share/doc/mutom-0.2/html
+%dir /usr/usr/share/doc/mutom-0.2/html/search
+/usr/usr/share/doc/mutom-0.2/html/annotated.html
+/usr/usr/share/doc/mutom-0.2/html/class*.html
+/usr/usr/share/doc/mutom-0.2/html/files.html
+/usr/usr/share/doc/mutom-0.2/html/functions*.html
+/usr/usr/share/doc/mutom-0.2/html/globals*.html
+/usr/usr/share/doc/mutom-0.2/html/hierarchy.html
+/usr/usr/share/doc/mutom-0.2/html/_i_b_*.html
+/usr/usr/share/doc/mutom-0.2/html/index.html
+/usr/usr/share/doc/mutom-0.2/html/namespace*.html
+/usr/usr/share/doc/mutom-0.2/html/struct*.html
+/usr/usr/share/doc/mutom-0.2/html/*.css
+/usr/usr/share/doc/mutom-0.2/html/*.png
+/usr/usr/share/doc/mutom-0.2/html/*.js
+/usr/usr/share/doc/mutom-0.2/html/search/*.html
+/usr/usr/share/doc/mutom-0.2/html/search/*.css
+/usr/usr/share/doc/mutom-0.2/html/search/*.png
+/usr/usr/share/doc/mutom-0.2/html/search/*.js
 
 %changelog
 * Tue Dec 04 2018 Paolo Andreetto <paolo.andreetto@pd.infn.it> - 0.2.1-1
