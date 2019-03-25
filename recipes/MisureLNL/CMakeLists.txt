@@ -1,97 +1,50 @@
 ################################################################################
-################################################################################
-################################################################################
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/recipes/MisureLNL/CMake")
 
-cmake_minimum_required(VERSION 2.6)
+### MUDULE FIND PCL PACKAGE ####################################################
 
-project(misureLNL)
-set(SOURCES
-    # put your source here
-    main.cpp
-)
-
-################################################################################
-################################################################################
-
-################################################################################
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")
-
-### MUDULE FIND PCL PACKAGE ------------------------------------------------------ ##
 find_package(PCL 1.3 REQUIRED COMPONENTS common io)
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 ################################################################################
-include(uLibDebugMacro)
-include(uLibCommon)
-include(uLibFindDependencies)
-include(uLibConfigHeader)
-include(uLibGenerateRMake)
 
-################################################################################
-## MUDULE FIND PACKAGE ------------------------------------------------------ ##
-#find_package(uLib REQUIRED) # not working at the moment
+#unset(ULIB_CONFIG)
+#unset(ULIB_INCLUDE_DIRS)
+#find_package(ULIB 0.2 CONFIG REQUIRED
+#             NAMES uLib
+#             PATHS /usr/lib64/cmake /usr/lib/cmake
+#             PATH_SUFFIXES mutom-0.2
+#)
+#if(NOT ULIB_CONFIG)
+# message("Cannot detect uLib")
+#endif()
 
-## CONFIG FIND PACKAGE ------------------------------------------------------ ##
-#set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/lib/cmake")
-unset(ULIB_CONFIG)
-unset(ULIB_INCLUDE_DIRS)
-find_package(ULIB 0.2 CONFIG REQUIRED
-             NAMES uLib
-             PATHS /usr/lib64/cmake /usr/lib/cmake
-             PATH_SUFFIXES mutom-0.2
+
+add_executable(misureLNL main.cpp)
+
+include_directories(${ULIB_INCLUDE_DIRS} ${IB_INCLUDE_DIRS} ${ULIB_ROOTLINK_DIR})
+
+target_link_libraries( misureLNL
+                       ${PACKAGE_LIBPREFIX}Core
+                       ${PACKAGE_LIBPREFIX}Math
+                       ${PACKAGE_LIBPREFIX}Detectors
+                       ${PACKAGE_LIBPREFIX}Vtk
+                       ${PACKAGE_LIBPREFIX}Root
+                       ${PACKAGE_LIBPREFIX}IB
+                       ${PCL_COMMON_LIBRARIES}
+                       ${PCL_IO_LIBRARIES}
 )
-if(ULIB_CONFIG)
- set(ULIB_FOUND true)
-endif()
+  ############################################################################
+  #    MANUAL INLCLUDE EXTERNAL DEPENDENCIES
+  #    ${Boost_SERIALIZATION_LIBRARY}
+  #    ${Boost_SIGNALS_LIBRARY}
+  #    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  #    ${Geant4_LIBRARIES}
+  #    ${ROOT_LIBRARIES}
+  #    ${VTK_LIBRARIES} # all VTK libs
+  ############################################################################
 
-unset(IB_CONFIG)
-find_package(IB 0.2 CONFIG REQUIRED
-             PATHS /usr/lib64/cmake /usr/lib/cmake
-             PATH_SUFFIXES mutom-0.2
-)
-if(IB_CONFIG)
- set(IB_FOUND true)
-endif()
-
-## PROJECT EXECUTABLE ------------------------------------------------------- ##
-add_executable(${PROJECT_NAME} ${SOURCES})
-add_executable(IB_abtrim ../../utils/filters/IB_abtrim.cpp)
-
-if(ULIB_FOUND AND IB_FOUND)
-    include_directories(${ULIB_INCLUDE_DIRS} ${IB_INCLUDE_DIRS} ${ULIB_ROOTLINK_DIR})
- target_link_libraries(${PROJECT_NAME}
-    ############################################################################
-    ## ULIB MODULES ##
-         mutomCore
-         mutomMath
-         mutomDetectors
-         mutomVtk
-         mutomRoot
-    ############################################################################
-         mutomIB
-    ############################################################################
-        ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES}
-    ############################################################################
-    #    MANUAL INLCLUDE EXTERNAL DEPENDENCIES
-    #    ${Boost_SERIALIZATION_LIBRARY}
-    #    ${Boost_SIGNALS_LIBRARY}
-    #    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    #    ${Geant4_LIBRARIES}
-    #    ${ROOT_LIBRARIES}
-    #    ${VTK_LIBRARIES} # all VTK libs
-    ############################################################################
-    )
-    target_link_libraries(IB_abtrim
-        mutomCore
-        mutomMath
-        mutomDetectors
-        mutomVtk
-   ############################################################################
-        mutomIB
-   ############################################################################
-    )
-endif(ULIB_FOUND AND IB_FOUND)
-
+install(TARGETS misureLNL RUNTIME DESTINATION bin)
 

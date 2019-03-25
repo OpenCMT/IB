@@ -1,11 +1,10 @@
 # UTILS
-set( UTILS
-        IB_abtrim
-        IB_abtrimu
-        IB_bilateral
-        IB_median
-        IB_spr
-        IB_scale
+set( UTILS IB_abtrim
+#          IB_abtrimu
+#          IB_bilateral
+#          IB_median
+#          IB_spr
+#          IB_scale
 )
 
 set(LIBRARIES

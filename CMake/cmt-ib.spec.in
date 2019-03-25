@@ -66,6 +66,19 @@ analysis and imaging software Developed by University of Padova and INFN Sezione
 /usr/include/mutom-0.2/IB/*.h
 /usr/include/mutom-0.2/IB/*.hpp
 
+%package binutils
+Summary: Cosmic Muon Tomography analysis libraries, bin files
+Requires: %{name}
+
+%description binutils
+This package contains the analysis toolkit library for Cosmic Muon Tomography reconstruction,
+analysis and imaging software Developed by University of Padova and INFN Sezione di Padova  Italy
+
+%files binutils
+%defattr(-,root,root)
+/usr/bin/IB_abtrim
+/usr/bin/misureLNL
+
 %package doc
 Summary: Cosmic Muon Tomography analysis libraries, document files
 
@@ -75,25 +88,29 @@ analysis and imaging software Developed by University of Padova and INFN Sezione
 
 %files doc
 %defattr(-,root,root)
-%dir /usr/usr/share/doc/mutom-0.2/html
-%dir /usr/usr/share/doc/mutom-0.2/html/search
-/usr/usr/share/doc/mutom-0.2/html/annotated.html
-/usr/usr/share/doc/mutom-0.2/html/class*.html
-/usr/usr/share/doc/mutom-0.2/html/files.html
-/usr/usr/share/doc/mutom-0.2/html/functions*.html
-/usr/usr/share/doc/mutom-0.2/html/globals*.html
-/usr/usr/share/doc/mutom-0.2/html/hierarchy.html
-/usr/usr/share/doc/mutom-0.2/html/_i_b_*.html
-/usr/usr/share/doc/mutom-0.2/html/index.html
-/usr/usr/share/doc/mutom-0.2/html/namespace*.html
-/usr/usr/share/doc/mutom-0.2/html/struct*.html
-/usr/usr/share/doc/mutom-0.2/html/*.css
-/usr/usr/share/doc/mutom-0.2/html/*.png
-/usr/usr/share/doc/mutom-0.2/html/*.js
-/usr/usr/share/doc/mutom-0.2/html/search/*.html
-/usr/usr/share/doc/mutom-0.2/html/search/*.css
-/usr/usr/share/doc/mutom-0.2/html/search/*.png
-/usr/usr/share/doc/mutom-0.2/html/search/*.js
+%dir /usr/share/doc/mutom-0.2/html
+%dir /usr/share/doc/mutom-0.2/html/search
+/usr/share/doc/mutom-0.2/html/annotated.html
+/usr/share/doc/mutom-0.2/html/class*.html
+/usr/share/doc/mutom-0.2/html/files.html
+/usr/share/doc/mutom-0.2/html/functions*.html
+/usr/share/doc/mutom-0.2/html/globals*.html
+/usr/share/doc/mutom-0.2/html/hierarchy.html
+/usr/share/doc/mutom-0.2/html/_i_b_*.html
+/usr/share/doc/mutom-0.2/html/index.html
+/usr/share/doc/mutom-0.2/html/namespace*.html
+/usr/share/doc/mutom-0.2/html/struct*.html
+/usr/share/doc/mutom-0.2/html/*.css
+/usr/share/doc/mutom-0.2/html/*.png
+/usr/share/doc/mutom-0.2/html/*.js
+/usr/share/doc/mutom-0.2/html/search/*.html
+/usr/share/doc/mutom-0.2/html/search/*.css
+/usr/share/doc/mutom-0.2/html/search/*.png
+/usr/share/doc/mutom-0.2/html/search/*.js
+
+#
+# TODO split cmt-ib-debuginfo package (bins and libs)
+#
 
 %changelog
 * Tue Dec 04 2018 Paolo Andreetto <paolo.andreetto@pd.infn.it> - 0.2.1-1

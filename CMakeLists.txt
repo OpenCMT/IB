@@ -85,7 +85,8 @@ include(uLibConfigHeader)
 include(uLibCommon)
 EXECUTE_PROCESS(COMMAND root-config --cflags OUTPUT_VARIABLE ROOT_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} -O0 ${ROOT_CXX_FLAGS}") ## Add flags here ##
-SET(CMAKE_EXE_LINKER_FLAGS "${ROOT_LD_FLAGS} ${MUTOMIB_ROOTLINK_DIR}/dict.cxx")
+#SET(CMAKE_EXE_LINKER_FLAGS "${ROOT_LD_FLAGS} ${MUTOMIB_ROOTLINK_DIR}/dict.cxx")
+SET(CMAKE_EXE_LINKER_FLAGS "${ROOT_LD_FLAGS}")
 
 ## FIND PACKAGES ------------------------------------------------------------ ##
 
@@ -106,15 +107,15 @@ endif()
 
 INCLUDE_DIRECTORIES(${ROOT_INCLUDE_DIR})
 
-## ADD LIBRARIES SUBDIRECTORIES --------------------------------------------- ##
+## ADD LIBRARIES ABD EXECUTABLES SUBDIRECTORIES ----------------------------- ##
 
 include_directories(${SRC_DIR})
 add_subdirectory(${SRC_DIR})
 
 
-#add_subdirectory(${PROJECT_SOURCE_DIR}/utils/filters)
+add_subdirectory(${PROJECT_SOURCE_DIR}/recipes/MisureLNL)
+add_subdirectory(${PROJECT_SOURCE_DIR}/utils/filters)
 #add_subdirectory(${PROJECT_SOURCE_DIR}/utils/roc)
-#add_subdirectory(${PROJECT_SOURCE_DIR}/examples EXCLUDE_FROM_ALL)
 
 
 

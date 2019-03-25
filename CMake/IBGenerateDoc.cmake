@@ -82,5 +82,5 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/index.html
 add_custom_target(doxygen ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
 
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-        DESTINATION usr/share/doc/${PACKAGE_NAME})
+        DESTINATION share/doc/${PACKAGE_NAME})
 
