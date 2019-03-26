@@ -77,6 +77,18 @@ analysis and imaging software Developed by University of Padova and INFN Sezione
 %files binutils
 %defattr(-,root,root)
 /usr/bin/IB_abtrim
+/usr/bin/IB_abtrimu
+/usr/bin/IB_bilateral
+/usr/bin/IB_median
+/usr/bin/IB_scale
+/usr/bin/IB_spr
+/usr/bin/IB_lnlROCBuilder
+/usr/bin/IB_lnlROCBuilder2
+/usr/bin/IB_portal3x6x5ROCBuilder
+/usr/bin/IB_ROCScaleToMidpt
+/usr/bin/IB_ROCScaleToMidAwo
+/usr/bin/IB_ROCScaleToMideff
+#/usr/bin/IB_ROCPlot
 /usr/bin/misureLNL
 
 %package doc

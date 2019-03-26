@@ -77,5 +77,28 @@ set(LIBRARIES
        ${PACKAGE_LIBPREFIX}Root
 )
 
-uLib_add_shared_library(IB)
+# DEPRECATED
+#uLib_add_shared_library(IB)
+add_library(${PACKAGE_LIBPREFIX}IB SHARED ${SOURCES})
+
+source_group("${PROJECT_NAME}\\IB" FILES ${SOURCES})
+
+set_target_properties(${PACKAGE_LIBPREFIX}IB PROPERTIES
+		                  VERSION ${PROJECT_VERSION}
+		                  SOVERSION ${PROJECT_SOVERSION}
+#		                  INTERFACE_LINK_LIBRARIES "${LIBRARIES}"
+#		                  LINK_INTERFACE_LIBRARIES "${LIBRARIES}"          ## <- ok for cmake from  2.12 ?
+#		                  IMPORTED_LINK_INTERFACE_LIBRARIES "${LIBRARIES}" ## <- breaks cmake after 2.11 ?
+)
+
+target_link_libraries(${PACKAGE_LIBPREFIX}IB ${LIBRARIES})
+
+install(TARGETS ${PACKAGE_LIBPREFIX}IB
+        EXPORT "${PROJECT_NAME}Targets"
+        RUNTIME DESTINATION ${PACKAGE_INSTALL_BIN_DIR} COMPONENT bin
+        LIBRARY DESTINATION ${PACKAGE_INSTALL_LIB_DIR} COMPONENT lib
+)
+
+install(FILES ${HEADERS} DESTINATION ${PACKAGE_INSTALL_INC_DIR}/IB)
+
 #add_subdirectory(testing)
