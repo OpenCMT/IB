@@ -30,145 +30,100 @@
 
 #include "IBMuonCollection.h"
 
-class IBMuonCollectionPimpl {
-
-    friend class IBMuonCollection;
-    struct _Cmp {
-        bool operator()(MuonScatter &data, const float value)
-        {
-            return MuonScatterAngle(data) <= value;
-        }
-    };
-    struct _PCmp {
-        bool operator()(const MuonScatter &data, const float value)
-        {
-            return data.GetMomentumPrime() <= value;
-        }
-    };
-    struct _PPCmp {
-        bool operator()(const MuonScatter &data, const float value)
-        {
-            return data.GetMomentum() <= value;
-        }
-    };
-
-    static float MuonScatterAngle(const MuonScatter &mu) {
-        Vector3f in = mu.LineIn().direction.head(3);
-        Vector3f out = mu.LineOut().direction.head(3);
-        float a = in.transpose() * out;
-        a = fabs( acos(a / (in.norm() * out.norm())) );
-        if(uLib::isFinite(a)) return a;
-        else return 0;
-    }
-
-public:
-
-    IBMuonCollectionPimpl() : m_HiPass(1), m_SliceIndex(0) { }
-
-
-    // members //
-    bool m_HiPass;
-    unsigned int m_SliceIndex;
-    Vector<MuonScatter> m_Data;
-  Vector<Vector<HPoint3f> > m_FullPathData;
-};
-
-
 
 IBMuonCollection::IBMuonCollection() :
-    d(new IBMuonCollectionPimpl)
+    m_HiPass(1),
+    m_SliceIndex(0)
 {}
 
 IBMuonCollection::~IBMuonCollection()
-{
-    delete d;
-}
+{}
 
 void IBMuonCollection::AddMuon(MuonScatter &mu)
 {
-    d->m_Data.push_back(mu);
+    m_Data.push_back(mu);
     // FINIRE o PENSARE perche non si puo' fare add muon dopo set Hi/LowPass //
 }
 
 void IBMuonCollection::AddMuonFullPath(Vector<HPoint3f> fullPath)
 {
-    d->m_FullPathData.push_back(fullPath);
+    m_FullPathData.push_back(fullPath);
 }
 
 Vector<MuonScatter> &IBMuonCollection::Data()
 {
-    return d->m_Data;
+    return m_Data;
 }
 
 Vector<Vector<HPoint3f> > &IBMuonCollection::FullPath()
 {
-    return d->m_FullPathData;
+    return m_FullPathData;
 }
 
 
 const MuonScatter &IBMuonCollection::At(int i) const
 {
-    return d->m_Data.at(d->m_SliceIndex * d->m_HiPass + i);
+    return m_Data.at(m_SliceIndex * m_HiPass + i);
 }
 
 MuonScatter &IBMuonCollection::operator [](int i)
-{    
-    return d->m_Data[d->m_SliceIndex * d->m_HiPass + i];
+{
+    return m_Data[m_SliceIndex * m_HiPass + i];
 }
 
 size_t IBMuonCollection::size() const
 {
-    if(d->m_HiPass) return d->m_Data.size() - d->m_SliceIndex;
-    else return d->m_SliceIndex;
+    if(m_HiPass) return m_Data.size() - m_SliceIndex;
+    else return m_SliceIndex;
 }
 
 
 void IBMuonCollection::SetHiPassAngle(float angle)
 {
-    d->m_SliceIndex =
-    VectorSplice(d->m_Data.begin(),d->m_Data.end(),angle,
-                 IBMuonCollectionPimpl::_Cmp());
-    d->m_HiPass = 1;
+    m_SliceIndex =
+    VectorSplice(m_Data.begin(),m_Data.end(),angle,
+                 IBMuonCollection::_Cmp());
+    m_HiPass = 1;
 }
 
 void IBMuonCollection::SetLowPassAngle(float angle)
 {
-    d->m_SliceIndex =
-    VectorSplice(d->m_Data.begin(),d->m_Data.end(),angle,
-                 IBMuonCollectionPimpl::_Cmp());
-    d->m_HiPass = 0;
+    m_SliceIndex =
+    VectorSplice(m_Data.begin(),m_Data.end(),angle,
+                 IBMuonCollection::_Cmp());
+    m_HiPass = 0;
 }
 
 void IBMuonCollection::SetHiPassMomentum(float momenutm)
 {
-    d->m_SliceIndex =
-    VectorSplice(d->m_Data.begin(),d->m_Data.end(),momenutm,
-                 IBMuonCollectionPimpl::_PCmp());
-    d->m_HiPass = 1;
+    m_SliceIndex =
+    VectorSplice(m_Data.begin(),m_Data.end(),momenutm,
+                 IBMuonCollection::_PCmp());
+    m_HiPass = 1;
 }
 
 void IBMuonCollection::SetLowPassMomentum(float momentum)
 {
-    d->m_SliceIndex =
-    VectorSplice(d->m_Data.begin(),d->m_Data.end(),momentum,
-                 IBMuonCollectionPimpl::_PCmp());
-    d->m_HiPass = 0;
+    m_SliceIndex =
+    VectorSplice(m_Data.begin(),m_Data.end(),momentum,
+                 IBMuonCollection::_PCmp());
+    m_HiPass = 0;
 }
 
 void IBMuonCollection::SetHiPassMomentumPrime(float momenutm)
 {
-    d->m_SliceIndex =
-    VectorSplice(d->m_Data.begin(),d->m_Data.end(),momenutm,
-                 IBMuonCollectionPimpl::_PPCmp());
-    d->m_HiPass = 1;
+    m_SliceIndex =
+    VectorSplice(m_Data.begin(),m_Data.end(),momenutm,
+                 IBMuonCollection::_PPCmp());
+    m_HiPass = 1;
 }
 
 void IBMuonCollection::SetLowPassMomentumPrime(float momentum)
 {
-    d->m_SliceIndex =
-    VectorSplice(d->m_Data.begin(),d->m_Data.end(),momentum,
-                 IBMuonCollectionPimpl::_PPCmp());
-    d->m_HiPass = 0;
+    m_SliceIndex =
+    VectorSplice(m_Data.begin(),m_Data.end(),momentum,
+                 IBMuonCollection::_PPCmp());
+    m_HiPass = 0;
 }
 
 
@@ -176,7 +131,7 @@ void IBMuonCollection::SetLowPassMomentumPrime(float momentum)
 void IBMuonCollection::PrintSelf(std::ostream &o)
 {
     o << "---- Muon Collection: ----- \n";
-    o << " Data size: " << d->m_Data.size() << "\n";
+    o << " Data size: " << m_Data.size() << "\n";
     if(this->size()!=0)
         o << " Muons passed: " << this->size() << "\n";
 
@@ -189,7 +144,7 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 void IBMuonCollection::DumpTTree(const char *filename)
-{ 
+{
     std::cout << "\n\n------------- Dump muon collection on root file " << filename << std::endl;
     static TFile *file = new TFile(filename,"RECREATE");
 

@@ -42,7 +42,8 @@ public:
     void SetMuonCollection(IBMuonCollection *muons);
 
 private:
-    class IBAnalyzerPocaPimpl *d;
+    IBPocaEvaluator *m_PocaAlgorithm;
+    Vector<HPoint3f> m_Data;
 };
 
 

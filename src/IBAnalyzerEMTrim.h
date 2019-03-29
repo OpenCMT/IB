@@ -25,9 +25,47 @@
 
 using namespace uLib;
 
+namespace IBAnalyzerEMTrimDetail {
+
+// ASYMMETRICAL TRIM AB //
+
+struct IBVoxelABTrim {
+
+    void SetABTrim(int a, int b) {
+        SijCap.SetABTrim(a,b);
+    }
+
+    Scalarf                 Value;
+    unsigned int            Count;
+    Accumulator_ABTrim<Scalarf,100> SijCap;
+};
+
+// VOX COLLECTION TRIM //
+
+class IBVoxCollectionATrim : public uLib::VoxImage< IBVoxelABTrim > {
+    typedef uLib::VoxImage< IBVoxelABTrim > BaseClass;
+public:
+
+    IBVoxCollectionATrim(const uLib::Vector3i size) :
+         BaseClass(size) {}
+
+    // templated update for analyzer specific customizations //
+    template < typename StaticUpdateAlgT >
+    void UpdateDensity(unsigned int threshold);
+    void SetABTrim(int a, int b) ;
+
+};
+
+} // namespace: IBAnalyzerEMTrimDetail
+
+
+
+
 class IBAnalyzerEMTrim : public IBAnalyzerEM {
 
     typedef IBAnalyzerEM BaseClass;
+    typedef IBAnalyzerEM::Event Event;
+
 public:
 
     IBAnalyzerEMTrim(IBVoxCollection &voxels);
@@ -38,8 +76,17 @@ public:
     void SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm);
 
 private:
-    friend class IBAnalyzerEMTrimPimpl;
-    class IBAnalyzerEMTrimPimpl *d;
+
+    void Project(Event *evc);
+    void BackProject(Event *evc);
+    void Evaluate(float muons_ratio);
+
+    IBAnalyzerEMAlgorithm                          *m_SijAlgorithm;
+    IBVoxCollection                                *m_VoxCollection;
+    IBAnalyzerEMTrimDetail::IBVoxCollectionATrim   *m_VoxCollectionMdn;
+    Vector<IBAnalyzerEM::Event>                    &m_Events;
+    unsigned int                                    m_MeanMuonVoxOccupancy;
+
 };
 
 

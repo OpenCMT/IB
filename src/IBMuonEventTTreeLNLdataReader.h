@@ -46,10 +46,72 @@ public:
     unsigned long getCurrentPosition();
 
     bool readNext(uLib::MuonScatter *event);
-    
+
 private:
-    friend class IBMuonEventTTreeLNLdataReaderPimpl;
-    class IBMuonEventTTreeLNLdataReaderPimpl *d;
+
+    typedef struct Demo_LNL_buffer Buffer;
+
+    struct MuonTrack_projection {
+        float position;
+        float slope;
+        float position_error;
+        float slope_error;
+    };
+
+    typedef struct
+    {
+        struct MuonTrack_projection phi_up;
+        struct MuonTrack_projection phi_down;
+        struct MuonTrack_projection theta_up;
+        struct MuonTrack_projection theta_down;
+    } MuonTracks;
+
+    typedef union {
+        struct {
+            unsigned short int phi_up : 4;
+            unsigned short int phi_down : 4;
+            unsigned short int theta_up : 4;
+            unsigned short int theta_down : 4;
+        };
+        unsigned short int data;
+    } MuonHits;
+
+#define SAFE_TTREE_BUFFER 50
+    struct Demo_LNL_buffer {
+        int event;
+        int iseg;
+        int sn[SAFE_TTREE_BUFFER];
+        float sx[SAFE_TTREE_BUFFER];
+        float ss[SAFE_TTREE_BUFFER];
+        float ersx[SAFE_TTREE_BUFFER];
+        float erss[SAFE_TTREE_BUFFER];
+    };
+#undef SAFE_TTREE_BUFFER
+
+    void init(TFile * file);
+    void init(TTree * tree);
+    void GetMuonScatter(MuonScatter * muon_event);
+    static const float events_per_minute() { return 242.3912*60; } //converted to minutes
+
+#ifndef NDEBUG
+    TFile*        m_out;
+    TTree*        m_dumpster;
+    float         m_xu, m_zu, m_xd, m_zd, m_pu, m_tu, m_pd, m_td;
+#endif
+    TTree*        m_tree;
+    MuonTracks    m_track;
+    Scalarf       m_momentum;
+    IBMuonError  *m_error;
+    bool          m_integrity;
+    int           m_hitX;
+    int           m_hitZ;
+    unsigned long m_total_events;
+    unsigned long m_max_event;
+    unsigned long m_pos;
+
+    Eigen::Affine3f        m_align;
+    struct Demo_LNL_buffer m_buffer;
+
 };
 
 #endif // IBMUONEVENTTTREELNLDATAREADER_H

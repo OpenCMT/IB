@@ -29,15 +29,14 @@ using namespace uLib;
 class IBNormalPlaneMinimizationVariablesEvaluator : public IBMinimizationVariablesEvaluator
 {
     uLibTypeMacro(IBNormalPlaneMinimizationVariablesEvaluator,IBMinimizationVariablesEvaluator)
+
 public:
+
     properties() {
         bool    use_free_rotation;
         Scalarf alphaXZ;
     };
 
-    bool m_scatterOnly, m_displacementOnly, m_oneD;
-
-    
     IBNormalPlaneMinimizationVariablesEvaluator();
     ~IBNormalPlaneMinimizationVariablesEvaluator();
 
@@ -49,10 +48,51 @@ public:
     Scalarf  getCovarianceMatrix(int i, int j);
     void setRaytracer(IBVoxRaytracer *tracer);
     void setDisplacementScatterOnly(bool,bool,bool);
-    // virtual void setConfiguration();
+
 private:
-    friend class IBNormalPlaneMinimizationVariablesEvaluatorPimpl;
-    class IBNormalPlaneMinimizationVariablesEvaluatorPimpl *d;
+
+#ifndef NDEBUG
+    struct READ{
+        float mx_in, my_in, mz_in;
+    } EV;
+    struct CHI {
+        float p, t, x, z, px, tz, pxtz, pt, xz;
+    } chi2;
+    struct DaTa {
+        float displNorm, poutLinNorm;
+    } DT;
+#endif
+
+
+    Vector4f evaluateVariables(const HLine3f &ingoing_track, const HLine3f &outgoing_track);
+    Matrix4f evaluateErrorMatrix(const HLine3f &ingoing_track, const HLine3f &outgoing_track);
+    Matrix4f getRotationMatrix(const HVector3f &track_direction);
+    HPoint3f projectOnContainer(const HLine3f &muon_out_track);
+
+    Matrix4f compileYRotation(Scalarf angle);
+    Matrix4f compileYRotation(Vector2f v);
+    Matrix4f compileZRotation(Scalarf angle);
+    Matrix4f compileZRotation(Vector2f v);
+    inline HVector3f getDirectorCosines(const HVector3f &track_direction);
+
+    Scalarf         m_alpha;
+    Scalarf         t_phi;
+    Scalarf         t_theta;
+    VoxRaytracer*   m_tracer;
+    MuonScatterData m_muon;
+    bool            m_integrity;
+    bool            m_scatterOnly;
+    bool            m_displacementOnly;
+    bool            m_oneD;
+
+    Vector4f        m_Data;
+    Matrix4f        m_ErrorMatrix;
+
+#ifndef NDEBUG
+    TFile*          m_out;
+    TTree*          m_tree;
+#endif
+
 };
 
 inline void IBNormalPlaneMinimizationVariablesEvaluator::init_properties() {

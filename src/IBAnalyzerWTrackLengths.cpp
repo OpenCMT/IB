@@ -27,86 +27,26 @@
 using namespace uLib;
 
 
-///// PIMPL ////////////////////////////////////////////////////////////////////
-
-
-class IBAnalyzerWTrackLengthsPimpl {
-public:
-    struct Event {
-        struct Element {
-            Matrix4f Wij;
-            IBVoxel *voxel;
-        };
-        HPoint3f PoCa;
-        Vector4f Variables;
-        Scalarf  Length;
-        Scalarf  Momentum;
-        Vector<Element> elements;
-    };
-
-    IBAnalyzerWTrackLengthsPimpl(IBAnalyzerWTrackLengths *parent) :
-        m_RayAlgorithm(NULL),
-        m_PocaAlgorithm(NULL),
-        m_VarAlgorithm(NULL),
-        m_poca_proximity_rms(0)
-    {}
-
-    void Project(Event *evc) {
-        IBVoxel *vox;
-        for (unsigned int j = 0; j < evc->elements.size(); ++j) {
-            vox = evc->elements[j].voxel;
-            float a;
-            if(m_VarAlgorithm)
-                a = ( pow(fabs(evc->Variables(0)),2) + pow(fabs(evc->Variables(2)),2)  ) *
-                        evc->elements[j].Wij(0,0) * pow(evc->Momentum,2) * 1.5E-6 / evc->Length;
-            else
-                a = evc->Variables(0) * pow(evc->Momentum,2) * 1.5E-6 * evc->elements[j].Wij(0,0) / evc->Length;
-            // FINIRE //
-            //  if(m_poca_proximity_rms > 0) {
-            //    float d = 1/sqrt(2*M_PI)/fabs(m_poca_proximity_rms) ;// ...
-            //  }
-            if(a<1E-6) {
-                vox->Value += a;
-                vox->Count++;
-            }
-        }
-    }
-
-    // members //
-    IBAnalyzerWTrackLengths *p;
-    Vector<Event> m_Events;
-    VoxRaytracer *m_RayAlgorithm;
-    IBPocaEvaluator *m_PocaAlgorithm;
-    IBMinimizationVariablesEvaluator *m_VarAlgorithm;
-    Scalarf m_poca_proximity_rms;
-};
-
-
-
-
-IBAnalyzerWTrackLengths::IBAnalyzerWTrackLengths() :
-    d(new IBAnalyzerWTrackLengthsPimpl(this))
+IBAnalyzerWTrackLengths::IBAnalyzerWTrackLengths()
 {}
 
 IBAnalyzerWTrackLengths::~IBAnalyzerWTrackLengths()
-{
-    delete d;
-}
+{}
 
 bool IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
 {
-    if(!d->m_RayAlgorithm || !d->m_PocaAlgorithm /*|| !d->m_VarAlgorithm*/) {
-        std::cerr << "not all parameters setted\n";
+    if(!m_RayAlgorithm || !m_PocaAlgorithm /*|| !m_VarAlgorithm*/) {
+        std::cerr << "not all parameters set\n";
         return false;
     }
 
-    IBAnalyzerWTrackLengthsPimpl::Event evc;
+    IBAnalyzerWTrackLengths::Event evc;
 
     evc.Momentum = muon.GetMomentum();
 
-    // VARIABLES //    
-    if(likely(d->m_VarAlgorithm && d->m_VarAlgorithm->evaluate(muon))) {
-        evc.Variables = d->m_VarAlgorithm->getDataVector();
+    // VARIABLES //
+    if(likely(m_VarAlgorithm && m_VarAlgorithm->evaluate(muon))) {
+        evc.Variables = m_VarAlgorithm->getDataVector();
     }
     else {
         Vector3f in, out;
@@ -122,23 +62,23 @@ bool IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
     IBVoxRaytracer::RayData ray;
     { // Get RayTrace RayData //
         HPoint3f entry_pt,poca,exit_pt;
-        if( !d->m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
-                !d->m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
+        if( !m_RayAlgorithm->GetEntryPoint(muon.LineIn(),entry_pt) ||
+                !m_RayAlgorithm->GetExitPoint(muon.LineOut(),exit_pt) )
             return false;
-        bool test = d->m_PocaAlgorithm->evaluate(muon);
-        poca = d->m_PocaAlgorithm->getPoca();
+        bool test = m_PocaAlgorithm->evaluate(muon);
+        poca = m_PocaAlgorithm->getPoca();
         if(test && this->GetVoxCollection()->IsInsideBounds(poca)) {
-            poca = d->m_PocaAlgorithm->getPoca();
-            ray = d->m_RayAlgorithm->TraceBetweenPoints(entry_pt,poca);
-            ray.AppendRay( d->m_RayAlgorithm->TraceBetweenPoints(poca,exit_pt) );
+            poca = m_PocaAlgorithm->getPoca();
+            ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,poca);
+            ray.AppendRay( m_RayAlgorithm->TraceBetweenPoints(poca,exit_pt) );
         }
         else {
-            ray = d->m_RayAlgorithm->TraceBetweenPoints(entry_pt,exit_pt);
+            ray = m_RayAlgorithm->TraceBetweenPoints(entry_pt,exit_pt);
         }
     }
 
     // LENGTHS //
-    IBAnalyzerWTrackLengthsPimpl::Event::Element elc;
+    IBAnalyzerWTrackLengths::Event::Element elc;
     Scalarf T = ray.TotalLength();
     evc.Length = T;
     for(int i=0; i<ray.Data().size(); ++i)
@@ -157,8 +97,8 @@ bool IBAnalyzerWTrackLengths::AddMuon(const MuonScatterData &muon)
 
         evc.elements.push_back(elc);
     }
-//    d->m_Events.push_back(evc);
-    d->Project(&evc);
+//    m_Events.push_back(evc);
+    Project(&evc);
     return true;
 }
 
@@ -166,27 +106,49 @@ void IBAnalyzerWTrackLengths::Run(unsigned int iterations, float muons_ratio)
 {
     std::cerr << "WARNING: Run function does nothing ... as the projection is "
                  "made inside AddMuon funcion (without accounting events).";
-    //    for(int i=0; i<d->m_Events.size(); ++i)
-    //        d->Project(&d->m_Events[i]);
+    //    for(int i=0; i<m_Events.size(); ++i)
+    //        Project(&m_Events[i]);
 }
 
 void IBAnalyzerWTrackLengths::SetRayAlgorithm(IBVoxRaytracer *raytracer)
 {
-    d->m_RayAlgorithm = raytracer;
+    m_RayAlgorithm = raytracer;
 }
 
 void IBAnalyzerWTrackLengths::SetPocaAlgorithm(IBPocaEvaluator *evaluator)
 {
-    d->m_PocaAlgorithm = evaluator;
+    m_PocaAlgorithm = evaluator;
 }
 
 void IBAnalyzerWTrackLengths::SetVarAlgorithm(IBMinimizationVariablesEvaluator *algorithm)
 {
-    d->m_VarAlgorithm = algorithm;
+    m_VarAlgorithm = algorithm;
 }
 
 void IBAnalyzerWTrackLengths::SetPocaProximity(float sigma)
 {
     // FINIRE //
-    //    d->m_poca_proximity_rms = p;
+    //    m_poca_proximity_rms = p;
 }
+
+void IBAnalyzerWTrackLengths::Project(IBAnalyzerWTrackLengths::Event *evc) {
+    IBVoxel *vox;
+    for (unsigned int j = 0; j < evc->elements.size(); ++j) {
+        vox = evc->elements[j].voxel;
+        float a;
+        if(m_VarAlgorithm)
+            a = ( pow(fabs(evc->Variables(0)),2) + pow(fabs(evc->Variables(2)),2)  ) *
+                    evc->elements[j].Wij(0,0) * pow(evc->Momentum,2) * 1.5E-6 / evc->Length;
+        else
+            a = evc->Variables(0) * pow(evc->Momentum,2) * 1.5E-6 * evc->elements[j].Wij(0,0) / evc->Length;
+        // FINIRE //
+        //  if(m_poca_proximity_rms > 0) {
+        //    float d = 1/sqrt(2*M_PI)/fabs(m_poca_proximity_rms) ;// ...
+        //  }
+        if(a<1E-6) {
+            vox->Value += a;
+            vox->Count++;
+        }
+    }
+}
+

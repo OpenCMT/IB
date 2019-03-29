@@ -29,7 +29,7 @@
 using namespace uLib;
 
 
-class IBAnalyzerTrackCount : public IBAnalyzer {    
+class IBAnalyzerTrackCount : public IBAnalyzer {
     uLibTypeMacro(IBAnalyzerTrackCount,IBAnalyzer)
 public:
 
@@ -54,7 +54,18 @@ public:
 
 
 private:
-    class IBAnalyzerTrackCountPimpl *d;
+    struct Event {
+        struct Element {
+            IBVoxel *voxel;
+        };
+        Vector<Element> elements;
+    };
+
+    Vector<Event>    m_Events;
+    VoxRaytracer    *m_RayAlgorithm;
+    IBPocaEvaluator *m_PocaAlgorithm;
+    //20170420 select detector based on Z coordinate: -1, 1, 0 if not used
+    int m_detSgnZ;
 };
 
 

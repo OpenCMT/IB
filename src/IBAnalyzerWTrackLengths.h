@@ -50,7 +50,28 @@ public:
     void SetPocaProximity(float sigma = 0); // TODO: //
 
 private:
-    class IBAnalyzerWTrackLengthsPimpl *d;
+    struct Event {
+
+        struct Element {
+            Matrix4f Wij;
+            IBVoxel *voxel;
+        };
+
+        HPoint3f PoCa;
+        Vector4f Variables;
+        Scalarf  Length;
+        Scalarf  Momentum;
+        Vector<Element> elements;
+    };
+
+    void Project(Event *evc);
+
+    Vector<Event>                     m_Events;
+    VoxRaytracer                     *m_RayAlgorithm;
+    IBPocaEvaluator                  *m_PocaAlgorithm;
+    IBMinimizationVariablesEvaluator *m_VarAlgorithm;
+    Scalarf                           m_poca_proximity_rms;
+
 };
 
 

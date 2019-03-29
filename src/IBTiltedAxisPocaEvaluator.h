@@ -27,6 +27,7 @@
 class IBTiltedAxisPocaEvaluator : public IBPocaEvaluator
 {
 public:
+
     IBTiltedAxisPocaEvaluator();
     ~IBTiltedAxisPocaEvaluator();
 
@@ -39,8 +40,16 @@ public:
     inline Scalarf getDistance() {return 0;}
 
 private:
-    friend class IBTiltedAxisPocaEvaluatorPimpl;
-    class IBTiltedAxisPocaEvaluatorPimpl *d;
+
+    Matrix4f getRotationMatrix(const HVector3f &track_direction);
+    Matrix4f compileYRotation(Scalarf angle);
+    Matrix4f compileZRotation(Scalarf angle);
+    HVector3f getDirectorCosines(const HVector3f &track_direction);
+
+    MuonScatterData m_muon;
+    HPoint3f        m_poca;
+    bool            m_integrity;
+
 };
 
 #endif // IBTILTEDAXISPOCAEVALUATOR_H

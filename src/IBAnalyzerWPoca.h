@@ -44,8 +44,24 @@ public:
     void SetVarAlgorithm(IBMinimizationVariablesEvaluator *evaluator);
 
 private:
-    friend class IBAnalyzerWPocaPimpl;
-    class IBAnalyzerWPocaPimpl *d;
+
+    struct Data {
+        HPoint3f poca;
+        Scalarf  weight;
+    };
+
+    IBPocaEvaluator                  *m_PocaAlgorithm;
+    IBMinimizationVariablesEvaluator *m_Minimizator;
+    Vector<Data>                      m_Data;
+
+    Data    tmp;
+    Scalarf t_w_1;
+    Scalarf t_w_2;
+
+#ifndef NDEBUG
+    TFile* m_out;
+    TTree* m_tree;
+#endif
 };
 
 #endif // IBANALYZERWPOCA_H

@@ -25,6 +25,7 @@
 #include <Core/Vector.h>
 
 #include <Math/Dense.h>
+#include <Math/Utils.h>
 
 #include "Root/RootMuonScatter.h"
 #include "Detectors/MuonScatter.h"
@@ -40,7 +41,7 @@ public:
 
     void AddMuon(MuonScatter &mu);
     void AddMuonFullPath(Vector<HPoint3f> fullPath);
-      
+
     Vector<MuonScatter> &Data();
     Vector<Vector<HPoint3f> > &FullPath();
 
@@ -76,8 +77,38 @@ public:
     void AddCollection(IBMuonCollection &muonsColl);
 
 private:
-    class IBMuonCollectionPimpl *d;
 
+    struct _Cmp {
+        bool operator()(MuonScatter &data, const float value)
+        {
+            // TODO move into IBMuonCollection
+            Vector3f in = data.LineIn().direction.head(3);
+            Vector3f out = data.LineOut().direction.head(3);
+            float a = in.transpose() * out;
+            a = fabs( acos(a / (in.norm() * out.norm())) );
+            if(uLib::isFinite(a)) return a <= value;
+            else return 0 <= value;
+        }
+    };
+
+    struct _PCmp {
+        bool operator()(const MuonScatter &data, const float value)
+        {
+            return data.GetMomentumPrime() <= value;
+        }
+    };
+
+    struct _PPCmp {
+        bool operator()(const MuonScatter &data, const float value)
+        {
+            return data.GetMomentum() <= value;
+        }
+    };
+
+    bool m_HiPass;
+    unsigned int              m_SliceIndex;
+    Vector<MuonScatter>       m_Data;
+    Vector<Vector<HPoint3f> > m_FullPathData;
 
 };
 

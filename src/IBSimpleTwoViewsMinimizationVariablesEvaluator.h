@@ -28,6 +28,7 @@ using namespace uLib;
 class IBSimpleTwoViewsMinimizationVariablesEvaluator : public IBMinimizationVariablesEvaluator
 {
 public:
+
     IBSimpleTwoViewsMinimizationVariablesEvaluator();
     ~IBSimpleTwoViewsMinimizationVariablesEvaluator();
 
@@ -39,11 +40,43 @@ public:
     Scalarf  getCovarianceMatrix(int i, int j);
     void setRaytracer(IBVoxRaytracer *tracer);
     void setDisplacementScatterOnly(bool,bool,bool);
-    // virtual void setConfiguration();
+
 private:
-    friend class IBSimpleTwoViewsMinimizationVariablesEvaluatorPimpl;
-    class IBSimpleTwoViewsMinimizationVariablesEvaluatorPimpl *d;
-    bool m_scatterOnly, m_displacementOnly;
+
+#ifndef NDEBUG
+    struct READ{
+        float mx_in, my_in, mz_in;
+    } EV;
+    struct CHI {
+        float p, t, x, z, px, tz, pxtz, pt, xz;
+    } chi2;
+    struct DaTa {
+        float displNorm, poutLinNorm;
+    } DT;
+#endif
+
+
+    Vector4f evaluateVariables();
+    Matrix4f evaluateErrorMatrix();
+    HVector3f getDirectorCosines(const HVector3f &track_direction);
+    void projectionOnContainer(HPoint3f &in, HPoint3f &out);
+
+    Scalarf         t_phi;
+    Scalarf         t_theta;
+    VoxRaytracer*   m_tracer;
+    MuonScatterData m_muon;
+    bool            m_integrity;
+    bool            m_displacementOnly;
+    bool            m_scatterOnly;
+
+    Vector4f        m_Data;
+    Matrix4f        m_ErrorMatrix;
+
+#ifndef NDEBUG
+    TFile* m_out;
+    TTree* m_tree;
+#endif
+
 };
 
 #endif // IBSimpleTwoViewsMINIMIZATIONVARIABLESEVALUATOR_H

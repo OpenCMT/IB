@@ -37,8 +37,18 @@ public:
     Scalarf getDistance();
 
 private:
-    friend class IBLineDistancePocaEvaluatorPimpl;
-    class IBLineDistancePocaEvaluatorPimpl *d;
+
+    HVector3f getDirectorCosines(const HVector3f &track_direction);
+
+    //TODO probably useless
+    bool m_integrity;
+
+    Scalarf m_cutlength;
+    Scalarf m_dist;
+    MuonScatterData m_muon;
+    HPoint3f m_poca;
+    HPoint3f m_inPoca;
+    HPoint3f m_outPoca;
 };
 
 #endif // IBLINEDISTANCEPOCAEVALUATOR_H

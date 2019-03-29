@@ -43,71 +43,16 @@ using namespace uLib;
 
 namespace IBAnalyzerEMTrimDetail {
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// ASYMMETRICAL TRIM AB //
-
-struct IBVoxelABTrim {
-
-    void SetABTrim(int a, int b) {
-        SijCap.SetABTrim(a,b);
-    }
-
-    Scalarf                 Value;
-    unsigned int            Count;
-    Accumulator_ABTrim<Scalarf,100> SijCap;
-};
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// VOX COLLECTION TRIM //
-
-
-class IBVoxCollectionATrim : public uLib::VoxImage< IBVoxelABTrim > {
-    typedef uLib::VoxImage< IBVoxelABTrim > BaseClass;
-public:
-
-    IBVoxCollectionATrim(const uLib::Vector3i size) :
-         BaseClass(size) {}
-
-    // templated update for analyzer specific customizations //
-    template < typename StaticUpdateAlgT >
-    void UpdateDensity(unsigned int threshold);
-
-    inline void InitCount(unsigned int count);
-
-    inline void SetABTrim(int a, int b) {
-        for(int i=0 ; i < Data().size(); ++i)
-            Data().at(i).SetABTrim(a,b);
-    }
-
-
-
-};
-
-// --- inlines -------------------------------------------------------------- //
-
-
-inline void IBVoxCollectionATrim::InitCount(unsigned int count)
-{
-    for(unsigned int i=0; i<this->Data().size(); ++i) {
-        this->Data().at(i).Count = count;
-    }
-}
-
-
-
 // --- Update --------------------------------------------------------------- //
 
 
 template < class StaticUpdateAlgT >
 inline void IBVoxCollectionATrim::UpdateDensity(unsigned int threshold) {
     StaticUpdateAlgT::UpdateDensity(this,threshold);
-    this->InitCount(0);
+
+    for(unsigned int i=0; i<this->Data().size(); ++i) {
+        this->Data().at(i).Count = 0;
+    }
 }
 
 
@@ -131,6 +76,12 @@ inline IBVoxCollectionATrim& operator << (IBVoxCollectionATrim &mdn_voxels, IBVo
     }
     return mdn_voxels;
 }
+
+inline void IBVoxCollectionATrim::SetABTrim(int a, int b) {
+    for(int i=0 ; i < Data().size(); ++i)
+        Data().at(i).SetABTrim(a,b);
+}
+
 
 
 
@@ -168,44 +119,66 @@ public:
 } // IBAnalyzerEMTrimDetail
 
 
-
-
-
-
 ////////////////////////////////////////////////////////////////////////////////
-/////  PIMPL  //////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// ANALYZER //
+
+
+IBAnalyzerEMTrim::IBAnalyzerEMTrim(IBVoxCollection &voxels) :
+    BaseClass(voxels),
+    m_Events(this->Events()),
+    m_SijAlgorithm(NULL),
+    m_VoxCollection(NULL),
+    m_MeanMuonVoxOccupancy(0)
+{}
+
+IBAnalyzerEMTrim::~IBAnalyzerEMTrim()
+{}
 
 
 
-class IBAnalyzerEMTrimPimpl {
-
-    typedef IBAnalyzerEM::Event Event;
-
-public:
-    IBAnalyzerEMTrimPimpl(Vector<IBAnalyzerEM::Event> &events) :
-        m_Events(events),
-        m_SijAlgorithm(NULL),
-        m_VoxCollection(NULL),
-        m_MeanMuonVoxOccupancy(0)
-    {}
-
-    void Project(Event *evc);
-
-    void BackProject(Event *evc);
-
-    void Evaluate(float muons_ratio);
-
-    // members //
-    IBAnalyzerEMAlgorithm                          *m_SijAlgorithm;
-    IBVoxCollection                                *m_VoxCollection;
-    IBAnalyzerEMTrimDetail::IBVoxCollectionATrim   *m_VoxCollectionMdn;
-    Vector<IBAnalyzerEM::Event>                    &m_Events;
-    unsigned int                                    m_MeanMuonVoxOccupancy;
-};
-
-void IBAnalyzerEMTrimPimpl::Project(Event *evc)
+void IBAnalyzerEMTrim::Run(unsigned int iterations, float muons_ratio, float a, float b)
 {
+    //IBVoxCollection -> IBVoxCollectionMedian
+    assert(this->GetVoxCollection());
+    IBAnalyzerEMTrimDetail::IBVoxCollectionATrim voxels_trim(this->GetVoxCollection()->GetDims());
+
+    // IF WE HAVE A MEAN VALUE COPUTE AB TRIM //
+
+    int sizeA = m_MeanMuonVoxOccupancy > 100 ? 100 * a : m_MeanMuonVoxOccupancy * a;
+    int sizeB = m_MeanMuonVoxOccupancy > 100 ? 100 * b : m_MeanMuonVoxOccupancy * b;
+
+    // Setting VoxCollection for Pimpl operations
+    m_VoxCollection = this->GetVoxCollection();
+    m_VoxCollectionMdn = &voxels_trim;
+
+    // performs iterations //
+    for (unsigned int it = 0; it < iterations; it++) {
+        // copy forward VoxCollection into median image
+        voxels_trim << (*this->GetVoxCollection());
+        voxels_trim.SetABTrim(sizeA, sizeB);
+
+        fprintf(stderr,"\r[%d muons] EM Trim -> performing iteration %i  occupancy=%i,a=%i,b=%i",
+                (int) m_Events.size(), it, m_MeanMuonVoxOccupancy,sizeA, sizeB);
+        Evaluate(muons_ratio);
+        voxels_trim.UpdateDensity<IBAnalyzerEMTrimDetail::UpdateDensitySijCapATrimAlgorithm>(2);
+
+        // copy back VoxCollection to Parent structure
+        (*this->GetVoxCollection()) << voxels_trim;
+    }
+
+    printf("\nEM Trim -> done\n");
+}
+
+void IBAnalyzerEMTrim::SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm)
+{
+    m_SijAlgorithm = MLAlgorithm;
+    BaseClass::SetMLAlgorithm(MLAlgorithm);
+}
+
+void IBAnalyzerEMTrim::Project(Event *evc) {
+
     // compute sigma //
     Matrix4f Sigma = Matrix4f::Zero();
     m_SijAlgorithm->ComputeSigma(Sigma, evc);
@@ -213,8 +186,8 @@ void IBAnalyzerEMTrimPimpl::Project(Event *evc)
     m_SijAlgorithm->evaluate(Sigma,evc);
 }
 
-void IBAnalyzerEMTrimPimpl::BackProject(Event *evc)
-{
+void IBAnalyzerEMTrim::BackProject(Event *evc) {
+
     // sommatoria della formula 38 //
     //#   pragma omp parallel for
     for (unsigned int i = 0; i < evc->elements.size(); ++i) {
@@ -228,11 +201,8 @@ void IBAnalyzerEMTrimPimpl::BackProject(Event *evc)
     //#   pragma omp barrier
 }
 
+void IBAnalyzerEMTrim::Evaluate(float muons_ratio) {
 
-
-
-void IBAnalyzerEMTrimPimpl::Evaluate(float muons_ratio)
-{
     // TODO: Move to iterators !!! //
     unsigned int start = 0;
     unsigned int end = (unsigned int) (m_Events.size() * muons_ratio);
@@ -262,75 +232,6 @@ void IBAnalyzerEMTrimPimpl::Evaluate(float muons_ratio)
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// ANALYZER //
-
-
-IBAnalyzerEMTrim::IBAnalyzerEMTrim(IBVoxCollection &voxels) :
-    BaseClass(voxels),
-    d(new IBAnalyzerEMTrimPimpl(this->Events()))
-{
-
-}
-
-IBAnalyzerEMTrim::~IBAnalyzerEMTrim()
-{
-    delete d;
-}
-
-
-
-void IBAnalyzerEMTrim::Run(unsigned int iterations, float muons_ratio, float a, float b)
-{
-    //IBVoxCollection -> IBVoxCollectionMedian
-    assert(this->GetVoxCollection());
-    IBAnalyzerEMTrimDetail::IBVoxCollectionATrim voxels_trim(this->GetVoxCollection()->GetDims());
-
-    // IF WE HAVE A MEAN VALUE COPUTE AB TRIM //
-
-    int sizeA = d->m_MeanMuonVoxOccupancy > 100 ? 100 * a : d->m_MeanMuonVoxOccupancy * a;
-    int sizeB = d->m_MeanMuonVoxOccupancy > 100 ? 100 * b : d->m_MeanMuonVoxOccupancy * b;
-
-    // Setting VoxCollection for Pimpl operations
-    d->m_VoxCollection = this->GetVoxCollection();
-    d->m_VoxCollectionMdn = &voxels_trim;
-
-    // performs iterations //
-    for (unsigned int it = 0; it < iterations; it++) {
-        // copy forward VoxCollection into median image
-        voxels_trim << (*this->GetVoxCollection());
-        voxels_trim.SetABTrim(sizeA,sizeB);
-
-        fprintf(stderr,"\r[%d muons] EM Trim -> performing iteration %i  occupancy=%i,a=%i,b=%i",
-                (int) d->m_Events.size(), it, d->m_MeanMuonVoxOccupancy,sizeA, sizeB);
-        d->Evaluate(muons_ratio);          // Evaluate //
-        voxels_trim.UpdateDensity<IBAnalyzerEMTrimDetail::UpdateDensitySijCapATrimAlgorithm>(2);
-
-        // copy back VoxCollection to Parent structure
-        (*this->GetVoxCollection()) << voxels_trim;
-    }
-
-    printf("\nEM Trim -> done\n");
-}
-
-void IBAnalyzerEMTrim::SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm)
-{
-    d->m_SijAlgorithm = MLAlgorithm;
-    BaseClass::SetMLAlgorithm(MLAlgorithm);
-}
-
 
 
 

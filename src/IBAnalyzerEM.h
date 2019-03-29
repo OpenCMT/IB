@@ -109,19 +109,24 @@ public:
     Vector<Event> & Events();
 
     float SijMedian(const Event &evc);
-    
+
     void SetSijMedianMomentum();
 
-private:    
+private:
+
+    void Project(Event *evc);
+    void BackProject(Event *evc);
+    void Evaluate(float muons_ratio);
+
     IBPocaEvaluator                            *m_PocaAlgorithm;
     IBMinimizationVariablesEvaluator           *m_VarAlgorithm;
     IBVoxRaytracer                             *m_RayAlgorithm;
     IBAbstract::IBVoxCollectionUpdateAlgorithm *m_UpdateAlgorithm;
-    friend class IBAnalyzerEMPimpl;    
+    friend class IBAnalyzerEMPimpl;
     class IBAnalyzerEMPimpl *m_d;
 
     int m_nPath;            //---- Int to indicate whether to build a 1, 2 or 3-path
-    double m_alpha;         //---- Relative distance along the trajectory to build the 3-path   
+    double m_alpha;         //---- Relative distance along the trajectory to build the 3-path
     bool m_useRecoPath;     //---- Use the true muon path from MC
     bool m_oldTCalculation; //---- Use the old method of calculating length parameter T
     float m_rankLimit;
@@ -129,6 +134,11 @@ private:
     IBVoxCollection* m_initialSqrPfromVtk;
     int m_pVoxelMean;   //---- compute p voxel by hand
     IBVoxCollection m_imgMC;
+
+    IBAnalyzerEMAlgorithm       *m_SijAlgorithm;
+    Vector<IBAnalyzerEM::Event>  m_Events;
+    bool                         m_firstIteration;
+
 };
 
 inline void IBAnalyzerEM::init_properties() {

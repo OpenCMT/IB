@@ -28,71 +28,45 @@
 
 using namespace uLib;
 
-class IBAnalyzerPocaPimpl {
-public:
-    IBAnalyzerPocaPimpl(IBAnalyzerPoca *pt) :
-        m_pt(pt),
-        m_PocaAlgorithm(NULL)
-    {}
-
-    bool CollectMuon(const MuonScatterData &muon)
-    {
-        assert(m_PocaAlgorithm);
-        if(m_PocaAlgorithm->evaluate(muon)) {
-
-            HPoint3f poca = m_PocaAlgorithm->getPoca();
-
-            //---- Check that the POCA is valid
-            HVector3f in, out;
-            in  = poca - muon.LineIn().origin;
-            out = muon.LineOut().origin - poca;
-            float poca_prj = in.transpose() * out;
-            bool validPoca = poca_prj > 0;
-
-            if(validPoca)
-                m_Data.push_back(m_PocaAlgorithm->getPoca());
-            return true;
-        } else return false;
-    }
-
-    void SetVoxels(IBVoxCollection *voxels)
-    {
-        for(int i=0; i<m_Data.size(); ++i) {
-            Vector3i id = voxels->Find(m_Data[i]);
-            if(voxels->IsInsideGrid(id))
-                voxels->operator [](id).Value += 1;
-        }
-    }
-
-    // members //
-    IBAnalyzerPoca  *m_pt;
-    IBPocaEvaluator *m_PocaAlgorithm;
-    Vector<HPoint3f> m_Data;
-};
-
-
-
-
 IBAnalyzerPoca::IBAnalyzerPoca() :
-    d(new IBAnalyzerPocaPimpl(this))
+    m_PocaAlgorithm(NULL)
 {}
 
 IBAnalyzerPoca::~IBAnalyzerPoca()
-{
-    delete d;
-}
+{}
 
 
 bool IBAnalyzerPoca::AddMuon(const MuonScatterData &event) {
-    return d->CollectMuon(event);
+    assert(m_PocaAlgorithm);
+    if(m_PocaAlgorithm->evaluate(event)) {
+
+        HPoint3f poca = m_PocaAlgorithm->getPoca();
+
+        //---- Check that the POCA is valid
+        HVector3f in, out;
+        in  = poca - event.LineIn().origin;
+        out = event.LineOut().origin - poca;
+        float poca_prj = in.transpose() * out;
+        bool validPoca = poca_prj > 0;
+
+        if(validPoca)
+            m_Data.push_back(m_PocaAlgorithm->getPoca());
+        return true;
+    } else return false;
 }
 
 void IBAnalyzerPoca::Run(unsigned int iterations, float muons_ratio) {
-    d->SetVoxels((IBVoxCollection *)this->GetVoxCollection());
+    IBVoxCollection *voxels = (IBVoxCollection *)this->GetVoxCollection();
+    for(int i=0; i<m_Data.size(); ++i) {
+        Vector3i id = voxels->Find(m_Data[i]);
+        if(voxels->IsInsideGrid(id))
+            voxels->operator [](id).Value += 1;
+    }
 }
 
-void IBAnalyzerPoca::SetPocaAlgorithm(IBPocaEvaluator *poca)
-{   d->m_PocaAlgorithm = poca;  }
+void IBAnalyzerPoca::SetPocaAlgorithm(IBPocaEvaluator *poca) {
+    m_PocaAlgorithm = poca;
+}
 
 void IBAnalyzerPoca::SetMuonCollection(IBMuonCollection *muons)
 {
