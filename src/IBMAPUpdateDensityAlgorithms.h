@@ -41,7 +41,9 @@ public:
     IBMAPPriorGaussianUpdateAlgorithm(Scalarf beta) :
         m_beta(beta), m_DensityPrior(NULL) {}
 
-    uLibSetMacro(DensityPrior, IBVoxCollection *)
+    inline void SetDensityPrior(IBVoxCollection *densp) {
+        this->m_DensityPrior = densp;
+    }
 
     void UpdateDensity(IBVoxCollection *voxels, unsigned int threshold);
 
@@ -220,7 +222,9 @@ public:
     IBMAPPriorNeighbourDensity(const IBVoxCollection &image, float sigma) :
         m_NeighMap(image), m_Sigma(sigma) {}
 
-    uLibSetMacro(Filter,Abstract::VoxImageFilter *)
+    inline void SetFilter(Abstract::VoxImageFilter *filter) {
+        this->m_Filter = filter;
+    }
 
     void UpdateDensity(IBVoxCollection *voxels, unsigned int threshold);
 
@@ -287,7 +291,9 @@ public:
     IBMAPPriorNeighbourDensity2(const IBVoxCollection &image, Scalarf a) :
         m_NeighMap(image) , m_a(a) {}
 
-    uLibSetMacro(Filter,Abstract::VoxImageFilter *)
+    inline void SetFilter(Abstract::VoxImageFilter *filter) {
+        this->m_Filter = filter;
+    }
 
     void UpdateDensity(IBVoxCollection *voxels, unsigned int threshold);
 

@@ -79,10 +79,25 @@ public:
 
     void SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm);
 
-    uLibGetSetMacro(PocaAlgorithm,IBPocaEvaluator *)
-    uLibGetSetMacro(VarAlgorithm,IBMinimizationVariablesEvaluator *)
-    uLibGetSetMacro(RayAlgorithm,IBVoxRaytracer *)
-    uLibGetSetMacro(UpdateAlgorithm,IBAbstract::IBVoxCollectionUpdateAlgorithm *)
+    inline IBPocaEvaluator *GetPocaAlgorithm() const { return this->m_PocaAlgorithm; }
+    inline void SetPocaAlgorithm(IBPocaEvaluator *algo) { this->m_PocaAlgorithm = algo; }
+
+    inline IBMinimizationVariablesEvaluator *GetVarAlgorithm() const {
+        return this->m_VarAlgorithm;
+    }
+    inline void SetVarAlgorithm(IBMinimizationVariablesEvaluator *eval) {
+        this->m_VarAlgorithm = eval;
+    }
+
+    inline IBVoxRaytracer *GetRayAlgorithm() const { return this->m_RayAlgorithm; }
+    inline void SetRayAlgorithm(IBVoxRaytracer *algo) { this->m_RayAlgorithm = algo; }
+
+    inline IBAbstract::IBVoxCollectionUpdateAlgorithm *GetUpdateAlgorithm() const {
+        return this->m_UpdateAlgorithm;
+    }
+    inline void SetUpdateAlgorithm(IBAbstract::IBVoxCollectionUpdateAlgorithm *algo) {
+        this->m_UpdateAlgorithm = algo;
+    }
 
     void filterEventsVoxelMask();
 
@@ -122,8 +137,6 @@ private:
     IBMinimizationVariablesEvaluator           *m_VarAlgorithm;
     IBVoxRaytracer                             *m_RayAlgorithm;
     IBAbstract::IBVoxCollectionUpdateAlgorithm *m_UpdateAlgorithm;
-    friend class IBAnalyzerEMPimpl;
-    class IBAnalyzerEMPimpl *m_d;
 
     int m_nPath;            //---- Int to indicate whether to build a 1, 2 or 3-path
     double m_alpha;         //---- Relative distance along the trajectory to build the 3-path

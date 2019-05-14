@@ -45,12 +45,24 @@ class IBAnalyzer : public Object {
 
 public:
 
-    virtual uLibGetMacro(Experiment,IBExperiment *)
-    virtual uLibSetMacro(Experiment,IBExperiment *)
-    virtual uLibGetMacro(VoxCollection,IBVoxCollection *)
-    virtual uLibSetMacro(VoxCollection,IBVoxCollection *)
-    virtual uLibGetMacro(MuonCollection,IBMuonCollection *)
-    virtual uLibSetMacro(MuonCollection,IBMuonCollection *)
+    virtual inline IBExperiment *GetExperiment() const {
+        return this->m_Experiment;
+    }
+    virtual inline void SetExperiment(IBExperiment *exp) {
+        this->m_Experiment = exp;
+    }
+    virtual inline IBVoxCollection *GetVoxCollection() const {
+        return this->m_VoxCollection;
+    }
+    virtual inline void SetVoxCollection(IBVoxCollection *coll) {
+        this->m_VoxCollection = coll;
+    }
+    virtual inline IBMuonCollection *GetMuonCollection() const {
+        return this->m_MuonCollection;
+    }
+    virtual inline void SetMuonCollection(IBMuonCollection *coll) {
+        this->m_MuonCollection = coll;
+    }
 
     virtual bool AddMuon(const MuonScatterData &event) = 0;
     virtual void Run(unsigned int iterations, float muons_ratio) = 0;
@@ -67,7 +79,7 @@ protected:
 public:
     IBMuonCollection   *m_MuonCollection;
 
-private:    
+private:
     IBExperiment       *m_Experiment;
     IBVoxCollection    *m_VoxCollection;
 };
