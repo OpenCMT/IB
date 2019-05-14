@@ -22,7 +22,6 @@
 #include <iterator>
 
 #include "Math/Utils.h"
-#include "Math/Accumulator.h"
 
 #include "IBAnalyzerEMTrim.h"
 #include "IBAnalyzerEMAlgorithm.h"

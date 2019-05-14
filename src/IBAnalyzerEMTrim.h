@@ -22,6 +22,7 @@
 #define IBANALYZEREMTRIM_H
 
 #include "IBAnalyzerEM.h"
+#include "Math/Accumulator.h"
 
 using namespace uLib;
 
