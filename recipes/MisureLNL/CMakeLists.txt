@@ -29,7 +29,6 @@ include_directories(${ULIB_INCLUDE_DIRS} ${IB_INCLUDE_DIRS} ${ULIB_ROOTLINK_DIR}
 target_link_libraries( misureLNL
                        ${PACKAGE_LIBPREFIX}Core
                        ${PACKAGE_LIBPREFIX}Math
-                       ${PACKAGE_LIBPREFIX}Detectors
                        ${PACKAGE_LIBPREFIX}Vtk
                        ${PACKAGE_LIBPREFIX}Root
                        ${PACKAGE_LIBPREFIX}IB
