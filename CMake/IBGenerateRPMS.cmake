@@ -1,6 +1,6 @@
 # Target for RPMs creation
 
-set(PKGREL 1)
+set(PKGREL 1 CACHE STRING "Package build number")
 set(ITEMS_FOR_SOURCE AUTHORS
                      CMake
                      CMakeConfig.in.h
@@ -14,7 +14,7 @@ set(ITEMS_FOR_SOURCE AUTHORS
                      src
                      utils)
 
-add_custom_target(rpm 
+add_custom_target(rpm
                   COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/rpmbuild/BUILD
                                    ${CMAKE_CURRENT_BINARY_DIR}/rpmbuild/RPMS
                                    ${CMAKE_CURRENT_BINARY_DIR}/rpmbuild/SOURCES
@@ -22,7 +22,7 @@ add_custom_target(rpm
                                    ${CMAKE_CURRENT_BINARY_DIR}/rpmbuild/SRPMS
                   COMMAND tar -zcf ${CMAKE_CURRENT_BINARY_DIR}/rpmbuild/SOURCES/cmt-ib-${PACKAGE_VERSION}.tar.gz ${ITEMS_FOR_SOURCE}
                   COMMAND sed -e 's|@PKGVERSION@|${PACKAGE_VERSION}|g'
-                              -e 's|@PKGRELEASE@|${PKGREL}|g' 
+                              -e 's|@PKGRELEASE@|${PKGREL}|g'
                               CMake/cmt-ib.spec.in > ${CMAKE_CURRENT_BINARY_DIR}/rpmbuild/SPECS/cmt-ib.spec
                   COMMAND QA_SKIP_BUILD_ROOT=1 rpmbuild -ba --define '_topdir ${CMAKE_CURRENT_BINARY_DIR}/rpmbuild'
                           ${CMAKE_CURRENT_BINARY_DIR}/rpmbuild/SPECS/cmt-ib.spec

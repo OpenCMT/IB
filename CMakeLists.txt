@@ -5,13 +5,6 @@
 
 cmake_minimum_required (VERSION 2.6)
 
-execute_process(COMMAND "clear")
-message("//////////////////////////////////////////////////////////////////////")
-message("/////////////////// CMAKE PJOJECT CONFIGURATION //////////////////////")
-message("//////////////////////////////////////////////////////////////////////")
-
-## -------------------------------------------------------------------------- ##
-
 project(IB)
 
 # The version number.
@@ -31,17 +24,12 @@ set(PACKAGE_AUTHOR "Andrea Rigoni Garola <andrea.rigoni@pd.infn.it>")
 ## CONFIG FIND PACKAGE
 #set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}/lib/cmake") # enable this to search installed cmake dir by default
 
-message(STATUS "Install prefix is ${PWD}")
-
 ## First of all find uLib package to get imported locations ##
-#unset(ULIB_CONFIG)
-#set(ULIB_DIR ../../uLib/trunk/build/)
 find_package(ULIB 0.2 CONFIG REQUIRED
              NAMES uLib
              PATHS /usr/lib64/cmake /usr/lib/cmake
              PATH_SUFFIXES mutom-0.2
 )
-message("ULIB_CONFIG=${ULIB_CONFIG}")
 
 
 
@@ -51,18 +39,19 @@ FIND_PACKAGE(ROOT REQUIRED)
 #INSTALL(MUTOMIB)
 
 #----
-if(NOT DEFINED IB_CMAKE_DIR)
-get_target_property(ULIB_CONFIG_CMD uLib_config LOCATION)
-message("uLib_config executable: ${ULIB_CONFIG_CMD}")
-execute_process(COMMAND ${ULIB_CONFIG_CMD} --cmake-modules
-                OUTPUT_VARIABLE ULIB_CONFIG_COMMAND_OUTPUT)
-message(STATUS "Adding of CMake directory: ")
-message(STATUS " ${ULIB_CONFIG_COMMAND_OUTPUT} ")
-set(IB_CMAKE_DIR "${PROJECT_BINARY_DIR}/CMake" CACHE PATH "CMake modules path")
-endif()
+#if(NOT DEFINED IB_CMAKE_DIR)
+#get_target_property(ULIB_CONFIG_CMD uLib_config LOCATION)
+#message("uLib_config executable: ${ULIB_CONFIG_CMD}")
+#execute_process(COMMAND ${ULIB_CONFIG_CMD} --cmake-modules
+#                OUTPUT_VARIABLE ULIB_CONFIG_COMMAND_OUTPUT)
+#message(STATUS "Adding of CMake directory: ")
+#message(STATUS " ${ULIB_CONFIG_COMMAND_OUTPUT} ")
+#set(IB_CMAKE_DIR "${PROJECT_BINARY_DIR}/CMake" CACHE PATH "CMake modules path")
+#endif()
 
-set(CMAKE_MODULE_PATH ${IB_CMAKE_DIR} ${CMAKE_MODULE_PATH})
-message(STATUS "Module path: ${CMAKE_MODULE_PATH}")
+#set(CMAKE_MODULE_PATH ${IB_CMAKE_DIR} ${CMAKE_MODULE_PATH})
+#message(STATUS "Module path: ${CMAKE_MODULE_PATH}")
+set(CMAKE_MODULE_PATH /usr/lib/cmake/mutom-0.2 ${CMAKE_MODULE_PATH})
 
 
 ## MACROS ------------------------------------------------------------------- ##
@@ -70,7 +59,7 @@ message(STATUS "Module path: ${CMAKE_MODULE_PATH}")
 include(uLibMacros)
 include(uLibDebugMacro)
 include(uLibTargetMacros)
-include(uLibGenerateRMake)
+#include(uLibGenerateRMake)
 include(IBGenerateRPMS)
 include(IBGenerateDoc)
 
@@ -80,8 +69,6 @@ include(uLibConfigHeader)
 
 
 ## GLOBALS ------------------------------------------------------------------ ##
- message("---------------CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
- message("---------------CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 include(uLibCommon)
 EXECUTE_PROCESS(COMMAND root-config --cflags OUTPUT_VARIABLE ROOT_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} -O0 ${ROOT_CXX_FLAGS}") ## Add flags here ##
@@ -124,10 +111,10 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/utils/roc)
 debug(ULIB_SHARED_LIBRARIES)
 
 export(PACKAGE IB)
-export(TARGETS ${ULIB_SHARED_LIBRARIES} 
+export(TARGETS ${ULIB_SHARED_LIBRARIES}
        FILE "${PROJECT_BINARY_DIR}/IBTargets.cmake"
       )
-    
+
 # Create the FooBarConfig.cmake and FooBarConfigVersion files
 file(RELATIVE_PATH REL_INCLUDE_DIR "${PACKAGE_INSTALL_CMAKE_DIR}"
    "${PACKAGE_INSTALL_INC_DIR}")
