@@ -52,7 +52,7 @@ FIND_PACKAGE(ROOT REQUIRED)
 #set(CMAKE_MODULE_PATH ${IB_CMAKE_DIR} ${CMAKE_MODULE_PATH})
 #message(STATUS "Module path: ${CMAKE_MODULE_PATH}")
 set(CMAKE_MODULE_PATH /usr/lib/cmake/mutom-0.2 ${CMAKE_MODULE_PATH})
-
+set(CMAKE_MODULE_PATH /usr/lib/cmake/mutom-0.2 ${CMAKE_MODULE_PATH})
 
 ## MACROS ------------------------------------------------------------------- ##
 
