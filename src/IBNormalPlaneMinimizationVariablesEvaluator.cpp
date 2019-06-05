@@ -27,9 +27,9 @@
 #include "IBNormalPlaneMinimizationVariablesEvaluator.h"
 
 // remove after test //
-#include <stdio.h>
-#include "Vtk/vtkMuonScatter.h"
-#include "Vtk/uLibVtkViewer.h"
+//#include <stdio.h>
+//#include "Vtk/vtkMuonScatter.h"
+//#include "Vtk/uLibVtkViewer.h"
 
 
 IBNormalPlaneMinimizationVariablesEvaluator::IBNormalPlaneMinimizationVariablesEvaluator()
