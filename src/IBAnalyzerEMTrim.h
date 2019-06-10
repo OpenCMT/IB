@@ -74,15 +74,12 @@ public:
 
     void Run(unsigned int iterations, float muons_ratio, float a=0, float b=0);
 
-    void SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm);
-
 private:
 
     void Project(Event *evc);
     void BackProject(Event *evc);
     void Evaluate(float muons_ratio);
 
-    IBAnalyzerEMAlgorithm                          *m_SijAlgorithm;
     IBVoxCollection                                *m_VoxCollection;
     IBAnalyzerEMTrimDetail::IBVoxCollectionATrim   *m_VoxCollectionMdn;
     Vector<IBAnalyzerEM::Event>                    &m_Events;

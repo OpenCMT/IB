@@ -127,6 +127,10 @@ public:
 
     void SetSijMedianMomentum();
 
+protected:
+
+    IBAnalyzerEMAlgorithm       *m_SijAlgorithm;
+
 private:
 
     void Project(Event *evc);
@@ -148,7 +152,6 @@ private:
     int m_pVoxelMean;   //---- compute p voxel by hand
     IBVoxCollection m_imgMC;
 
-    IBAnalyzerEMAlgorithm       *m_SijAlgorithm;
     Vector<IBAnalyzerEM::Event>  m_Events;
     bool                         m_firstIteration;
 

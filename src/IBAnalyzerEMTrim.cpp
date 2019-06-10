@@ -125,9 +125,8 @@ public:
 
 
 IBAnalyzerEMTrim::IBAnalyzerEMTrim(IBVoxCollection &voxels) :
-    BaseClass(voxels),
+    IBAnalyzerEM(voxels),
     m_Events(this->Events()),
-    m_SijAlgorithm(NULL),
     m_VoxCollection(NULL),
     m_MeanMuonVoxOccupancy(0)
 {}
@@ -168,12 +167,6 @@ void IBAnalyzerEMTrim::Run(unsigned int iterations, float muons_ratio, float a, 
     }
 
     printf("\nEM Trim -> done\n");
-}
-
-void IBAnalyzerEMTrim::SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm)
-{
-    m_SijAlgorithm = MLAlgorithm;
-    BaseClass::SetMLAlgorithm(MLAlgorithm);
 }
 
 void IBAnalyzerEMTrim::Project(Event *evc) {
