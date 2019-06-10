@@ -21,7 +21,6 @@
 #ifndef IBPOCAEVALUATOR_H
 #define IBPOCAEVALUATOR_H
 
-#include "Core/Macros.h"
 #include "Math/Dense.h"
 #include "Math/Utils.h"
 #include "Detectors/MuonScatter.h"

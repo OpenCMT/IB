@@ -18,7 +18,6 @@
 #ifndef IBMINIMIZATIONVARIABLESEVALUATOR_H
 #define IBMINIMIZATIONVARIABLESEVALUATOR_H
 
-#include "Core/Macros.h"
 #include "Math/Dense.h"
 #include "Detectors/MuonScatter.h"
 #include "IBVoxRaytracer.h"
@@ -48,7 +47,7 @@ public:
 
     virtual void setRaytracer(IBVoxRaytracer* tracer)   = 0;
     virtual void setDisplacementScatterOnly(bool,bool,bool) = 0;
-    
+
     // virtual void setConfiguration();
 
     virtual ~IBMinimizationVariablesEvaluator() {} // make this protected again!!

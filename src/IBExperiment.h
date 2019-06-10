@@ -64,14 +64,29 @@ public:
 
     ~Experiment() {}
 
-    uLibRefMacro(m_Muons,IBMuonCollection)
-    uLibConstRefMacro(m_Muons,IBMuonCollection)
+    inline IBMuonCollection & Muons() { return this->m_Muons; }
 
-    uLibGetSetMacro(m_Reader,IBMuonEventTTreeReader*)
-    uLibGetSetMacro(m_Poca,IBPocaEvaluator*)
-    uLibGetSetMacro(m_Tracer,IBVoxRaytracer*)
-    uLibGetSetMacro(m_Analyzer,IBAnalyzer*)
-    uLibGetSetMacro(m_Voxels,IBVoxCollection*)
+    inline const IBMuonCollection & Muons() const { return this->m_Muons; }
+
+    inline IBMuonEventTTreeReader* GetReader() const { return this->m_Reader; }
+
+    inline void SetReader(IBMuonEventTTreeReader* reader) { this->m_Reader = reader; }
+
+    inline IBPocaEvaluator* GetPoca() const { return this->m_Poca; }
+
+    inline void SetPoca(IBPocaEvaluator* poca) { this->m_Poca = poca; }
+
+    inline IBVoxRaytracer* GetTracer() const { return this->m_Tracer; }
+
+    inline void SetTracer(IBVoxRaytracer* tracer) { this->m_Tracer = tracer; }
+
+    inline IBAnalyzer* GetAnalyzer() const { return this->m_Analyzer; }
+
+    inline void SetAnalyzer(IBAnalyzer* analyzer) { this->m_Analyzer = analyzer; }
+
+    inline IBVoxCollection* GetVoxels() const { return this->m_Voxels; }
+
+    inline void SetVoxels(IBVoxCollection* voxels) { this->m_Voxels = voxels; }
 
 protected:
     // members //

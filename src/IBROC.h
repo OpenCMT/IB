@@ -156,7 +156,7 @@ class IBROC : public Vector<ROCElement>{
         return scale_factor;
     }
 
-    uLibRefMacro(Samples,Vector2i)
+    inline Vector2i & Samples() { return this->m_Samples; }
 
 public:
     std::string m_labels[3];

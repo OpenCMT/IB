@@ -40,7 +40,9 @@ public:
         return scanner.Scan(opt);
     }
 
-    uLibGetSetMacro(Image, T*)
+    inline T* GetImage() const { return this->m_Image; }
+
+    inline void SetImage(T* image) { this->m_Image = image; }
 
 private:
     T * m_Image;

@@ -42,7 +42,9 @@ class IBAnalyzerEMAlgorithmSGA_PXTZ3 : public IBAnalyzerEMAlgorithmSGA_PXTZ {
 public:
     IBAnalyzerEMAlgorithmSGA_PXTZ3() : m_Factor(0) {}
 
-    uLibGetSetMacro(Factor,Scalarf)
+    inline Scalarf GetFactor() const { return this->m_Factor; }
+
+    inline void SetFactor(Scalarf factor) { this->m_Factor = factor; }
 
     bool ComputeSigma(Matrix4f &Sigma, Event *evc);
 private:
@@ -54,8 +56,13 @@ class IBAnalyzerEMAlgorithmSGA_PXTZ4 : public IBAnalyzerEMAlgorithmSGA {
 public:
     IBAnalyzerEMAlgorithmSGA_PXTZ4() : m_AR(0,0,0), m_MA(0,0,0) {}
 
-    uLibGetSetMacro(AR,Vector3f)
-    uLibGetSetMacro(MA,Vector3f)
+    inline Vector3f GetAR() const { return this->m_AR; }
+
+    inline void SetAR(Vector3f ar) { this->m_AR = ar; }
+
+    inline Vector3f GetMA() const { return this->m_MA; }
+
+    inline void SetMA(Vector3f ma) { this->m_MA = ma; }
 
     void evaluate(Matrix4f &Sigma, Event *evc);
 

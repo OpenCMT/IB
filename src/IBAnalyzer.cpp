@@ -18,8 +18,6 @@
 
 
 
-#include <Core/Macros.h>
-
 #include "IBAnalyzer.h"
 
 #include "IBAnalyzerPoca.h"

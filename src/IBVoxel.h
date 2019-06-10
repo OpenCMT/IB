@@ -23,11 +23,9 @@
 
 #include <Math/Dense.h>
 #include <Math/VoxImage.h>
-#include <Core/Macros.h>
 
 
-
-struct IBVoxel {    
+struct IBVoxel {
     uLib::Scalarf Value;
     uLib::Scalard SijCap;
     unsigned int  Count;

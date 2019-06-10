@@ -18,7 +18,7 @@
 
 
 
-/* 
+/*
  * File:   IB.h
  * Author: andrea
  *
@@ -28,7 +28,6 @@
 
 // list of IB Headers for fast inclusion //
 
-#include <Core/Macros.h>
 #include <Core/Object.h>
 #include <Detectors/MuonScatter.h>
 
