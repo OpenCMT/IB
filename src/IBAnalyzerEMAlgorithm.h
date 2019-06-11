@@ -33,25 +33,18 @@ protected:
     typedef struct IBAnalyzerEM::Event Event;
     uLibTypeMacro(IBAnalyzerEMAlgorithm, uLib::Object)
 public:
-    properties() {
-        Scalarf inertia;
-    };
-
-    IBAnalyzerEMAlgorithm() { init_properties(); }
+    IBAnalyzerEMAlgorithm() : inertia(1) {}
 
     virtual void evaluate(Matrix4f &Sigma, Event *evc) = 0;
 
     virtual bool ComputeSigma(Matrix4f &Sigma, Event *evc);
 
 protected:
+    Scalarf inertia;
+
     virtual ~IBAnalyzerEMAlgorithm() {}
 
 };
 
-
-inline void IBAnalyzerEMAlgorithm::init_properties() {
-    $_init();
-    $$.inertia = 1;
-}
 
 #endif // IBANALYZEREMALGORITHM_H

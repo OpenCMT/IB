@@ -476,7 +476,7 @@ void IBAnalyzerEM::SetSijMedianMomentum()
     Vector< Event >::iterator itr = this->m_Events.begin();
 
 //    std::cout << "SetSijMedianMomentum \n"
-//              << "old invp2 = " << itr->header.InitialSqrP/(m_parent->$$.nominal_momentum * m_parent->$$.nominal_momentum);
+//              << "old invp2 = " << itr->header.InitialSqrP/(m_parent->nominal_momentum * m_parent->nominal_momentum);
 
     while (itr != this->m_Events.end()) {
         Event & evc = (*itr);
@@ -500,19 +500,19 @@ void IBAnalyzerEM::SetSijMedianMomentum()
             invp2guess = 0.0004;
 
         /// set InitialSqrP variable
-        itr->header.InitialSqrP = $$.nominal_momentum * $$.nominal_momentum * invp2guess;
+        itr->header.InitialSqrP = nominal_momentum * nominal_momentum * invp2guess;
 
         /// set in addition every voxel pw, since from voxel momentum code it is used in the algorithm
         Vector< Event::Element >::iterator itre = evc.elements.begin();
         while (itre != evc.elements.end()) {
             Event::Element &elc = *itre;
-            elc.pw = $$.nominal_momentum * $$.nominal_momentum *invp2guess;
+            elc.pw = nominal_momentum * nominal_momentum *invp2guess;
 //            std::cout << "Setting voxel pw.... " << elc.pw << std::endl;
             ++itre;
         }
 
 //        std::cout  << ", median = " << m << ", invp2guess " << invp2guess
-//                  << ", pguess = " <<  sqrt(m_parent->$$.nominal_momentum *m_parent-> $$.nominal_momentum/itr->header.InitialSqrP) << std::endl;
+//                  << ", pguess = " <<  sqrt(m_parent->nominal_momentum *m_parent-> nominal_momentum/itr->header.InitialSqrP) << std::endl;
         itr++;
     }
 
@@ -606,7 +606,7 @@ IBAnalyzerEM::IBAnalyzerEM(IBVoxCollection &voxels, int nPath, double alpha, boo
   std::cout << "Reco path ("    << m_useRecoPath      << "), "
 	    << "Old T ("        << m_oldTCalculation  << "), " << std::endl;
   BaseClass::SetVoxCollection(&voxels);
-  init_properties(); // < DANGER !!! should be moved away !!
+  nominal_momentum = 3;
 }
 
 //___________________________
@@ -645,8 +645,8 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon){
   if(unlikely(!m_RayAlgorithm || !m_VarAlgorithm)) return false;
   Event evc;
 
-  evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
-  if(std::isnan(evc.header.InitialSqrP)) std::cout << "sono in AddMuon: nominalp:" << $$.nominal_momentum << " muon.GetMomentum():" << muon.GetMomentum() <<"\n"
+  evc.header.InitialSqrP = pow(nominal_momentum/muon.GetMomentum() ,2);
+  if(std::isnan(evc.header.InitialSqrP)) std::cout << "sono in AddMuon: nominalp:" << nominal_momentum << " muon.GetMomentum():" << muon.GetMomentum() <<"\n"
 					      << std::flush;
   //    DBG(trd,evc.header.InitialSqrP,"invP2/F");
   if(likely(m_VarAlgorithm->evaluate(muon))) {
@@ -775,12 +775,12 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
     evc.header.Di = m_VarAlgorithm->getDataVector();
     evc.header.E  = m_VarAlgorithm->getCovarianceMatrix();
     //---- Momentum square (the "$$" notation is a bit much...)
-    evc.header.InitialSqrP = pow($$.nominal_momentum/muon.GetMomentum() ,2);
+    evc.header.InitialSqrP = pow(nominal_momentum/muon.GetMomentum() ,2);
     // SV for Sij studies
     evc.header.pTrue = muon.GetMomentumPrime();
 
     if(std::isnan(evc.header.InitialSqrP)){
-      std::cout << "AddMuonFullPath: nominalp:" << $$.nominal_momentum
+      std::cout << "AddMuonFullPath: nominalp:" << nominal_momentum
 		<< "muon.GetMomentum():" << muon.GetMomentum() <<"\n" << std::endl;
     }
   }
@@ -1091,13 +1091,13 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
     if(m_pVoxelMean){
         //std::cout << "\n*** Computing p voxel from IN <1/p2> mean : 0.0131459,         OUT <1/p2> mean : 0.197075 *** " << std::endl;
-        elc.pw = 1/((deltaP * sumLijFurnace + sqrt(1/invp2_IN))*(deltaP * sumLijFurnace + sqrt(1/invp2_IN)))*  $$.nominal_momentum *  $$.nominal_momentum;
+        elc.pw = 1/((deltaP * sumLijFurnace + sqrt(1/invp2_IN))*(deltaP * sumLijFurnace + sqrt(1/invp2_IN)))*  nominal_momentum *  nominal_momentum;
 //        std::cout << "Voxel " <<  *it  << ", pw_hand " << elc.pw << std::endl;
 //                  << ":   pw_file " <<  voxel_1op2
 //                  << " MC voxel value " << imgMC.operator [](*it).Value * (1.e6) << std::endl;
     }
     else if(m_initialSqrPfromVtk){
-        float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  $$.nominal_momentum *  $$.nominal_momentum;
+        float voxel_1op2 = m_initialSqrPfromVtk->operator [](*it).Value * (1.e6) *  nominal_momentum *  nominal_momentum;
         if(voxel_1op2!=0.){
           elc.pw = voxel_1op2;
           //std::cout << "ATTENTION : Replacing 1/p2 " << evc.header.InitialSqrP << " with " << elc.pw << std::endl;
@@ -1245,7 +1245,7 @@ void IBAnalyzerEM::SijGuess(Vector<Vector2f> tpv){
         while (itr != this->m_Events.end()) {
             if(em_test_SijCut(*itr, tpv[i](0), nvox_cut))
             {
-                itr->header.InitialSqrP = $$.nominal_momentum / tpv[i](1);
+                itr->header.InitialSqrP = nominal_momentum / tpv[i](1);
                 itr->header.InitialSqrP *= itr->header.InitialSqrP;
                 for (unsigned int j = 0; j < itr->elements.size(); ++j)
                     itr->elements[j].pw = itr->header.InitialSqrP;
@@ -1305,7 +1305,7 @@ void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
             char name[100];
             sprintf(name,"inv_p_sq_%i",counter++);
             TH1F *h = new TH1F(name,"1/p^2 distribution [1/GeV^2]",1000,x0,x1);
-            float p0sq = $$.nominal_momentum * $$.nominal_momentum;
+            float p0sq = nominal_momentum * nominal_momentum;
             for(Id_t i=0; i<m_Events.size(); ++i)
                 h->Fill(m_Events[i].header.InitialSqrP / p0sq );
             h->Write();
@@ -1316,7 +1316,7 @@ void IBAnalyzerEM::DumpP(const char *filename, float x0, float x1)
             char name[100];
             sprintf(name,"p_%i",counter++);
             TH1F *h = new TH1F(name,"p distribution [GeV]",1000,x0,x1);
-            float p0sq = $$.nominal_momentum * $$.nominal_momentum;
+            float p0sq = nominal_momentum * nominal_momentum;
             for(Id_t i=0; i<m_Events.size(); ++i)
                 h->Fill( sqrt(p0sq / m_Events[i].header.InitialSqrP) );
             h->Write();
@@ -1381,12 +1381,12 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
             float Nij = fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap );
             Si.push_back(Nij);
 
-            vpw->push_back($$.nominal_momentum/sqrt(elc.pw));
+            vpw->push_back(nominal_momentum/sqrt(elc.pw));
 
             ++itre;
         }
         // momentum used in the algorithm
-        mom = $$.nominal_momentum/sqrt(evc.header.InitialSqrP);
+        mom = nominal_momentum/sqrt(evc.header.InitialSqrP);
 
         DP = evc.header.Di[0];
         DX = evc.header.Di[1];

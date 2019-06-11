@@ -32,11 +32,6 @@ class IBNormalPlaneMinimizationVariablesEvaluator : public IBMinimizationVariabl
 
 public:
 
-    properties() {
-        bool    use_free_rotation;
-        Scalarf alphaXZ;
-    };
-
     IBNormalPlaneMinimizationVariablesEvaluator();
     ~IBNormalPlaneMinimizationVariablesEvaluator();
 
@@ -48,6 +43,11 @@ public:
     Scalarf  getCovarianceMatrix(int i, int j);
     void setRaytracer(IBVoxRaytracer *tracer);
     void setDisplacementScatterOnly(bool,bool,bool);
+
+    inline Scalarf GetAlphaXZ() const { return alphaXZ; }
+    inline void SetAlphaXZ(Scalarf alpha) { alphaXZ = alpha; }
+    inline bool GetUse_free_rotation() const { return use_free_rotation; }
+    inline void SetUse_free_rotation(bool free_rot) { use_free_rotation = free_rot; }
 
 private:
 
@@ -75,6 +75,8 @@ private:
     Matrix4f compileZRotation(Vector2f v);
     inline HVector3f getDirectorCosines(const HVector3f &track_direction);
 
+    bool            use_free_rotation;
+    Scalarf         alphaXZ;
     Scalarf         m_alpha;
     Scalarf         t_phi;
     Scalarf         t_theta;
@@ -94,12 +96,6 @@ private:
 #endif
 
 };
-
-inline void IBNormalPlaneMinimizationVariablesEvaluator::init_properties() {
-    $_init();
-    $$.use_free_rotation = 0;
-    $$.alphaXZ = 1; // 0 = X ---> 1 = Z
-}
 
 
 #endif // IBNORMALPLANEMINIMIZATIONVARIABLESEVALUATOR_H

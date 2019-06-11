@@ -70,7 +70,8 @@ IBNormalPlaneMinimizationVariablesEvaluator::IBNormalPlaneMinimizationVariablesE
     m_tree->Branch("chi2_pxtz", &chi2.pxtz,          "chi2pxtz/F");
 #endif
 
-    this->init_properties();
+    use_free_rotation =  0;
+    alphaXZ =            1; // 0 = X ---> 1 = Z
 
     m_oneD =             false;
     m_scatterOnly =      false;
@@ -403,15 +404,15 @@ Matrix4f IBNormalPlaneMinimizationVariablesEvaluator::getRotationMatrix(const HV
     Matrix4f first_z_rotation = compileZRotation(the);
 
     Matrix4f secnd_y_rotation;
-    if(!$$.use_free_rotation) {
+    if(!use_free_rotation) {
         Vector2f alphaX(dc(0),-dc(2)*dc(1));
         Vector2f alphaZ(dc(0)*dc(1),-dc(2));
-        float &weight = $$.alphaXZ;
+        float &weight = alphaXZ;
         assert(weight >=0 && weight <= 1);
         secnd_y_rotation = compileYRotation(  alphaX * (1-weight) + alphaZ * (weight) );
     }
     else {
-        m_alpha = $$.alphaXZ;
+        m_alpha = alphaXZ;
         secnd_y_rotation = compileYRotation(m_alpha);
     }
 

@@ -57,12 +57,6 @@ public:
     };
 
 
-    properties()
-    {
-        Scalarf nominal_momentum;
-        Scalarf SijCutEM;
-    };
-
 public:
     IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0., bool doRecoPath=true,
          bool oldTCalculation=false, float rankLimit=-100., IBVoxCollection* initialSqrPfromVtk=NULL, int pVoxelMean=0);
@@ -130,6 +124,8 @@ public:
 protected:
 
     IBAnalyzerEMAlgorithm       *m_SijAlgorithm;
+    Scalarf                      nominal_momentum;
+    //Scalarf                      SijCutEM;
 
 private:
 
@@ -156,11 +152,6 @@ private:
     bool                         m_firstIteration;
 
 };
-
-inline void IBAnalyzerEM::init_properties() {
-    $_init();
-    $$.nominal_momentum = 3;
-}
 
 
 #endif // IBANALYZEREM_H

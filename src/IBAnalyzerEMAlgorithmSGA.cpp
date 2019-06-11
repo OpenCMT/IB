@@ -37,14 +37,14 @@ void IBAnalyzerEMAlgorithmSGA_PXTZ::evaluate(Matrix4f &Sigma,
     iS = Sigma.inverse();
     Matrix4f Wij = Matrix4f::Zero();
     Matrix4f Dn = iS * (evc->header.Di * evc->header.Di.transpose());
-    
+
     for (unsigned int j = 0; j < evc->elements.size(); ++j) {
       Wij.block<2,2>(0,0) = evc->elements[j].Wij;
-      Wij.block<2,2>(2,2) = evc->elements[j].Wij;	
+      Wij.block<2,2>(2,2) = evc->elements[j].Wij;
       Matrix4f Bn = iS * Wij;
       evc->elements[j].Sij =  ((Bn * Dn).trace() - Bn.trace()) *
 	evc->elements[j].lambda * evc->elements[j].lambda *
-	evc->elements[j].pw / 4 / $$.inertia;
+	evc->elements[j].pw / 4 / inertia;
     }
 }
 
@@ -99,7 +99,7 @@ bool IBAnalyzerEMAlgorithmSGA_PXTZ3::ComputeSigma(Matrix4f &Sigma, IBAnalyzerEMA
 void IBAnalyzerEMAlgorithmSGA_PXTZ4::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm::Event *evc)
 {
     Matrix4f iS;
-    iS = Sigma.inverse();    
+    iS = Sigma.inverse();
     Matrix4f Wij = Matrix4f::Zero();
 
     Matrix4f Dn = iS * (evc->header.Di * evc->header.Di.transpose());
@@ -166,7 +166,7 @@ void IBAnalyzerEMAlgorithmSGA_PX::evaluate(Matrix4f &Sigma,
         Matrix2f iSWij = iS * evc->elements[j].Wij;
         float DISWISD  = Di.transpose() * iSWij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2 /$$.inertia; // << reintroduced 2 factor !!
+                evc->elements[j].lambda * evc->elements[j].lambda / 2 / inertia; // << reintroduced 2 factor !!
     }
 }
 
@@ -185,7 +185,7 @@ void IBAnalyzerEMAlgorithmSGA_TZ::evaluate(Matrix4f &Sigma,
         Matrix2f iSWij = iS * evc->elements[j].Wij;
         float DISWISD  = Di.transpose() * iSWij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2 / $$.inertia; // << reintroduced 2 factor !!
+                evc->elements[j].lambda * evc->elements[j].lambda / 2 / inertia; // << reintroduced 2 factor !!
     }
 }
 
@@ -217,7 +217,7 @@ void IBAnalyzerEMAlgorithmSGA_PXT::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorit
         Matrix4f Bn = iS * Wij;
         evc->elements[j].Sij =  ((Bn * Dn).trace() - Bn.trace()) *
                 evc->elements[j].lambda * evc->elements[j].lambda *
-                evc->elements[j].pw / 3 / $$.inertia;
+                evc->elements[j].pw / 3 / inertia;
     }
 
 }
@@ -248,7 +248,7 @@ void IBAnalyzerEMAlgorithmSGA_PT::evaluate(Matrix4f &Sigma,
         float lambda = evc->elements[j].lambda;
         float DISWISD  = Di.transpose() * iSWij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2 / $$.inertia;
+                evc->elements[j].lambda * evc->elements[j].lambda / 2 / inertia;
         //        if(isnan(evc->elements[j].Sij)) {
         //            std::cout << "\n\n -------------------------- \n"
         //                      << "Di: " << Di.transpose() << "\n"
@@ -258,7 +258,7 @@ void IBAnalyzerEMAlgorithmSGA_PT::evaluate(Matrix4f &Sigma,
         //                      << "\nE:\n" << evc->header.E
         //                      << "\nISigma: \n" << iS
         //                      << "\npw:" << evc->elements[j].pw
-        //                      << "\ninertia:" << $$.inertia
+        //                      << "\ninertia:" << inertia
         //                      << "\nlambda dopo: " << evc->elements[j].lambda
         //                      << "\n" << std::flush;
         //        }
@@ -288,7 +288,7 @@ void IBAnalyzerEMAlgorithmSGA_XZ::evaluate(Matrix4f &Sigma,
         Matrix2f iSWij = iS * Wij;
         float DISWISD  = Di.transpose() * iSWij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / 2 / $$.inertia;
+                evc->elements[j].lambda * evc->elements[j].lambda / 2 / inertia;
     }
 }
 
@@ -306,7 +306,7 @@ void IBAnalyzerEMAlgorithmSGA_P::evaluate(Matrix4f &Sigma,
         float Wij = evc->elements[j].Wij(0,0);
         float DISWISD = Di * iS * Wij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iS * Wij) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / $$.inertia;
+                evc->elements[j].lambda * evc->elements[j].lambda / inertia;
     }
 }
 
@@ -319,7 +319,7 @@ void IBAnalyzerEMAlgorithmSGA_T::evaluate(Matrix4f &Sigma,
         float Wij = evc->elements[j].Wij(0,0);
         float DISWISD = Di * iS * Wij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iS * Wij) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / $$.inertia;
+                evc->elements[j].lambda * evc->elements[j].lambda / inertia;
     }
 }
 
@@ -340,7 +340,7 @@ void IBAnalyzerEMAlgorithmSGA_X::evaluate(Matrix4f &Sigma,
         float Wij = evc->elements[j].Wij(1,1);
         float DISWISD = Di * iS * Wij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iS * Wij) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / $$.inertia;
+                evc->elements[j].lambda * evc->elements[j].lambda / inertia;
     }
 }
 
@@ -353,7 +353,7 @@ void IBAnalyzerEMAlgorithmSGA_Z::evaluate(Matrix4f &Sigma,
         float Wij = evc->elements[j].Wij(1,1);
         float DISWISD = Di * iS * Wij * iS * Di;
         evc->elements[j].Sij = (DISWISD - iS * Wij) * evc->elements[j].pw *
-                evc->elements[j].lambda * evc->elements[j].lambda / $$.inertia;
+                evc->elements[j].lambda * evc->elements[j].lambda / inertia;
     }
 }
 
@@ -367,7 +367,7 @@ void IBAnalyzerEMAlgorithmSGA_Z::evaluate(Matrix4f &Sigma,
 
 
 void IBAnalyzerEMAlgorithmSGA_M::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm::Event *evc)
-{    
+{
     Matrix4f iS = Sigma.inverse();
     Matrix4f Wij = Matrix4f::Zero();
 
@@ -380,7 +380,7 @@ void IBAnalyzerEMAlgorithmSGA_M::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgorithm
 
         Matrix4f Bn = iS * Wij;
         delta_p += ((Bn * Dn).trace() - Bn.trace()) * evc->elements[j].lambda *
-                pow(evc->elements[j].pw,2) / 4 / $$.inertia;
+                pow(evc->elements[j].pw,2) / 4 / inertia;
     }
     delta_p /= evc->elements.size();
 
@@ -407,7 +407,7 @@ void IBAnalyzerEMAlgorithmSGA_M_PX::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgori
         Matrix2f iSWij = iS * evc->elements[j].Wij;
         float DISWISD  = Di.transpose() * iSWij * iS * Di;
         delta_p = (DISWISD - iSWij.trace()) * evc->elements[j].pw *
-                evc->elements[j].pw * evc->elements[j].lambda / 2 /$$.inertia; // << reintroduced 2 factor !!
+                evc->elements[j].pw * evc->elements[j].lambda / 2 / inertia; // << reintroduced 2 factor !!
     }
     delta_p /= evc->elements.size();
 

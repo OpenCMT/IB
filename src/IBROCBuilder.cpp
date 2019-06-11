@@ -191,7 +191,10 @@ struct Trim5 {
 ////////////////////////////////////////////////////////////////////////////////
 // CLASS
 
-ROCBuilder::ROCBuilder()
+ROCBuilder::ROCBuilder() :
+    start(0),
+    stop(100),
+    samples(1000)
 {}
 
 
@@ -243,10 +246,10 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> 
     }
     max += max/2;
 
-    IBROC roc($$.samples);
-    for(int i=0; i < $$.samples; ++i )
+    IBROC roc(samples);
+    for(int i=0; i < samples; ++i )
     {
-        roc[i].X() = max/$$.samples * i;
+        roc[i].X() = max/samples * i;
         roc[i].Awo() = 0;
         roc[i].Owa() = 0;
     }

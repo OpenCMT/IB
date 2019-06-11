@@ -26,13 +26,11 @@
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
-#include<pcl/registration/icp.h>
+#include <pcl/registration/icp.h>
 #include <pcl/common/common.h>
 #include <pcl/common/angles.h>
 #include <pcl/common/transforms.h>
 #include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
 #include <pcl/registration/transformation_estimation_svd.h>
 
 #include <TFile.h>
@@ -111,7 +109,7 @@ static struct Parameters : Options
     } detector;
 
     struct initImage {
-        float lambda_air; 
+        float lambda_air;
         bool maskVoxels;
         float maskThreshold;
         bool axis;
@@ -1057,7 +1055,7 @@ int doIterations(const char *file_in,
     IBVoxRaytracer* tracer = new IBVoxRaytracer(voxels);
     IBNormalPlaneMinimizationVariablesEvaluator* minimizator =
             new IBNormalPlaneMinimizationVariablesEvaluator();
-    minimizator->$$.alphaXZ = 0; // X
+    minimizator->SetAlphaXZ(0); // X
     minimizator->setRaytracer(tracer);
 
     // ML Algorithm //

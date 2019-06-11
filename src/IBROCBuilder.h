@@ -36,15 +36,12 @@ using namespace uLib;
 class ROCBuilder : public Object
 {
     uLibTypeMacro(ROCBuilder,Object)
-public:
-    properties()
-    {
-        float start; // actually not used
-        float stop;  // actually not used
-        unsigned int samples;
-    };
 
 public:
+    float start; // actually not used
+    float stop;  // actually not used
+    unsigned int samples;
+
     ROCBuilder();
 
     enum ROCRecipeEnum {
@@ -71,12 +68,5 @@ public:
 
 };
 
-
-inline void ROCBuilder::init_properties() {
-    $_init()
-    $$.start = 0;
-    $$.stop  = 100;
-    $$.samples  = 1000;
-}
 
 #endif // IBROCBUILDER_H
