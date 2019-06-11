@@ -40,9 +40,8 @@ class IBMinimizationVariablesEvaluator;
 class IBVoxCollection;
 
 
-class IBAnalyzer : public Object {
-    uLibTypeMacro(IBAnalyzer,Object)
-
+class IBAnalyzer : public Object
+{
 public:
 
     virtual inline IBExperiment *GetExperiment() const {
@@ -64,6 +63,7 @@ public:
         this->m_MuonCollection = coll;
     }
 
+    virtual const char *type_name() const = 0;
     virtual bool AddMuon(const MuonScatterData &event) = 0;
     virtual void Run(unsigned int iterations, float muons_ratio) = 0;
     virtual unsigned int Size() { return 0; }

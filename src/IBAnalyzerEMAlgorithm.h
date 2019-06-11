@@ -31,7 +31,6 @@ using namespace uLib;
 class IBAnalyzerEMAlgorithm : public Object {
 protected:
     typedef struct IBAnalyzerEM::Event Event;
-    uLibTypeMacro(IBAnalyzerEMAlgorithm, uLib::Object)
 public:
     IBAnalyzerEMAlgorithm() : inertia(1) {}
 

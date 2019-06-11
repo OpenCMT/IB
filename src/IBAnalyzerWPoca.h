@@ -30,10 +30,11 @@ class IBMinimizationVariablesEvaluator;
 
 class IBAnalyzerWPoca : public IBAnalyzer
 {
-    uLibTypeMacro(IBAnalyzerWPoca,IBAnalyzer)
 public:
     IBAnalyzerWPoca();
     ~IBAnalyzerWPoca();
+
+    inline virtual const char *type_name() const { return "IBAnalyzerWPoca"; }
 
     bool AddMuon(const MuonScatterData &event);
 

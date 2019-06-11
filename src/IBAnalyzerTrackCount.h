@@ -29,12 +29,15 @@
 using namespace uLib;
 
 
-class IBAnalyzerTrackCount : public IBAnalyzer {
-    uLibTypeMacro(IBAnalyzerTrackCount,IBAnalyzer)
+class IBAnalyzerTrackCount : public IBAnalyzer
+{
 public:
+    typedef IBAnalyzer BaseClass;
 
     IBAnalyzerTrackCount();
     ~IBAnalyzerTrackCount();
+
+    inline virtual const char *type_name() const { return "IBAnalyzerTrackCount"; }
 
     bool AddMuon(const MuonScatterData &muon);
 

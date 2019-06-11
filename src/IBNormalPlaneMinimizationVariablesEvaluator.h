@@ -28,8 +28,6 @@ using namespace uLib;
 
 class IBNormalPlaneMinimizationVariablesEvaluator : public IBMinimizationVariablesEvaluator
 {
-    uLibTypeMacro(IBNormalPlaneMinimizationVariablesEvaluator,IBMinimizationVariablesEvaluator)
-
 public:
 
     IBNormalPlaneMinimizationVariablesEvaluator();

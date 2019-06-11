@@ -29,6 +29,8 @@ class IBAnalyzerEM3p : public IBAnalyzerEM {
 public:
     IBAnalyzerEM3p(IBVoxCollection &voxels) : BaseClass(voxels) {}
 
+    inline virtual const char *type_name() const { return "IBAnalyzerEM3p"; }
+
     void SetPocaAlgorithm(IBPocaEvaluator *PocaAlgorithm);
 
     virtual bool AddMuon(const MuonScatterData &muon);

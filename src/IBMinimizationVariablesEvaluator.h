@@ -30,7 +30,6 @@ class IBSimpleTwoViewsMinimizationVariablesEvaluator;
 
 class IBMinimizationVariablesEvaluator : public Object
 {
-    uLibTypeMacro(IBMinimizationVariablesEvaluator,Object)
 public:
     enum IBMinVarEvaluatorAlgorithm {
         NormalPlane,

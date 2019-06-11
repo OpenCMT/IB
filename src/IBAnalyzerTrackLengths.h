@@ -30,11 +30,15 @@
 using namespace uLib;
 
 
-class IBAnalyzerTrackLengths : public IBAnalyzer {
-    uLibTypeMacro(IBAnalyzerTrackLengths,IBAnalyzer)
+class IBAnalyzerTrackLengths : public IBAnalyzer
+{
 public:
+    typedef IBAnalyzer BaseClass;
+
     IBAnalyzerTrackLengths();
     ~IBAnalyzerTrackLengths();
+
+    inline virtual const char *type_name() const { return "IBAnalyzerTrackLengths"; }
 
     bool AddMuon(const MuonScatterData &muon);
 

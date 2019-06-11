@@ -35,8 +35,6 @@ using namespace uLib;
 
 class ROCBuilder : public Object
 {
-    uLibTypeMacro(ROCBuilder,Object)
-
 public:
     float start; // actually not used
     float stop;  // actually not used

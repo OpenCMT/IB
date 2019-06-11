@@ -32,10 +32,11 @@ class IBMinimizationVariablesEvaluator;
 class IBAnalyzerEMAlgorithm;
 
 
-class IBAnalyzerEM : public IBAnalyzer {
-    uLibTypeMacro(IBAnalyzerEM,IBAnalyzer)
-
+class IBAnalyzerEM : public IBAnalyzer
+{
 public:
+    typedef IBAnalyzer BaseClass;
+
     struct Event {
         struct Element {
             Matrix2f Wij;
@@ -61,6 +62,8 @@ public:
     IBAnalyzerEM(IBVoxCollection &voxels, int nPath=2, double alpha=0., bool doRecoPath=true,
          bool oldTCalculation=false, float rankLimit=-100., IBVoxCollection* initialSqrPfromVtk=NULL, int pVoxelMean=0);
     ~IBAnalyzerEM();
+
+    inline virtual const char *type_name() const { return "IBAnalyzerEM"; }
 
     bool AddMuon(const MuonScatterData &muon);//{ return false;}
     bool AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath);

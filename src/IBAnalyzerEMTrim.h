@@ -72,6 +72,8 @@ public:
     IBAnalyzerEMTrim(IBVoxCollection &voxels);
     ~IBAnalyzerEMTrim();
 
+    inline virtual const char *type_name() const { return "IBAnalyzerEMTrim"; }
+
     void Run(unsigned int iterations, float muons_ratio, float a=0, float b=0);
 
 private:

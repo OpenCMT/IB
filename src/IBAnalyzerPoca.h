@@ -27,11 +27,15 @@ using namespace uLib;
 
 class IBPocaEvaluator;
 
-class IBAnalyzerPoca : public IBAnalyzer {
-    uLibTypeMacro(IBAnalyzerPoca,IBAnalyzer)
+class IBAnalyzerPoca : public IBAnalyzer
+{
 public:
+    typedef IBAnalyzer BaseClass;
+
     IBAnalyzerPoca();
     ~IBAnalyzerPoca();
+
+    inline virtual const char *type_name() const { return "IBAnalyzerPoca"; }
 
     bool AddMuon(const MuonScatterData &event);
 
