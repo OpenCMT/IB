@@ -26,7 +26,6 @@
 
 #include <Math/Dense.h>
 #include <Math/Utils.h>
-#include "Root/RootMuonScatter.h"
 
 #include "IBMuonCollection.h"
 
@@ -140,40 +139,6 @@ void IBMuonCollection::PrintSelf(std::ostream &o)
     o << "\n Last muon: \n";
     o << this->At(this->size() - 1);
 
-}
-
-// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7
-void IBMuonCollection::DumpTTree(const char *filename)
-{
-    std::cout << "\n\n------------- Dump muon collection on root file " << filename << std::endl;
-    static TFile *file = new TFile(filename,"RECREATE");
-
-    char name[100];
-    sprintf(name,"muons");
-    gDirectory->cd(file->GetPath());
-
-    TTree *tree = new TTree(name,name);
-
-    uLib::MuonScatter u_mu;
-    ROOT::Mutom::MuonScatter mu;
-
-    tree->Branch("mu",&mu);
-
-    for(int i=0; i < this->size(); ++i )
-    {
-        const MuonScatter &u_mu = this->At(i);
-        mu << u_mu;
-        tree->Fill();
-    }
-
-    tree->Write();
-
-//    file->Write();
-    file->Close();
-//    delete tree;
-//    delete file;
-
-    return;
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7

@@ -27,7 +27,6 @@
 #include <Math/Dense.h>
 #include <Math/Utils.h>
 
-#include "Root/RootMuonScatter.h"
 #include "Detectors/MuonScatter.h"
 
 using namespace uLib;
@@ -62,7 +61,6 @@ public:
 
 
     void PrintSelf(std::ostream &o);
-    void DumpTTree(const char *filename);
     void DumpSimpleTree(const char *filename);
 
     void DumpTxt(const char *filename);

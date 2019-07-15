@@ -30,7 +30,6 @@ target_link_libraries( misureLNL
                        ${PACKAGE_LIBPREFIX}Core
                        ${PACKAGE_LIBPREFIX}Math
                        ${PACKAGE_LIBPREFIX}Vtk
-                       ${PACKAGE_LIBPREFIX}Root
                        ${PACKAGE_LIBPREFIX}IB
                        ${PCL_COMMON_LIBRARIES}
                        ${PCL_IO_LIBRARIES}
