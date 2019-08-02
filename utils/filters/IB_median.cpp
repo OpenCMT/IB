@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     IBVoxFilter_Median trim(Vector3i(s,s,s));
     //    IBFilterGaussShape shape(0.7);
     //    trim.SetKernelWeightFunction(shape);
-    Vector <float> values;
+    std::vector <float> values;
     for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
         values.push_back(1.);
     }

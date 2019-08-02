@@ -21,9 +21,9 @@
 #ifndef IBMUONCOLLECTION_H
 #define IBMUONCOLLECTION_H
 
-#include <Core/Object.h>
-#include <Core/Vector.h>
+#include <vector>
 
+#include <Core/Object.h>
 #include <Math/Dense.h>
 #include <Math/Utils.h>
 
@@ -39,10 +39,10 @@ public:
     ~IBMuonCollection();
 
     void AddMuon(MuonScatter &mu);
-    void AddMuonFullPath(Vector<HPoint3f> fullPath);
+    void AddMuonFullPath(std::vector<HPoint3f> fullPath);
 
-    Vector<MuonScatter> &Data();
-    Vector<Vector<HPoint3f> > &FullPath();
+    std::vector<MuonScatter> &Data();
+    std::vector<std::vector<HPoint3f> > &FullPath();
 
     const MuonScatter &At(int i) const;
 
@@ -53,10 +53,10 @@ public:
     void SetHiPassAngle(float angle);
     void SetLowPassAngle(float angle);
 
-    void SetHiPassMomentum(float momenutm);
+    void SetHiPassMomentum(float momentum);
     void SetLowPassMomentum(float momentum);
 
-    void SetHiPassMomentumPrime(float momenutm);
+    void SetHiPassMomentumPrime(float momentum);
     void SetLowPassMomentumPrime(float momentum);
 
 
@@ -76,37 +76,13 @@ public:
 
 private:
 
-    struct _Cmp {
-        bool operator()(MuonScatter &data, const float value)
-        {
-            // TODO move into IBMuonCollection
-            Vector3f in = data.LineIn().direction.head(3);
-            Vector3f out = data.LineOut().direction.head(3);
-            float a = in.transpose() * out;
-            a = fabs( acos(a / (in.norm() * out.norm())) );
-            if(uLib::isFinite(a)) return a <= value;
-            else return 0 <= value;
-        }
-    };
+    void splice(const float value,
+                std::function<bool(MuonScatter&, const float)> cmp);
 
-    struct _PCmp {
-        bool operator()(const MuonScatter &data, const float value)
-        {
-            return data.GetMomentumPrime() <= value;
-        }
-    };
-
-    struct _PPCmp {
-        bool operator()(const MuonScatter &data, const float value)
-        {
-            return data.GetMomentum() <= value;
-        }
-    };
-
-    bool m_HiPass;
-    unsigned int              m_SliceIndex;
-    Vector<MuonScatter>       m_Data;
-    Vector<Vector<HPoint3f> > m_FullPathData;
+    bool                                m_HiPass;
+    unsigned int                        m_SliceIndex;
+    std::vector<MuonScatter>            m_Data;
+    std::vector<std::vector<HPoint3f> > m_FullPathData;
 
 };
 

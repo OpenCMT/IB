@@ -18,7 +18,6 @@
 
 
 
-#include <Core/Vector.h>
 #include "IBVoxCollectionCap.h"
 #include "IBAnalyzerWTrackLengths.h"
 #include "IBVoxRaytracer.h"

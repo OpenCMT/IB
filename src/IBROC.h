@@ -26,8 +26,9 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <vector>
+
 #include "Math/Dense.h"
-#include "Core/Vector.h"
 
 #define CSV_SEPARATOR ';'
 
@@ -48,8 +49,8 @@ struct ROCElement : public Vector3f {
 };
 
 
-class IBROC : public Vector<ROCElement>{
-    typedef Vector<ROCElement> BaseClass;
+class IBROC : public std::vector<ROCElement>{
+    typedef std::vector<ROCElement> BaseClass;
   public:
 
     IBROC() : BaseClass() , m_Samples(0,0)  {}
@@ -106,14 +107,14 @@ class IBROC : public Vector<ROCElement>{
                << CSV_SEPARATOR << Samples()(1)
                << "\n";
         // items
-        for (IBROC::Iterator itr = this->begin(); itr < this->end(); itr++)
+        for (IBROC::iterator itr = this->begin(); itr < this->end(); itr++)
             stream << itr->X() << CSV_SEPARATOR
                    << itr->Awo() << CSV_SEPARATOR
                    << itr->Owa() << "\n";
     }
 
     Vector2f GetRange(float y = 90 ) {
-        IBROC::Iterator itr1,itr2;
+        IBROC::iterator itr1,itr2;
         itr1 = this->begin();
         while (itr1 != this->end() && itr1->Awo() > y ) { itr1++; }
         //        itr2 = itr1-1;
@@ -137,13 +138,13 @@ class IBROC : public Vector<ROCElement>{
 
 
     inline void shift_roc(float shift ) {
-        for(IBROC::Iterator itr = this->begin(); itr<this->end(); itr++)
+        for(IBROC::iterator itr = this->begin(); itr<this->end(); itr++)
             itr->X() += shift;
         this->Update();
     }
 
     inline void scale_roc(float scale ) {
-        for(IBROC::Iterator itr = this->begin(); itr<this->end(); itr++)
+        for(IBROC::iterator itr = this->begin(); itr<this->end(); itr++)
             itr->X() *= scale;
         this->Update();
     }

@@ -63,12 +63,12 @@ private:
         Vector4f Variables;
         Scalarf  Length;
         Scalarf  Momentum;
-        Vector<Element> elements;
+        std::vector<Element> elements;
     };
 
     void Project(Event *evc);
 
-    Vector<Event>                     m_Events;
+    std::vector<Event>                m_Events;
     VoxRaytracer                     *m_RayAlgorithm;
     IBPocaEvaluator                  *m_PocaAlgorithm;
     IBMinimizationVariablesEvaluator *m_VarAlgorithm;

@@ -345,18 +345,19 @@ float objectDensity(const char *file_in, HPoint3f B, HPoint3f E) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Vector<Vector2f> objectVarSliceDensities(const char *file_in, HPoint3f B, HPoint3f E, int nslices) {
+std::vector<Vector2f> objectVarSliceDensities(const char *file_in, HPoint3f B, HPoint3f E, int nslices) {
 
     /// clip object
     IBVoxCollection img;
     if( !img.ImportFromVtk(file_in) )
-        return 0;
+        // TODO veify return value
+        return std::vector<Vector2f>(0);
 
     // returns in 1/m units
     img = img.LambdaToInvLrad(3.);
 
     /// init density vector
-    Vector<Vector2f> densities;
+    std::vector<Vector2f> densities;
 
     /// compare with total object density and save it in vector
     float totDensity = objectDensity(file_in, B, E);
@@ -425,7 +426,7 @@ Vector<Vector2f> objectVarSliceDensities(const char *file_in, HPoint3f B, HPoint
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Vector<Vector2f> objectSliceDensities(const char *file_in, HPoint3f B, HPoint3f E, int nslices) {
+std::vector<Vector2f> objectSliceDensities(const char *file_in, HPoint3f B, HPoint3f E, int nslices) {
 
     /// this function computes density running over voxels, voxel dim=slice thickness
   std::cout << "Importing from vtk" << std::endl;
@@ -433,7 +434,8 @@ Vector<Vector2f> objectSliceDensities(const char *file_in, HPoint3f B, HPoint3f 
     /// clip object
     IBVoxCollection img;
     if( !img.ImportFromVtk(file_in) )
-        return 0;
+        // TODO veify return value
+        return std::vector<Vector2f>(0);
 
     std::cout << "Done" << std::endl;
 
@@ -441,7 +443,7 @@ Vector<Vector2f> objectSliceDensities(const char *file_in, HPoint3f B, HPoint3f 
     img = img.LambdaToInvLrad(3.);
 
     /// init density vector
-    Vector<Vector2f> densities;
+    std::vector<Vector2f> densities;
 
     std::cout << "Generating region densities" << std::endl;
     /// compare with total object density and save it in vector
@@ -580,7 +582,7 @@ static std::string systemPipe(std::string cmd) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TGraphErrors * createTGraph(const Vector<Vector2f> &v, const Vector<float> &e, int mcolor, int mstyle=7) {
+TGraphErrors * createTGraph(const std::vector<Vector2f> &v, const std::vector<float> &e, int mcolor, int mstyle=7) {
     if(mcolor==10)
         mcolor+=1;
 
@@ -641,8 +643,8 @@ void objectSliceAnalisis(int argc, char **argv, TGraph *&gr_mean){
 
 
       /// density MEAN
-      Vector<Vector2f> densities_mean(p.analysis.nslices+4);
-      Vector<float> densities_rms(p.analysis.nslices+4);
+      std::vector<Vector2f> densities_mean(p.analysis.nslices+4);
+      std::vector<float> densities_rms(p.analysis.nslices+4);
       for(int iv=0; iv<p.analysis.nslices+4; iv++){
           densities_mean[iv]=Vector2f(0,0);
           densities_rms[iv]=0;
@@ -660,7 +662,7 @@ void objectSliceAnalisis(int argc, char **argv, TGraph *&gr_mean){
           if(c<100){
               //if(c==0)
               std::cout << "processing file: " << str << "\n";
-              Vector<Vector2f> densities = objectSliceDensities(str.c_str(),B,E,p.analysis.nslices);
+              std::vector<Vector2f> densities = objectSliceDensities(str.c_str(),B,E,p.analysis.nslices);
               for(int iv=0; iv<p.analysis.nslices+4; iv++){
                   densities_mean[iv](0) =  densities[iv](0);
                   densities_mean[iv](1) +=  densities[iv](1);
@@ -676,7 +678,7 @@ void objectSliceAnalisis(int argc, char **argv, TGraph *&gr_mean){
       c=0;
       foreach (std::string &str, files) {
           if(c<100){
-              Vector<Vector2f> densities = objectSliceDensities(str.c_str(),B,E,p.analysis.nslices);
+              std::vector<Vector2f> densities = objectSliceDensities(str.c_str(),B,E,p.analysis.nslices);
               for(int iv=0; iv<densities.size(); iv++)
                   densities_rms[iv] += pow(densities[iv](1)-densities_mean[iv](1),2.);
               c++;
@@ -687,8 +689,9 @@ void objectSliceAnalisis(int argc, char **argv, TGraph *&gr_mean){
 
       gr_mean = createTGraph(densities_mean,densities_rms,2);
 
-      std::cout << "Mean " << densities_mean;
-      std::cout << "Rms " << densities_rms << "\n";
+      // TODO override operator <<
+      //std::cout << "Mean " << densities_mean;
+      //std::cout << "Rms " << densities_rms << "\n";
       of << "mean";
       for(int iv=0; iv<p.analysis.nslices+4; iv++)
         of << ";" << densities_mean[iv](1);

@@ -47,7 +47,7 @@ public:
 
 private:
     IBPocaEvaluator *m_PocaAlgorithm;
-    Vector<HPoint3f> m_Data;
+    std::vector<HPoint3f> m_Data;
 };
 
 

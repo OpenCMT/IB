@@ -54,7 +54,7 @@ public:
             Scalarf  InitialSqrP;
             Scalarf  pTrue; // SV 20160921 variable to store useful quantities to study....
         } header;
-        Vector<Element> elements;
+        std::vector<Element> elements;
     };
 
 
@@ -66,7 +66,7 @@ public:
     inline virtual const char *type_name() const { return "IBAnalyzerEM"; }
 
     bool AddMuon(const MuonScatterData &muon);//{ return false;}
-    bool AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath);
+    bool AddMuonFullPath(const MuonScatterData &muon, std::vector<HPoint3f>& muonPath);
 
     void SetMuonCollection(IBMuonCollection *muons);
 
@@ -102,11 +102,11 @@ public:
 
     void SijCut(float threshold);
 
-    Vector<Event > SijCutCount(float threshold_low, float threshold_high);
+    std::vector<Event > SijCutCount(float threshold_low, float threshold_high);
 
-    void dumpEventsSijInfo(const char *filename, Vector<float> N);
+    void dumpEventsSijInfo(const char *filename, std::vector<float> N);
 
-    void SijGuess(Vector<Vector2f> tpv);
+    void SijGuess(std::vector<Vector2f> tpv);
 
     void Chi2Cut(float threshold);
 
@@ -118,7 +118,7 @@ public:
     void DumpP(const char *filename, float x0 = 0, float x1 = 10);
     void DumpEvent(Event *evc);
 
-    Vector<Event> & Events();
+    std::vector<Event> & Events();
 
     float SijMedian(const Event &evc);
 
@@ -151,8 +151,8 @@ private:
     int m_pVoxelMean;   //---- compute p voxel by hand
     IBVoxCollection m_imgMC;
 
-    Vector<IBAnalyzerEM::Event>  m_Events;
-    bool                         m_firstIteration;
+    std::vector<IBAnalyzerEM::Event>  m_Events;
+    bool                              m_firstIteration;
 
 };
 

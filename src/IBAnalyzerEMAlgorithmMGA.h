@@ -21,7 +21,7 @@
 #ifndef IBANALYZEREMALGORITHMMGA_H
 #define IBANALYZEREMALGORITHMMGA_H
 
-#include <Core/Vector.h>
+#include <vector>
 #include "IBAnalyzerEMAlgorithm.h"
 
 
@@ -34,7 +34,7 @@ template < int size = 1 >
 class IBAnalyzerEMAlgorithmMGA : public IBAnalyzerEMAlgorithm {
     typedef struct IBAnalyzerEM::Event Event;
 public:
-    void SetGaussians(Vector<Vector2f> &WS);
+    void SetGaussians(std::vector<Vector2f> &WS);
     void SetGaussians(Scalarf *w, Scalarf *s);
     Scalarf GetNominalMomentum() const { return m_P; }
 
@@ -42,9 +42,9 @@ protected:
     virtual ~IBAnalyzerEMAlgorithmMGA() {}
 
     Scalarf Ki(Scalarf Chi2);
-    Vector<Vector2f> normalizeScaling(Vector<Vector2f> &ws);
+    std::vector<Vector2f> normalizeScaling(std::vector<Vector2f> &ws);
 
-private:    
+private:
     Vector2f m_Kparams[size * size];
     Scalarf  m_P;
 };
@@ -52,10 +52,10 @@ private:
 
 
 template < int size >
-Vector<Vector2f>
-IBAnalyzerEMAlgorithmMGA<size>::normalizeScaling(Vector<Vector2f> &ws)
+std::vector<Vector2f>
+IBAnalyzerEMAlgorithmMGA<size>::normalizeScaling(std::vector<Vector2f> &ws)
 {
-    Vector<Vector2f> out = ws;
+    std::vector<Vector2f> out = ws;
 
     float wsum=0;
     for(int i=0; i < size; ++i) {
@@ -73,16 +73,16 @@ IBAnalyzerEMAlgorithmMGA<size>::normalizeScaling(Vector<Vector2f> &ws)
 template < int size >
 void IBAnalyzerEMAlgorithmMGA<size>::SetGaussians(Scalarf *w, Scalarf *s)
 {
-    Vector<Vector2f> ws;
+    std::vector<Vector2f> ws;
     for(int i=0 ; i<size ; ++i)
         ws.push_back(Vector2f(w[i], s[i]));
     this->SetGaussians(ws);
 }
 
 template < int size >
-void IBAnalyzerEMAlgorithmMGA<size>::SetGaussians(Vector<Vector2f> &WS)
+void IBAnalyzerEMAlgorithmMGA<size>::SetGaussians(std::vector<Vector2f> &WS)
 {
-    Vector<Vector2f> ws = normalizeScaling(WS);
+    std::vector<Vector2f> ws = normalizeScaling(WS);
     float wsnorm = 0;
     for(int i=0; i<size; i++)
         wsnorm += ws[i].prod();

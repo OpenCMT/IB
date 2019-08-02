@@ -184,7 +184,7 @@ void IBAnalyzerEMTrim::BackProject(Event *evc) {
     //#   pragma omp parallel for
     for (unsigned int i = 0; i < evc->elements.size(); ++i) {
         IBAnalyzerEMTrimDetail::IBVoxelABTrim *vox;
-        Vector<IBVoxel>::Iterator itr(evc->elements[i].voxel);
+        std::vector<IBVoxel>::iterator itr(evc->elements[i].voxel);
         Id_t voxid = std::distance(m_VoxCollection->Data().begin(), itr);
         vox = &m_VoxCollectionMdn->operator [](voxid);
         vox->SijCap += evc->elements[i].Sij;

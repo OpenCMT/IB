@@ -44,17 +44,17 @@ void IBMuonCollection::AddMuon(MuonScatter &mu)
     // FINIRE o PENSARE perche non si puo' fare add muon dopo set Hi/LowPass //
 }
 
-void IBMuonCollection::AddMuonFullPath(Vector<HPoint3f> fullPath)
+void IBMuonCollection::AddMuonFullPath(std::vector<HPoint3f> fullPath)
 {
     m_FullPathData.push_back(fullPath);
 }
 
-Vector<MuonScatter> &IBMuonCollection::Data()
+std::vector<MuonScatter> &IBMuonCollection::Data()
 {
     return m_Data;
 }
 
-Vector<Vector<HPoint3f> > &IBMuonCollection::FullPath()
+std::vector<std::vector<HPoint3f> > &IBMuonCollection::FullPath()
 {
     return m_FullPathData;
 }
@@ -77,51 +77,86 @@ size_t IBMuonCollection::size() const
 }
 
 
+
+void IBMuonCollection::splice(const float value,
+    std::function<bool(MuonScatter&, const float)> cmp)
+{
+    std::vector<MuonScatter>::iterator m_it = m_Data.begin();
+    std::vector<MuonScatter>::iterator m_end = m_Data.end() - 1;
+
+    while(m_it != m_end)
+    {
+        if (cmp(*m_it, value))       ++m_it;
+        else if(cmp(*m_end, value))  std::swap(*m_it, *m_end--);
+        else                         --m_end;
+    }
+
+    m_SliceIndex = m_it - m_Data.begin();
+}
+
+
+
+const float calc_angle(const MuonScatter &data)
+{
+    Vector3f in = data.LineIn().direction.head(3);
+    Vector3f out = data.LineOut().direction.head(3);
+    float a = in.transpose() * out;
+    a = fabs( acos(a / (in.norm() * out.norm())) );
+    if(uLib::isFinite(a)) return a;
+    return 0.;
+}
+
 void IBMuonCollection::SetHiPassAngle(float angle)
 {
-    m_SliceIndex =
-    VectorSplice(m_Data.begin(),m_Data.end(),angle,
-                 IBMuonCollection::_Cmp());
+    splice( angle,
+            [](MuonScatter &data, const float value)->bool
+                {return calc_angle(data) <= value;}
+            );
     m_HiPass = 1;
 }
 
 void IBMuonCollection::SetLowPassAngle(float angle)
 {
-    m_SliceIndex =
-    VectorSplice(m_Data.begin(),m_Data.end(),angle,
-                 IBMuonCollection::_Cmp());
+    splice( angle,
+            [](MuonScatter &data, const float value)->bool
+                {return calc_angle(data) <= value;}
+            );
     m_HiPass = 0;
 }
 
-void IBMuonCollection::SetHiPassMomentum(float momenutm)
+void IBMuonCollection::SetHiPassMomentum(float momentum)
 {
-    m_SliceIndex =
-    VectorSplice(m_Data.begin(),m_Data.end(),momenutm,
-                 IBMuonCollection::_PCmp());
+    splice( momentum,
+            [](MuonScatter &data, const float value)->bool
+                {return data.GetMomentum() <= value;}
+            );
     m_HiPass = 1;
 }
 
 void IBMuonCollection::SetLowPassMomentum(float momentum)
 {
-    m_SliceIndex =
-    VectorSplice(m_Data.begin(),m_Data.end(),momentum,
-                 IBMuonCollection::_PCmp());
+    splice( momentum,
+            [](MuonScatter &data, const float value)->bool
+                {return data.GetMomentum() <= value;}
+            );
     m_HiPass = 0;
 }
 
-void IBMuonCollection::SetHiPassMomentumPrime(float momenutm)
+void IBMuonCollection::SetHiPassMomentumPrime(float momentum)
 {
-    m_SliceIndex =
-    VectorSplice(m_Data.begin(),m_Data.end(),momenutm,
-                 IBMuonCollection::_PPCmp());
+    splice( momentum,
+            [](MuonScatter &data, const float value)->bool
+                {return data.GetMomentumPrime() <= value;}
+            );
     m_HiPass = 1;
 }
 
 void IBMuonCollection::SetLowPassMomentumPrime(float momentum)
 {
-    m_SliceIndex =
-    VectorSplice(m_Data.begin(),m_Data.end(),momentum,
-                 IBMuonCollection::_PPCmp());
+    splice( momentum,
+            [](MuonScatter &data, const float value)->bool
+                {return data.GetMomentumPrime() <= value;}
+            );
     m_HiPass = 0;
 }
 

@@ -22,7 +22,6 @@
 #include <fstream>
 #include <algorithm>
 
-#include <Core/Vector.h>
 #include <Math/Dense.h>
 
 using namespace std;
@@ -35,7 +34,7 @@ struct ROCElement : public Vector3f {
     inline float &Owa() { return this->operator ()(2); }
 };
 
-typedef Vector<ROCElement> ROC;
+typedef std::vector<ROCElement> ROC;
 
 #define CSVSEP ';'
 
@@ -61,12 +60,12 @@ ROC read_roc_with_header(ifstream &file) {
 
 
 void shift_roc(ROC &roc, float shift ) {
-    for(ROC::Iterator itr = roc.begin(); itr<roc.end(); itr++)
+    for(ROC::iterator itr = roc.begin(); itr<roc.end(); itr++)
         itr->X() += shift;
 }
 
 void scale_roc(ROC &roc, float scale ) {
-    for(ROC::Iterator itr = roc.begin(); itr<roc.end(); itr++)
+    for(ROC::iterator itr = roc.begin(); itr<roc.end(); itr++)
         itr->X() *= scale;
 }
 
@@ -98,7 +97,7 @@ int main (int argc,char **argv)
     fin.close();
 
     // first point
-    ROC::Iterator itr = roc1.begin();
+    ROC::iterator itr = roc1.begin();
     while (itr != roc1.end() && itr->Awo() > 0 ) itr++;
 
     float eff = 0;

@@ -48,7 +48,7 @@ private:
     T * m_Image;
 };
 
-// TODO: interface for Vector<float> ImageData
+// TODO: interface for std::vector<float> ImageData
 // TODO: Threshold Scanner Interface
 // TODO: in SubImageGrabber a mapper between V3i/int of Image and SubImage;
 // move in a separate file to be included!!!
@@ -59,7 +59,7 @@ private:
 class SimpleThresholdScan
 {
 public:
-    typedef Vector<float> ImageData;
+    typedef std::vector<float> ImageData;
     struct ScanData {
         float Percent;
         float Intensity;
@@ -121,8 +121,8 @@ class RangeThresholdScan : public SimpleThresholdScan
 {
 public:
     typedef SimpleThresholdScan BaseClass;
-    typedef Vector<BaseClass::ScanOption> ScanOption;
-    typedef Vector<BaseClass::ScanData>   ScanData;
+    typedef std::vector<BaseClass::ScanOption> ScanOption;
+    typedef std::vector<BaseClass::ScanData>   ScanData;
 
     RangeThresholdScan() : BaseClass() {}
     ScanData Scan(ScanOption opt);

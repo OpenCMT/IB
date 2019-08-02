@@ -41,7 +41,7 @@ namespace Recipes {
 ////        IBVoxFilter_Linear trim(Vector3i(3,3,3));
 //        IBVoxFilter_Median trim(Vector3i(3,3,3));
 //        IBFilterGaussShape shape(0.2);
-//        Vector <float> values;
+//        std::vector <float> values;
 //        for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
 //            values.push_back(1.);
 //        }
@@ -97,7 +97,7 @@ struct Avg {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Linear trim(Vector3i(3,3,3));
-        Vector <float> values;
+        std::vector <float> values;
         for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
             values.push_back(1.);
         }
@@ -114,7 +114,7 @@ struct Median {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Median trim(Vector3i(3,3,3));
-        Vector <float> values;
+        std::vector <float> values;
         for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
             values.push_back(1.);
         }
@@ -147,7 +147,7 @@ struct Trim3u {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-        Vector <float> values;
+        std::vector <float> values;
         for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
             values.push_back(1.);
         }
@@ -223,7 +223,7 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
         sprintf(bnameInte[i], "AverageIntensity_%i",      i);
         sprintf(bnameIden[i], "IdentificationPercent_%i", i);
     }
-    
+
     IBVoxCollection image(Vector3i::Zero());
 
 
@@ -296,7 +296,7 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
     }
     iron_average_accumulator_1 /= fbulk;
 
-    
+
     float iron_average_accumulator_2 = 0.;
     ////////////////////////////////////
     ///  E M P T Y    D A T A S E T  ///
@@ -361,7 +361,7 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
 
 
     // FILE SAVE ------------------------------------------------------------ //
-    std::cout << "Finalizing Data and Saving..." << std::flush;    
+    std::cout << "Finalizing Data and Saving..." << std::flush;
     std::ofstream fout;
 
 //    char fname[200];

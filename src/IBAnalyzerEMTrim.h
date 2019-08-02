@@ -84,7 +84,7 @@ private:
 
     IBVoxCollection                                *m_VoxCollection;
     IBAnalyzerEMTrimDetail::IBVoxCollectionATrim   *m_VoxCollectionMdn;
-    Vector<IBAnalyzerEM::Event>                    &m_Events;
+    std::vector<IBAnalyzerEM::Event>               &m_Events;
     unsigned int                                    m_MeanMuonVoxOccupancy;
 
 };

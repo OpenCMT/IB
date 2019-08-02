@@ -41,7 +41,7 @@ private:
 
     // dump useless function in order to be skipped at compile time
 public:
-    void SetKernelNumericXZY(const Vector<float> &numeric)    {}
+    void SetKernelNumericXZY(const std::vector<float> &numeric)    {}
     void SetKernelSpherical(float (*shape)(float))            {}
     template < typename ShapeT >
     void SetKernelSpherical( ShapeT shape )                   {}

@@ -54,9 +54,9 @@ public:
     };
 
     template < class RecipeT >
-    IBROC BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> Awo);
+    IBROC BuildRoc(std::vector<IBVoxCollection> Owa, std::vector<IBVoxCollection> Awo);
 
-    IBROC BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> Awo, ROCRecipeEnum recipe = NoFilter);
+    IBROC BuildRoc(std::vector<IBVoxCollection> Owa, std::vector<IBVoxCollection> Awo, ROCRecipeEnum recipe = NoFilter);
 
     float Ratio(IBROC roc, float y);
 

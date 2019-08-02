@@ -58,10 +58,10 @@ private:
             Matrix4f Wij;
             IBVoxel *voxel;
         };
-        Vector<Element> elements;
+        std::vector<Element> elements;
     };
 
-    Vector<Event> m_Events;
+    std::vector<Event> m_Events;
     VoxRaytracer *m_RayAlgorithm;
     IBPocaEvaluator *m_PocaAlgorithm;
     //20170420 select detector based on Z coordinate: -1, 1, 0 if not used

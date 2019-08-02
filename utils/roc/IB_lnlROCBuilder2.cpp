@@ -112,7 +112,7 @@ struct Avg {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Linear trim(Vector3i(3,3,3));
-        Vector <float> values;
+        std::vector<float> values;
         for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
             values.push_back(1.);
         }
@@ -129,7 +129,7 @@ struct Median {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Median trim(Vector3i(3,3,3));
-        Vector <float> values;
+        std::vector<float> values;
         for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
             values.push_back(1.);
         }
@@ -162,7 +162,7 @@ struct Trim3u {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-        //        Vector <float> values;
+        //        std::vector <float> values;
         //        for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
         //            values.push_back(1.);
         //        }
@@ -225,7 +225,7 @@ struct BilateralTrim {
 
 
 float max_of_image(IBVoxCollection &image) {
-    Vector<IBVoxel>::Iterator itr;
+    std::vector<IBVoxel>::iterator itr;
     float max = 0;
     for(itr = image.Data().begin(); itr != image.Data().end(); ++itr)
         if(itr->Value > max) max = itr->Value;
@@ -280,7 +280,7 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
         RecipeT::Run(&image);
 
         // SCAN THRESHOLD //
-        for(uLib::IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++)
+        for(uLib::IBROC::iterator itr = roc.begin(); itr != roc.end(); itr++)
             itr->Owa() += (image.CountLambdaOverThreshold(itr->X(),
                                                          img_center,
                                                          img_hsize)) > 0 ? 1 : 0;
@@ -301,7 +301,7 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
         RecipeT::Run(&image);
 
         // SCAN THRESHOLD //
-        for(uLib::IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++)
+        for(uLib::IBROC::iterator itr = roc.begin(); itr != roc.end(); itr++)
             itr->Awo() += (image.CountLambdaOverThreshold(itr->X(),
                                                           img_center,
                                                           img_hsize) > 0) ? 1 : 0;
@@ -310,11 +310,11 @@ int process_ROC(int argc, char** argv, int sequence_number=-1)
     }
 
 
-    for(uLib::IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++) {
+    for(uLib::IBROC::iterator itr = roc.begin(); itr != roc.end(); itr++) {
         itr->X()   *= 1E6;
         itr->Awo() *= 100./fBulk;
         itr->Owa()  = 100 * (1 - itr->Owa()/fbulk);
-    }    
+    }
 
     roc.Samples() << fBulk , fbulk;
 

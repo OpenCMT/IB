@@ -78,7 +78,7 @@ struct Avg {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Linear trim(Vector3i(3,3,3));
-        Vector <float> values;
+        std::vector <float> values;
         for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
             values.push_back(1.);
         }
@@ -95,7 +95,7 @@ struct Median {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Median trim(Vector3i(3,3,3));
-        Vector <float> values;
+        std::vector <float> values;
         for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
             values.push_back(1.);
         }
@@ -142,7 +142,7 @@ struct Trim3u {
     static bool Run(IBVoxCollection *image) {
         // RECIPE // -------------------------------------------------------- //
         IBVoxFilter_Abtrim trim(Vector3i(3,3,3));
-        Vector <float> values;
+        std::vector <float> values;
         for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
             values.push_back(1.);
         }
@@ -206,7 +206,7 @@ ROCBuilder::ROCBuilder() :
 
 
 float max_of_image(IBVoxCollection &image) {
-    Vector<IBVoxel>::Iterator itr;
+    std::vector<IBVoxel>::iterator itr;
     float max = 0;
     for(itr = image.Data().begin(); itr != image.Data().end(); ++itr)
         if(itr->Value > max) max = itr->Value;
@@ -218,9 +218,9 @@ float max_of_image(IBVoxCollection &image) {
 
 
 template < class RecipeT >
-IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> Awo)
+IBROC ROCBuilder::BuildRoc(std::vector<IBVoxCollection> Owa, std::vector<IBVoxCollection> Awo)
 {
-    typedef Vector<IBVoxCollection> ImgSequence;
+    typedef std::vector<IBVoxCollection> ImgSequence;
     static const HPoint3f  img_center(-5,-95,-5);
     static const HVector3f img_hsize(55,70,50);
 
@@ -235,7 +235,7 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> 
     ////////////////////////////////////
     float max = 0;
     {
-        for (ImgSequence::Iterator Itr = Owa.begin(); Itr < Owa.end(); Itr++) {
+        for (ImgSequence::iterator Itr = Owa.begin(); Itr < Owa.end(); Itr++) {
             image = *Itr;
             IBSubImageGrabber<IBVoxCollection> grabber(image);
             IBVoxCollection img = grabber.GrabRegion<IBVoxCollection>(img_center,img_hsize);
@@ -259,7 +259,7 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> 
     //   L E A D     D A T A S E T    //
     ////////////////////////////////////
     int fbulk = 0;
-    for (ImgSequence::Iterator Itr = Owa.begin(); Itr < Owa.end(); Itr++) {
+    for (ImgSequence::iterator Itr = Owa.begin(); Itr < Owa.end(); Itr++) {
         fbulk ++;
         image = *Itr;
 
@@ -267,7 +267,7 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> 
         RecipeT::Run(&image);
 
         // SCAN THRESHOLD //
-        for(IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++)
+        for(IBROC::iterator itr = roc.begin(); itr != roc.end(); itr++)
             itr->Owa() += (int)(image.CountLambdaOverThreshold(itr->X(),
                                                          img_center,
                                                          img_hsize) > 0);
@@ -280,7 +280,7 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> 
     ////////////////////////////////////
 
     int fBulk = 0;
-    for (ImgSequence::Iterator Itr = Awo.begin(); Itr < Awo.end(); Itr++) {
+    for (ImgSequence::iterator Itr = Awo.begin(); Itr < Awo.end(); Itr++) {
         fBulk ++;
         image = *Itr;
 
@@ -288,7 +288,7 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> 
         RecipeT::Run(&image);
 
         // SCAN THRESHOLD //
-        for(IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++)
+        for(IBROC::iterator itr = roc.begin(); itr != roc.end(); itr++)
             itr->Awo() += (int)(image.CountLambdaOverThreshold(itr->X(),
                                                          img_center,
                                                          img_hsize) > 0);
@@ -297,7 +297,7 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> 
     }
 
 
-    for(IBROC::Iterator itr = roc.begin(); itr != roc.end(); itr++) {
+    for(IBROC::iterator itr = roc.begin(); itr != roc.end(); itr++) {
         itr->X()   *= 1E6;
         itr->Awo() *= 100./fBulk;
         itr->Owa()  = 100 * (1 - itr->Owa()/fbulk);
@@ -310,8 +310,8 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa, Vector<IBVoxCollection> 
 
 
 
-IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa,
-                         Vector<IBVoxCollection> Awo,
+IBROC ROCBuilder::BuildRoc(std::vector<IBVoxCollection> Owa,
+                         std::vector<IBVoxCollection> Awo,
                          ROCBuilder::ROCRecipeEnum recipe)
 {
     IBROC ret;
@@ -350,7 +350,7 @@ IBROC ROCBuilder::BuildRoc(Vector<IBVoxCollection> Owa,
 float ROCBuilder::Ratio(IBROC roc, float y)
 {
     // first point y [%] Owa
-    IBROC::Iterator itr = roc.begin();
+    IBROC::iterator itr = roc.begin();
     while (itr != roc.end() && itr->Awo() > y ) itr++;
     float begin = itr->X();
 
@@ -366,7 +366,7 @@ float ROCBuilder::Ratio(IBROC roc, float y)
 float ROCBuilder::FSI(IBROC roc, float y)
 {
     // first point y [%] Owa
-    IBROC::Iterator itr = roc.begin();
+    IBROC::iterator itr = roc.begin();
     while (itr != roc.end() && itr->Awo() > y ) itr++;
     float begin = itr->X();
 
@@ -382,7 +382,7 @@ float ROCBuilder::FSI(IBROC roc, float y)
 float ROCBuilder::AUC(IBROC &roc)
 {
     float AUC = 0;
-    for(IBROC::Iterator itr=roc.begin(); itr<roc.end()-1; itr++) {
+    for(IBROC::iterator itr=roc.begin(); itr<roc.end()-1; itr++) {
         AUC += (itr->Awo() - (itr+1)->Awo()) * (100 - itr->Owa() + 100 - (itr+1)->Owa()) / 2E4;
     }
     return AUC;

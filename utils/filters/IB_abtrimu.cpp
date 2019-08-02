@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
     int s = parameters.size;
     IBVoxFilter_Abtrim trim(Vector3i(s,s,s));
-    Vector <float> values;
+    std::vector <float> values;
     for (int i=0; i<trim.GetKernelData().GetDims().prod(); ++i) {
         values.push_back(1.);
     }

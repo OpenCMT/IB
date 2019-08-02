@@ -53,7 +53,7 @@ private:
 
     IBPocaEvaluator                  *m_PocaAlgorithm;
     IBMinimizationVariablesEvaluator *m_Minimizator;
-    Vector<Data>                      m_Data;
+    std::vector<Data>                 m_Data;
 
     Data    tmp;
     Scalarf t_w_1;

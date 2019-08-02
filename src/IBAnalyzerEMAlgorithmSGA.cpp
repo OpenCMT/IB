@@ -116,7 +116,7 @@ void IBAnalyzerEMAlgorithmSGA_PXTZ4::evaluate(Matrix4f &Sigma, IBAnalyzerEMAlgor
         evc->elements[j].Sij =  Sij;
     }
 
-    Vector<Event::Element> copy = evc->elements;
+    std::vector<Event::Element> copy = evc->elements;
     const float factor[5] = {2,3,3,3,2};
 
     float Sij;

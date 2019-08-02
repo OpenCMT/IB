@@ -26,7 +26,6 @@
 #include <TH1F.h>
 #include <TROOT.h>
 
-#include <Core/Vector.h>
 #include <Core/Debug.h>
 
 #include "IBPocaEvaluator.h"
@@ -41,6 +40,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 typedef IBAnalyzerEM::Event Event;
 class UpdateDensitySijCapAlgorithm;
@@ -214,14 +214,14 @@ void IBAnalyzerEM::Evaluate(float muons_ratio)
 void IBAnalyzerEM::filterEventsVoxelMask()
 {
   std::cout << "\nIBAnalyzerEM: Removing frozen voxels from " << this->m_Events.size() << " muon collection." << std::endl;
-    Vector< Event >::iterator itr = this->m_Events.begin();
-    const Vector< Event >::iterator begin = this->m_Events.begin();
+    std::vector< Event >::iterator itr = this->m_Events.begin();
+    const std::vector< Event >::iterator begin = this->m_Events.begin();
 
     while (itr != this->m_Events.end()) {
         Event & evc = *itr;
-        Vector< Event::Element >::iterator itre = evc.elements.begin();
+        std::vector< Event::Element >::iterator itre = evc.elements.begin();
         // create new vector and fill it with positive voxels
-        Vector< Event::Element > newvelc;
+        std::vector< Event::Element > newvelc;
         while (itre != evc.elements.end()) {
             Event::Element & elc = *itre;
             if(elc.voxel->Value <= 0){
@@ -243,9 +243,15 @@ void IBAnalyzerEM::filterEventsVoxelMask()
         /// erase event and muon with empty voxel collection
         if(evc.elements.empty()){
             unsigned int pos = itr - begin;
-            this->m_Events.remove_element(evc);
+
+            std::swap(evc, m_Events.back()); m_Events.pop_back();
+
             if(m_MuonCollection)
-                m_MuonCollection->Data().remove_element(pos);
+            {
+                std::swap(m_MuonCollection->Data().at(pos),
+                          m_MuonCollection->Data().back());
+                m_MuonCollection->Data().pop_back();
+            }
         }
         else
             ++itr;
@@ -262,8 +268,8 @@ void IBAnalyzerEM::filterEventsLineDistance(float min, float max)
 {
   std::cout << "\n*** Removing events with line distance out of range from " << this->m_Events.size() << " muon collection." << std::endl;
 
-    Vector< Event >::iterator itr = this->m_Events.begin();
-    const Vector< Event >::iterator begin = this->m_Events.begin();
+    std::vector< Event >::iterator itr = this->m_Events.begin();
+    const std::vector< Event >::iterator begin = this->m_Events.begin();
 
     while (itr != this->m_Events.end()) {
         Event & evc = *itr;
@@ -276,8 +282,11 @@ void IBAnalyzerEM::filterEventsLineDistance(float min, float max)
         /// erase event and muon with distance out of range
         if(!isFinite(dist) || dist >= max || dist < min){
 
-            this->m_Events.remove_element(evc);
-            m_MuonCollection->Data().remove_element(pos);
+            std::swap(evc, m_Events.back()); m_Events.pop_back();
+
+            std::swap(m_MuonCollection->Data().at(pos),
+                      m_MuonCollection->Data().back());
+            m_MuonCollection->Data().pop_back();
         }
         else
 	  ++itr;
@@ -319,7 +328,7 @@ float IBAnalyzerEM::SijMedian(const Event &evc)
 {
     Evaluate(1);
 
-    Vector< float > Si;
+    std::vector< float > Si;
     for (unsigned int i = 0; i < evc.elements.size(); i++) {
         const Event::Element &el = evc.elements[i];
         Si.push_back(fabs( (el.Sij * el.voxel->Count - el.voxel->SijCap) / el.voxel->SijCap ));
@@ -344,13 +353,13 @@ float IBAnalyzerEM::SijMedian(const Event &evc)
 }
 
 //________________________
-Vector<Event > IBAnalyzerEM::SijCutCount(float threshold_low, float threshold_high)
+std::vector<Event > IBAnalyzerEM::SijCutCount(float threshold_low, float threshold_high)
 {
     Evaluate(1);
     //std::cout << "Cut tresholds : " << std::dec << threshold_low << ", " << threshold_high << " ... " << std::endl;
-    Vector< Event > ve;
-    Vector< Event >::iterator itr = this->m_Events.begin();
-    const Vector< Event >::iterator begin = this->m_Events.begin();
+    std::vector< Event > ve;
+    std::vector< Event >::iterator itr = this->m_Events.begin();
+    const std::vector< Event >::iterator begin = this->m_Events.begin();
     int evnum = 0;
     int nvox_cut_low = 0;
     int nvox_cut_high = 0;
@@ -370,16 +379,16 @@ Vector<Event > IBAnalyzerEM::SijCutCount(float threshold_low, float threshold_hi
     return ve;
 }
 //________________________
-void IBAnalyzerEM::dumpEventsSijInfo(const char *name, Vector<float> N)
+void IBAnalyzerEM::dumpEventsSijInfo(const char *name, std::vector<float> N)
 {
     Evaluate(1);
     /// dump event Sij info on file
     std::fstream fout;
     fout.open(name, std::fstream::out | std::fstream::app);
 
-    Vector< Event > ve;
-    Vector< Event >::iterator itr = this->m_Events.begin();
-    const Vector< Event >::iterator begin = this->m_Events.begin();
+    std::vector< Event > ve;
+    std::vector< Event >::iterator itr = this->m_Events.begin();
+    const std::vector< Event >::iterator begin = this->m_Events.begin();
     int nev = 0;
 
     /// loop over events
@@ -392,9 +401,9 @@ void IBAnalyzerEM::dumpEventsSijInfo(const char *name, Vector<float> N)
         float mom =  evc.header.pTrue;
 
         /// compute and dump median
-        Vector< float > Si;
+        std::vector< float > Si;
         float median;
-        Vector< Event::Element >::iterator itre = evc.elements.begin();
+        std::vector< Event::Element >::iterator itre = evc.elements.begin();
         while (itre != evc.elements.end()) {
             Event::Element & elc = *itre;
             float Nij = fabs( (elc.Sij * elc.voxel->Count - elc.voxel->SijCap) / elc.voxel->SijCap );
@@ -416,8 +425,8 @@ void IBAnalyzerEM::dumpEventsSijInfo(const char *name, Vector<float> N)
         fout << median << " ";
 
 //        /// loop over Sij tresholds
-//        Vector< float >::iterator itrN = N.begin();
-//        const Vector< float >::iterator beginN = N.begin();
+//        std::vector< float >::iterator itrN = N.begin();
+//        const std::vector< float >::iterator beginN = N.begin();
 //        while (itrN != N.end()) {
 //            int nvox_cut = 0;
 //            // dump number of voxels above the threshold
@@ -446,8 +455,8 @@ void IBAnalyzerEM::SijCut(float threshold)
 {
     Evaluate(1);
 
-    Vector< Event >::iterator itr = this->m_Events.begin();
-    const Vector< Event >::iterator begin = this->m_Events.begin();
+    std::vector< Event >::iterator itr = this->m_Events.begin();
+    const std::vector< Event >::iterator begin = this->m_Events.begin();
 
     int count = 0;
     int nvox_cut=0;
@@ -455,9 +464,15 @@ void IBAnalyzerEM::SijCut(float threshold)
         if(em_test_SijCut(*itr, threshold, nvox_cut))
         {
             unsigned int pos = itr - begin;
-            this->m_Events.remove_element(*itr);
+
+            std::swap(*itr, m_Events.back()); m_Events.pop_back();
+
             if(m_MuonCollection)
-                m_MuonCollection->Data().remove_element(pos);
+            {
+                std::swap(m_MuonCollection->Data().at(pos),
+                          m_MuonCollection->Data().back());
+                m_MuonCollection->Data().pop_back();
+            }
             count ++;
         }
         else ++itr;
@@ -473,7 +488,7 @@ void IBAnalyzerEM::SetSijMedianMomentum()
 {
     Evaluate(1);
 
-    Vector< Event >::iterator itr = this->m_Events.begin();
+    std::vector< Event >::iterator itr = this->m_Events.begin();
 
 //    std::cout << "SetSijMedianMomentum \n"
 //              << "old invp2 = " << itr->header.InitialSqrP/(m_parent->nominal_momentum * m_parent->nominal_momentum);
@@ -503,7 +518,7 @@ void IBAnalyzerEM::SetSijMedianMomentum()
         itr->header.InitialSqrP = nominal_momentum * nominal_momentum * invp2guess;
 
         /// set in addition every voxel pw, since from voxel momentum code it is used in the algorithm
-        Vector< Event::Element >::iterator itre = evc.elements.begin();
+        std::vector< Event::Element >::iterator itre = evc.elements.begin();
         while (itre != evc.elements.end()) {
             Event::Element &elc = *itre;
             elc.pw = nominal_momentum * nominal_momentum *invp2guess;
@@ -528,7 +543,7 @@ void IBAnalyzerEM::Chi2Cut(float threshold)
     Evaluate(1);
 
     std::vector< Event >::iterator itr = this->m_Events.begin();
-    const Vector< Event >::iterator begin = this->m_Events.begin();
+    const std::vector< Event >::iterator begin = this->m_Events.begin();
 
     do {
         Matrix4f Sigma = Matrix4f::Zero();
@@ -538,9 +553,15 @@ void IBAnalyzerEM::Chi2Cut(float threshold)
         Matrix4f Dn = iS * (evc.header.Di * evc.header.Di.transpose());
         if ( Dn.trace() > threshold ){
             unsigned int pos = itr - begin;
-            this->m_Events.remove_element(*itr);
+
+            std::swap(*itr, m_Events.back()); m_Events.pop_back();
+
             if(m_MuonCollection)
-                m_MuonCollection->Data().remove_element(pos);
+            {
+                std::swap(m_MuonCollection->Data().at(pos),
+                          m_MuonCollection->Data().back());
+                m_MuonCollection->Data().pop_back();
+            }
         }
         else ++itr;
     } while (itr != this->m_Events.end());
@@ -614,7 +635,7 @@ IBAnalyzerEM::~IBAnalyzerEM()
 {}
 
 //___________________________
-Vector<IBAnalyzerEM::Event> &IBAnalyzerEM::Events(){
+std::vector<IBAnalyzerEM::Event> &IBAnalyzerEM::Events(){
     return m_Events;
 }
 
@@ -625,7 +646,7 @@ void IBAnalyzerEM::DumpEvent(Event *evc){
     std::cout << "InitialSqrP " << evc->header.InitialSqrP <<  ", Di " << evc->header.Di << ", E " << evc->header.E << std::endl;
     std::cout << "Voxel vector size " << evc->elements.size();
 
-    Vector< Event::Element >::iterator itre = evc->elements.begin();
+    std::vector< Event::Element >::iterator itre = evc->elements.begin();
     int ivox=0;
     while (itre != evc->elements.end()) {
         Event::Element &elc = *itre;
@@ -747,7 +768,7 @@ bool IBAnalyzerEM::AddMuon(const MuonScatterData &muon){
 //---- 1) Fixes bugs in L and T
 //---- 2) Allows one to use the true muon path (provided by the argument muonPath)
 //---- 3) Allows one to use any arbitrary path (see 3-path implementation)
-bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>& muonPath){
+bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, std::vector<HPoint3f>& muonPath){
 
   bool debug = false;
 
@@ -766,7 +787,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
   evc.header.E << NAN, NAN, NAN,NAN,NAN, NAN, NAN,NAN,NAN, NAN, NAN,NAN,NAN, NAN, NAN,NAN;
   evc.header.InitialSqrP = NAN;
   evc.header.pTrue = NAN;
-  Vector<Event::Element> voxVec(0);
+  std::vector<Event::Element> voxVec(0);
   evc.elements = voxVec;
   evc.elements.clear();
 
@@ -795,7 +816,7 @@ bool IBAnalyzerEM::AddMuonFullPath(const MuonScatterData &muon, Vector<HPoint3f>
 
   //---------
   //---- STEP #2.1: Get all of the path points
-  Vector<HPoint3f> pts;       //<---- A vector of the muon path points
+  std::vector<HPoint3f> pts;       //<---- A vector of the muon path points
   HPoint3f front_pt, back_pt; //<---- The first and last point
 
   //---- If reconstructing the muon's path (i.e. NOT the true path)
@@ -1160,8 +1181,8 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
   m_Events.clear();
 
   //---- Iterate over the muon data, and collec the muon data, and the muon path
-  Vector<MuonScatterData>::iterator itr = muons->Data().begin();
-  Vector<Vector<HPoint3f> >::iterator path_itr = muons->FullPath().begin();
+  std::vector<MuonScatterData>::iterator itr = muons->Data().begin();
+  std::vector<std::vector<HPoint3f> >::iterator path_itr = muons->FullPath().begin();
   std::cout << "Adding " << muons->Data().size() << " muons " << std::endl;
 
   if(m_pVoxelMean){
@@ -1185,8 +1206,14 @@ void IBAnalyzerEM::SetMuonCollection(IBMuonCollection *muons){
 
     //---- If the muon full path has an error, remove the muon
     if(!AddMuonFullPath(*itr, *path_itr)){
-      muons->Data().remove_element(*itr);
-      if(muons->FullPath().size() > 0) muons->FullPath().remove_element(*path_itr);
+
+        std::swap(*itr, muons->Data().back()); muons->Data().pop_back();
+
+        if(muons->FullPath().size() > 0)
+        {
+            std::swap(*path_itr, muons->FullPath().back());
+            muons->FullPath().pop_back();
+        }
     }
     //---- Otherwise, iterate
     else{
@@ -1234,12 +1261,12 @@ void IBAnalyzerEM::SetMLAlgorithm(IBAnalyzerEMAlgorithm *MLAlgorithm){
 }
 
 //________________________
-void IBAnalyzerEM::SijGuess(Vector<Vector2f> tpv){
+void IBAnalyzerEM::SijGuess(std::vector<Vector2f> tpv){
     Evaluate(1);
     // ATTENZIONE!! il vettore deve essere ordinato per threshold crescenti   //
     for (int i=0; i<tpv.size(); ++i) {
 
-        Vector< Event >::iterator itr = this->m_Events.begin();
+        std::vector< Event >::iterator itr = this->m_Events.begin();
         int count = 0;
         int nvox_cut=0;
         while (itr != this->m_Events.end()) {
@@ -1364,7 +1391,7 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
 
 
     /// event loop
-    Vector< Event >::iterator itr = m_Events.begin();
+    std::vector< Event >::iterator itr = m_Events.begin();
     std::cout << "Reading " << m_Events.size() << " events " << std::endl;
     while (itr != m_Events.end()) {
         Event & evc = *itr;
@@ -1372,8 +1399,8 @@ void IBAnalyzerEM::dumpEventsTTree(const char *filename)
         /// crossed voxel loop
         sumLij = 0;
         vpw->clear();
-        Vector< float > Si;
-        Vector< Event::Element >::iterator itre = evc.elements.begin();
+        std::vector< float > Si;
+        std::vector< Event::Element >::iterator itre = evc.elements.begin();
 
         while (itre != evc.elements.end()) {
             Event::Element & elc = *itre;

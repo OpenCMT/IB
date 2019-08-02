@@ -20,8 +20,8 @@
 
 #include <assert.h>
 
-#include <Core/Vector.h>
-//#include <Math/Utils.h>
+#include <vector>
+
 #include "IBAnalyzerPoca.h"
 #include "IBPocaEvaluator.h"
 #include "IBVoxCollectionCap.h"
