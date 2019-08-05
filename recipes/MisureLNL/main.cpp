@@ -183,7 +183,7 @@ void setInitImage(IBVoxCollection &img, const char * vtkout){
     std::cout << "*** Init lambda values (*1.E-6)" << "\nair: " << p.image.lambda_air << std::endl;
 
     /// fill all voxels with air
-    IBVoxel air{p.image.lambda_air*1.E-6,0,0};
+    IBVoxel air{p.image.lambda_air*1.E-6f,0,0};
     img.InitLambda(air);
 
     /// test
@@ -1034,7 +1034,7 @@ int doIterations(const char *file_in,
                                     vox_bounding(2)/vox_size));
 
     IBVoxel zero{0,0,0};
-    IBVoxel air{p.image.lambda_air*1.E-6,0,0};
+    IBVoxel air{p.image.lambda_air*1.E-6f,0,0};
     voxels.InitLambda(air);
     voxels.SetSpacing (Vector3f(vox_size,
                                 vox_size,
