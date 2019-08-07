@@ -22,7 +22,6 @@
 #define IBPWEIGHTALGORITHMS_H
 
 
-#include <Core/StaticInterface.h>
 #include <Math/Dense.h>
 
 

@@ -21,7 +21,6 @@
 #ifndef IBNORMALPLANEMINIMIZATIONVARIABLESEVALUATOR_H
 #define IBNORMALPLANEMINIMIZATIONVARIABLESEVALUATOR_H
 
-#include "Core/Object.h"
 #include "IBMinimizationVariablesEvaluator.h"
 
 using namespace uLib;

@@ -26,8 +26,6 @@
 #include <TH1F.h>
 #include <TROOT.h>
 
-#include <Core/Debug.h>
-
 #include "IBPocaEvaluator.h"
 #include "IBMinimizationVariablesEvaluator.h"
 #include "IBVoxRaytracer.h"

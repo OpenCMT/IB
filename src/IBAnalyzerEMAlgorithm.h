@@ -21,14 +21,14 @@
 #ifndef IBANALYZEREMALGORITHM_H
 #define IBANALYZEREMALGORITHM_H
 
-#include "Core/Object.h"
 #include "IBAnalyzerEM.h"
 
 using namespace uLib;
 
 
 
-class IBAnalyzerEMAlgorithm : public Object {
+class IBAnalyzerEMAlgorithm
+{
 protected:
     typedef struct IBAnalyzerEM::Event Event;
 public:

@@ -15,7 +15,6 @@
  Licence for the specific language governing permissions and limitations under
  the Licence.
 ////////////////////////////////////////////////////////////////////////////*/
-#include "Core/StaticInterface.h"
 #include "IBVoxCollection.h"
 
 #include <TGeoNode.h>

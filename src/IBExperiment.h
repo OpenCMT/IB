@@ -27,7 +27,6 @@
 //#include <TFile.h>
 //#include <TTree.h>
 
-//#include "Core/Object.h"
 //#include "Core/Options.h"
 //#include "Detectors/MuonScatter.h"
 
@@ -52,7 +51,8 @@
 
 namespace IB {
 
-class Experiment : public uLib::Object {
+class Experiment
+{
 public:
     Experiment() :
         m_Reader(NULL),

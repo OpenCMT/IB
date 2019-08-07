@@ -23,7 +23,6 @@
 
 #include <vector>
 
-#include <Core/Object.h>
 #include <Math/Dense.h>
 #include <Math/Utils.h>
 
@@ -31,8 +30,8 @@
 
 using namespace uLib;
 
-class IBMuonCollection : public Object {
-
+class IBMuonCollection
+{
 public:
 
     IBMuonCollection();

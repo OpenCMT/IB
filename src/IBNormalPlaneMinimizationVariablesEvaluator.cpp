@@ -25,6 +25,7 @@
 
 #include <vector>
 #include "IBNormalPlaneMinimizationVariablesEvaluator.h"
+#include <Core/Macros.h>
 
 // remove after test //
 //#include <stdio.h>

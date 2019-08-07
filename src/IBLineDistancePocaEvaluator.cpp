@@ -18,6 +18,7 @@
 
 
 #include "IBLineDistancePocaEvaluator.h"
+#include <Core/Macros.h>
 #include <iostream>
 
 

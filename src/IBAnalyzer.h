@@ -21,8 +21,7 @@
 #ifndef IBANALYZER_H
 #define IBANALYZER_H
 
-#include <Core/Object.h>
-
+#include <Core/Macros.h>
 #include <Detectors/MuonScatter.h>
 #include <Detectors/MuonError.h>
 
@@ -40,7 +39,7 @@ class IBMinimizationVariablesEvaluator;
 class IBVoxCollection;
 
 
-class IBAnalyzer : public Object
+class IBAnalyzer
 {
 public:
 

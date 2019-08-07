@@ -21,12 +21,9 @@
 #ifndef IBABSTRACTREADER_H
 #define IBABSTRACTREADER_H
 
-#include <Core/Object.h>
-
 template <typename T>
-class IBAbstractReader : public uLib::Object
+class IBAbstractReader
 {
-    typedef uLib::Object BaseClass;
 public:
     virtual ~IBAbstractReader() {}
 

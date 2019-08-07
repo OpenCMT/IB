@@ -21,8 +21,6 @@
 #ifndef IB_VOXFILTERS_H
 #define IB_VOXFILTERS_H
 
-#include <Core/Object.h>
-#include <Core/StaticInterface.h>
 #include <Math/VoxImageFilter.h>
 #include "IBVoxel.h"
 
@@ -32,7 +30,8 @@
 
 
 
-class IBFilterGaussShape : public uLib::Interface::VoxImageFilterShape {
+class IBFilterGaussShape
+{
 public:
     IBFilterGaussShape(float sigma) : m_sigma2(sigma*sigma) {}
 
@@ -46,7 +45,7 @@ public:
                 compute_gaussian(pos(2)-0.5, pos(2)+0.5, m_sigma2);
     }
 
-private:        
+private:
 
     static float compute_gaussian(float x0, float x1, float sigma2, int divs =5)
     {

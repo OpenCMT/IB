@@ -28,7 +28,7 @@ using namespace uLib;
 class IBNormalPlaneMinimizationVariablesEvaluator;
 class IBSimpleTwoViewsMinimizationVariablesEvaluator;
 
-class IBMinimizationVariablesEvaluator : public Object
+class IBMinimizationVariablesEvaluator
 {
 public:
     enum IBMinVarEvaluatorAlgorithm {

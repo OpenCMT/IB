@@ -25,7 +25,6 @@
 #include <algorithm>
 #include <fstream>
 
-#include "Core/Object.h"
 #include "IBVoxCollection.h"
 
 #include "IBROC.h"
@@ -33,7 +32,7 @@
 using namespace uLib;
 
 
-class ROCBuilder : public Object
+class ROCBuilder
 {
 public:
     float start; // actually not used

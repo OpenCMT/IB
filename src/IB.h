@@ -26,11 +26,7 @@
  */
 
 
-// list of IB Headers for fast inclusion //
-
-#include <Core/Object.h>
-#include <Detectors/MuonScatter.h>
-
+#include <ostream>
 
 namespace IB {
 

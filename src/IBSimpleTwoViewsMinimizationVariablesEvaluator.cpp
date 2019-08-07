@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <vector>
 #include "IBSimpleTwoViewsMinimizationVariablesEvaluator.h"
+#include <Core/Macros.h>
 
 
 IBSimpleTwoViewsMinimizationVariablesEvaluator::IBSimpleTwoViewsMinimizationVariablesEvaluator()
