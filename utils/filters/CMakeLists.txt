@@ -10,7 +10,6 @@ set(UTILS IB_abtrim
 set(LIBRARIES  ${PACKAGE_LIBPREFIX}Core
                ${PACKAGE_LIBPREFIX}Math
                ${PACKAGE_LIBPREFIX}Vtk
-               ${PACKAGE_LIBPREFIX}Root
                ${PACKAGE_LIBPREFIX}IB
 )
 
