@@ -75,6 +75,15 @@ set(LIBRARIES
        ${PACKAGE_LIBPREFIX}Math
 )
 
+option(ENABLE_TF_PLUGIN "Enable the compilation of the Tensorflow plugin")
+if(ENABLE_TF_PLUGIN)
+    LIST(APPEND HEADERS IBAnalyzerTF.h)
+    LIST(APPEND SOURCES IBAnalyzerTF.cpp)
+    list(APPEND LIBRARIES tensorflow_cc tensorflow_framework)
+    # TEMPORARY DECLARATION
+    include_directories("/usr/include/tf-suite")
+endif(ENABLE_TF_PLUGIN)
+
 # DEPRECATED
 #uLib_add_shared_library(IB)
 add_library(${PACKAGE_LIBPREFIX}IB SHARED ${SOURCES})
