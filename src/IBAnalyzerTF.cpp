@@ -20,10 +20,11 @@
 
 #include "tensorflow/cc/client/client_session.h"
 #include "tensorflow/cc/ops/standard_ops.h"
+#include "tensorflow/cc/framework/gradients.h"
 #include "tensorflow/core/framework/tensor.h"
 
-using tensorflow::DT_FLOAT;
-
+using namespace tensorflow;
+using namespace tensorflow::ops;
 
 // ****************************************************************************
 // Graph variables
@@ -57,7 +58,10 @@ Variable& TFVariableSet::At(const Vector3i &id) const
     return *tf_vars.at(Map(id));
 }
 
-
+unsigned int TFVariableSet::size() const
+{
+    return tf_vars.size();
+}
 
 
 // ****************************************************************************
@@ -68,12 +72,14 @@ IBAnalyzerTF::IBAnalyzerTF(IBVoxCollection &voxels,
                            const Scope &scope,
                            IBPocaEvaluator *poca_algo,
                            IBMinimizationVariablesEvaluator *var_algo,
-                           IBVoxRaytracer *ray_algo) :
+                           IBVoxRaytracer *ray_algo,
+                           float learn_rate) :
     tf_scope(scope),
     m_Events(),
     m_PocaAlgorithm(poca_algo),
     m_VarAlgorithm(var_algo),
     m_RayAlgorithm(ray_algo),
+    learning_rate(learn_rate),
     nominal_momentum(3),
     tf_Variables(TFVariableSet(tf_scope, voxels.GetDims()))
 {
@@ -237,9 +243,219 @@ bool IBAnalyzerTF::AddMuonFullPath(const MuonScatterData &muon,
 }
 
 void IBAnalyzerTF::Run(unsigned int iterations, float muons_ratio)
-{}
+{
+    auto init_density = Const(tf_scope, { 7.f * 1.E-8f }); // air density
+
+    int m2a[4][4] =
+    {
+        { 0, 1, 2, 3 },
+        { 1, 4, 5, 6 },
+        { 2, 5, 7, 8 },
+        { 3, 6, 8, 9 }
+    };
+
+    auto ident_mat = OneHot(tf_scope, { 0, 1, 2, 3 }, 4, 1.f, 0.f);
+
+    Output oh_sym[10];
+    oh_sym[m2a[0][0]] = OneHot(tf_scope, { 0, -1, -1, -1 }, 4, 1.f, 0.f);
+    oh_sym[m2a[1][1]] = OneHot(tf_scope, { -1, 1, -1, -1 }, 4, 1.f, 0.f);
+    oh_sym[m2a[2][2]] = OneHot(tf_scope, { -1, -1, 2, -1 }, 4, 1.f, 0.f);
+    oh_sym[m2a[3][3]] = OneHot(tf_scope, { -1, -1, -1, 3 }, 4, 1.f, 0.f);
+    oh_sym[m2a[0][1]] = OneHot(tf_scope, { 1, 0, -1, -1 }, 4, 1.f, 0.f);
+    oh_sym[m2a[0][2]] = OneHot(tf_scope, { 2, -1, 0, -1 }, 4, 1.f, 0.f);
+    oh_sym[m2a[0][3]] = OneHot(tf_scope, { 3, -1, -1, 0 }, 4, 1.f, 0.f);
+    oh_sym[m2a[1][2]] = OneHot(tf_scope, { -1, 2, 1, -1 }, 4, 1.f, 0.f);
+    oh_sym[m2a[1][3]] = OneHot(tf_scope, { -1, 3, -1, 1 }, 4, 1.f, 0.f);
+    oh_sym[m2a[2][3]] = OneHot(tf_scope, { -1, -1, 3, 2 }, 4, 1.f, 0.f);
+
+    Output oh_det[24] =
+    {
+        // positive terms
+        OneHot(tf_scope,{ 0, 1, 2, 3 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 0, 2, 3, 1 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 0, 3, 1, 2 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 1, 0, 3, 2 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 1, 2, 0, 3 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 1, 3, 2, 0 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 2, 0, 1, 3 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 2, 1, 3, 0 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 2, 3, 0, 1 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 3, 0, 2, 1 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 3, 1, 0, 2 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 3, 2, 1, 0 }, 4, 1.f, 0.f),
+        //negative terms
+        OneHot(tf_scope,{ 0, 1, 3, 2 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 0, 2, 1, 3 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 0, 3, 2, 1 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 1, 0, 2, 3 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 1, 2, 3, 0 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 1, 3, 0, 2 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 2, 0, 3, 1 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 2, 1, 0, 3 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 2, 3, 1, 0 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 3, 0, 1, 2 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 3, 1, 2, 0 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 3, 2, 0, 1 }, 4, 1.f, 0.f)
+    };
+
+    Output oh_wij[3] =
+    {
+        OneHot(tf_scope,{ 0, -1, 2, -1 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ 1, 0, 3, 2 }, 4, 1.f, 0.f),
+        OneHot(tf_scope,{ -1, 1, -1, 3 }, 4, 1.f, 0.f)
+    };
+
+    std::vector<Output> v_list;                    // TODO duplicated structure
+    std::vector<Output> v_assigns;
+    for(int k = 0; k < tf_Variables.size(); k++)
+    {
+        v_list.push_back(tf_Variables.At(k));
+        v_assigns.push_back(Assign(tf_scope, tf_Variables.At(k), init_density));
+    }
+
+    // ************************************************************************
+    // Likelihood function composition
+    // ************************************************************************
+
+    std::vector<Output> likeli_parts;
+
+    for(IBAnalyzerTF::Event& evn_item : m_Events)
+    {
+        auto d_input = Const(tf_scope,
+        {
+            { evn_item.Di(0) },
+            { evn_item.Di(1) },
+            { evn_item.Di(2) },
+            { evn_item.Di(3) }
+        });
+
+        std::vector<Output> sigma_parts;
+        for(IBAnalyzerTF::Event::Element& el_item : evn_item.elements)
+        {
+
+            std::vector<Output> wij_parts;
+            wij_parts.push_back(Multiply(tf_scope, oh_wij[0], el_item.Wij(0,0)));
+            wij_parts.push_back(Multiply(tf_scope, oh_wij[1], el_item.Wij(0,1)));
+            wij_parts.push_back(Multiply(tf_scope, oh_wij[2], el_item.Wij(1,1)));
+            auto all_wij = AddN(tf_scope, wij_parts);
+
+            auto tmp_term = Multiply(tf_scope, all_wij, evn_item.InitialSqrP);
+            auto s_term = Multiply(tf_scope, tmp_term, tf_Variables.At(el_item.v_idx));
+
+            sigma_parts.push_back(s_term);
+        }
+        auto tmp_sigma = AddN(tf_scope, sigma_parts);
+
+        std::vector<Output> err_parts;
+        for(int k = 0; k < 4; k++)
+        {
+            for(int j = 0; j < k; j++)
+            {
+                err_parts.push_back(Multiply(tf_scope,
+                                            oh_sym[m2a[k][j]],
+                                            evn_item.E(k,j)));
+            }
+        }
+        auto err_mat = AddN(tf_scope, err_parts);
+
+        auto s_tensor = Add(tf_scope, tmp_sigma, err_mat);
+
+        // ************************************************************************
+        // Determinant
+        // ************************************************************************
+
+        std::vector<Output> det_parts;
+        for(int k = 0; k < 24; k++)
+        {
+            auto tmp_mul = Multiply(tf_scope, oh_det[k], s_tensor);
+            auto tmp_term = Prod(tf_scope, Sum(tf_scope, tmp_mul, 0), 0);
+            if(k < 12)
+            {
+                det_parts.push_back(tmp_term);
+            }
+            else
+            {
+                det_parts.push_back(Negate(tf_scope, tmp_term));
+            }
+
+        }
+        auto s_deter = AddN(tf_scope, det_parts);
+
+        // ************************************************************************
+        // matrix inverse
+        // https://en.wikipedia.org/wiki/Invertible_matrix#Inversion_of_4_%C3%97_4_matrices
+        // ************************************************************************
+
+        auto s_tensor2 = MatMul(tf_scope, s_tensor, s_tensor);
+        auto s_tensor3 = MatMul(tf_scope, s_tensor2, s_tensor);
+
+        auto s_trace = Sum(tf_scope, Sum(tf_scope, Multiply(tf_scope, s_tensor, ident_mat), 0), 0);
+        auto s_trace2 = Multiply(tf_scope, s_trace, s_trace);
+        auto s_trace3 = Multiply(tf_scope, s_trace, s_trace2);
+        auto s2_trace = Sum(tf_scope, Sum(tf_scope, Multiply(tf_scope, s_tensor2, ident_mat), 0), 0);
+        auto s3_trace = Sum(tf_scope, Sum(tf_scope, Multiply(tf_scope, s_tensor3, ident_mat), 0), 0);
+
+        std::vector<Output> c0_parts;
+        c0_parts.push_back(s_trace3);
+        c0_parts.push_back(Multiply(tf_scope,
+                            Const(tf_scope, -3.f), Multiply(tf_scope, s_trace, s2_trace)));
+        c0_parts.push_back(Multiply(tf_scope, Const(tf_scope, 2.f), s3_trace));
+
+        std::vector<Output> c1_parts;
+        c1_parts.push_back(Multiply(tf_scope, Const(tf_scope, 3.f), s_trace2));
+        c1_parts.push_back(Multiply(tf_scope, Const(tf_scope, -3.f), s2_trace));
+
+        auto c2 = Multiply(tf_scope, Const(tf_scope, 6.f), s_trace);
+        auto c3 = Const(tf_scope, -6.f);
+
+        std::vector<Output> inv_parts;
+        inv_parts.push_back(Multiply(tf_scope, ident_mat, AddN(tf_scope, c0_parts)));
+        inv_parts.push_back(Multiply(tf_scope, s_tensor, AddN(tf_scope, c1_parts)));
+        inv_parts.push_back(Multiply(tf_scope, s_tensor2, c2));
+        inv_parts.push_back(Multiply(tf_scope, s_tensor3, c3));
+
+        auto s_inv = Multiply(tf_scope, AddN(tf_scope, inv_parts), Inv(tf_scope, s_deter));
+        auto m_comp = MatMul(tf_scope,
+                             MatMul(tf_scope, d_input, s_inv, MatMul::TransposeA(true)),
+                             d_input);
+
+        likeli_parts.push_back(Log(tf_scope, s_deter));
+        likeli_parts.push_back(m_comp);
+    }
+
+    auto likeli_fnct = AddN(tf_scope, likeli_parts);
+
+    std::vector<Output> grad_outputs;
+    TF_CHECK_OK(AddSymbolicGradients(tf_scope, { likeli_fnct }, v_list, &grad_outputs));
+
+    std::vector<Output> algo_apply;
+    for(int k = 0; k < tf_Variables.size(); k++)
+    {
+        algo_apply.push_back(ApplyGradientDescent(tf_scope, tf_Variables.At(k),
+                                                  learning_rate, { grad_outputs[k] }));
+    }
+
+    // ************************************************************************
+    // Minimization step
+    // ************************************************************************
+
+    ClientSession session(tf_scope);
+    TF_CHECK_OK(session.Run(v_assigns, nullptr));
+
+    std::vector<Tensor> likeli_val;
+    for (int i = 0; i < iterations; ++i)
+    {
+        TF_CHECK_OK(session.Run({ likeli_fnct }, &likeli_val));
+        std::cout << "Loss after " << i << " steps " << likeli_val[0].scalar<float>() << std::endl;
+        TF_CHECK_OK(session.Run(algo_apply, nullptr));
+    }
+
+    std::vector<Tensor> results;
+    TF_CHECK_OK(session.Run(v_list, &results));
+}
 
 unsigned int IBAnalyzerTF::Size()
 {
     return m_Events.size();
 }
+

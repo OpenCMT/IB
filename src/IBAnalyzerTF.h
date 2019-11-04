@@ -44,6 +44,7 @@ public:
 
     inline Variable& At(int i) const;
     inline Variable& At(const Vector3i &id) const;
+    inline unsigned int size() const;
 
 private:
     std::vector<Variable*> tf_vars;
@@ -73,7 +74,8 @@ public:
                  const Scope &scope,
                  IBPocaEvaluator *poca_algo,
                  IBMinimizationVariablesEvaluator *var_algo,
-                 IBVoxRaytracer *ray_algo);
+                 IBVoxRaytracer *ray_algo,
+                 float learn_rate = 0.01f);
 
     virtual ~IBAnalyzerTF();
 
@@ -99,6 +101,7 @@ private:
 
     Scope                              tf_scope;
     TFVariableSet                      tf_Variables;
+    float                              learning_rate;
     std::vector<IBAnalyzerTF::Event>   m_Events;
 };
 
