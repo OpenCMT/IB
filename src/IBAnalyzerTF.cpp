@@ -81,8 +81,9 @@ IBAnalyzerTF::IBAnalyzerTF(IBVoxCollection &voxels,
     m_RayAlgorithm(ray_algo),
     learning_rate(learn_rate),
     nominal_momentum(3),
-    tf_Variables(TFVariableSet(tf_scope, voxels.GetDims()))
+    tf_Variables(TFVariableSet(scope, voxels.GetDims()))
 {
+    SetVoxCollection(&voxels);
 }
 
 IBAnalyzerTF::~IBAnalyzerTF()
@@ -136,7 +137,7 @@ bool IBAnalyzerTF::AddMuonFullPath(const MuonScatterData &muon,
     evn.InitialSqrP = pow(nominal_momentum/muon.GetMomentum(), 2);
     evn.elements = std::vector<Event::Element>(0);
 
-    if(evn.Di[0] != NAN)
+    if(evn.Di[0] == NAN)
     {
         return false;
     }
@@ -422,6 +423,8 @@ void IBAnalyzerTF::Run(unsigned int iterations, float muons_ratio)
         likeli_parts.push_back(Log(tf_scope, s_deter));
         likeli_parts.push_back(m_comp);
     }
+
+    if(likeli_parts.size() == 0) return;
 
     auto likeli_fnct = AddN(tf_scope, likeli_parts);
 
