@@ -26,43 +26,6 @@
 using namespace tensorflow;
 using namespace tensorflow::ops;
 
-// ****************************************************************************
-// Graph variables
-// ****************************************************************************
-
-TFVariableSet::TFVariableSet(const Scope &scope, const Vector3i &size) :
-    tf_vars(size.prod()),
-    StructuredData(size)
-{
-    for(int k; k<size.prod(); k++)
-    {
-        tf_vars[k] = new Variable(scope, {1}, DT_FLOAT);
-    }
-}
-
-TFVariableSet::~TFVariableSet()
-{
-    for(int k; k<tf_vars.size(); k++)
-    {
-        delete tf_vars[k];
-    }
-}
-
-Variable& TFVariableSet::At(int i) const
-{
-    return *tf_vars.at(i);
-}
-
-Variable& TFVariableSet::At(const Vector3i &id) const
-{
-    return *tf_vars.at(Map(id));
-}
-
-unsigned int TFVariableSet::size() const
-{
-    return tf_vars.size();
-}
-
 
 // ****************************************************************************
 // Plugin
@@ -80,8 +43,7 @@ IBAnalyzerTF::IBAnalyzerTF(IBVoxCollection &voxels,
     m_VarAlgorithm(var_algo),
     m_RayAlgorithm(ray_algo),
     learning_rate(learn_rate),
-    nominal_momentum(3),
-    tf_Variables(TFVariableSet(scope, voxels.GetDims()))
+    nominal_momentum(3)
 {
     SetVoxCollection(&voxels);
 }
@@ -306,14 +268,6 @@ void IBAnalyzerTF::Run(unsigned int iterations, float muons_ratio)
         OneHot(tf_scope,{ -1, 1, -1, 3 }, 4, 1.f, 0.f)
     };
 
-    std::vector<Output> v_list;                    // TODO duplicated structure
-    std::vector<Output> v_assigns;
-    for(int k = 0; k < tf_Variables.size(); k++)
-    {
-        v_list.push_back(tf_Variables.At(k));
-        v_assigns.push_back(Assign(tf_scope, tf_Variables.At(k), init_density));
-    }
-
     // ************************************************************************
     // Likelihood function composition
     // ************************************************************************
@@ -341,7 +295,20 @@ void IBAnalyzerTF::Run(unsigned int iterations, float muons_ratio)
             auto all_wij = AddN(tf_scope, wij_parts);
 
             auto tmp_term = Multiply(tf_scope, all_wij, evn_item.InitialSqrP);
-            auto s_term = Multiply(tf_scope, tmp_term, tf_Variables.At(el_item.v_idx));
+
+            Variable* tmpvar = nullptr;
+            auto tmpitem = tf_Variables.find(el_item.v_idx);
+            if(tmpitem == tf_Variables.end())
+            {
+                tmpvar = new Variable(tf_scope, {1}, DT_FLOAT);
+                tf_Variables[el_item.v_idx] = tmpvar;
+            }
+            else
+            {
+                tmpvar = tmpitem->second;
+            }
+
+            auto s_term = Multiply(tf_scope, tmp_term, *tmpvar);
 
             sigma_parts.push_back(s_term);
         }
@@ -420,22 +387,31 @@ void IBAnalyzerTF::Run(unsigned int iterations, float muons_ratio)
                              MatMul(tf_scope, d_input, s_inv, MatMul::TransposeA(true)),
                              d_input);
 
-        likeli_parts.push_back(Log(tf_scope, s_deter));
-        likeli_parts.push_back(m_comp);
+        likeli_parts.push_back(Add(tf_scope, Log(tf_scope, s_deter), m_comp));
+        std::cout << "Built graph module " << likeli_parts.size() << std::endl;
     }
 
     if(likeli_parts.size() == 0) return;
 
     auto likeli_fnct = AddN(tf_scope, likeli_parts);
 
-    std::vector<Output> grad_outputs;
-    TF_CHECK_OK(AddSymbolicGradients(tf_scope, { likeli_fnct }, v_list, &grad_outputs));
+    // ************************************************************************
+    // Gradients setup
+    // ************************************************************************
 
+    std::vector<Output> v_assigns;
     std::vector<Output> algo_apply;
-    for(int k = 0; k < tf_Variables.size(); k++)
+    int m_cnt = 0;
+    for(auto& item : tf_Variables)
     {
-        algo_apply.push_back(ApplyGradientDescent(tf_scope, tf_Variables.At(k),
-                                                  learning_rate, { grad_outputs[k] }));
+        v_assigns.push_back(Assign(tf_scope, *(item.second), init_density));
+
+        std::vector<Output> grad_outputs;
+        TF_CHECK_OK(AddSymbolicGradients(tf_scope, { likeli_fnct }, { *(item.second) }, &grad_outputs));
+        algo_apply.push_back(ApplyGradientDescent(tf_scope, *(item.second),
+                                                  learning_rate, { grad_outputs[0] }));
+        std::cout << "Gradient " << m_cnt << "/" << tf_Variables.size() << std::endl;
+        m_cnt++;
     }
 
     // ************************************************************************
@@ -453,8 +429,6 @@ void IBAnalyzerTF::Run(unsigned int iterations, float muons_ratio)
         TF_CHECK_OK(session.Run(algo_apply, nullptr));
     }
 
-    std::vector<Tensor> results;
-    TF_CHECK_OK(session.Run(v_list, &results));
 }
 
 unsigned int IBAnalyzerTF::Size()

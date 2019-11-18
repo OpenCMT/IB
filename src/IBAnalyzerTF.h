@@ -36,22 +36,6 @@ using tensorflow::Scope;
 using tensorflow::ops::Variable;
 
 
-class TFVariableSet : public StructuredData
-{
-public:
-    TFVariableSet(const Scope &scope, const Vector3i &size);
-    virtual ~TFVariableSet();
-
-    inline Variable& At(int i) const;
-    inline Variable& At(const Vector3i &id) const;
-    inline unsigned int size() const;
-
-private:
-    std::vector<Variable*> tf_vars;
-};
-
-
-
 class IBAnalyzerTF : public IBAnalyzer
 {
 public:
@@ -100,7 +84,7 @@ private:
     IBVoxRaytracer                    *m_RayAlgorithm;
 
     Scope                              tf_scope;
-    TFVariableSet                      tf_Variables;
+    std::unordered_map<int, Variable*> tf_Variables;
     float                              learning_rate;
     std::vector<IBAnalyzerTF::Event>   m_Events;
 };
